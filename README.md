@@ -30,3 +30,5 @@ This is the software repository for signal processing software for Rasberry Pi a
 
 ### Checklist
 - [x] Decide on a standardized programming language: Python
+- [ ] Implement a simple triangulation program.
+
