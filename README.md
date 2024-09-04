@@ -17,8 +17,7 @@ This is the software repository for signal processing software for Rasberry Pi a
 
 ## Set up communication between RPIs
 
- - Designing a system and protocol for communication between RPIs and 
- - De
+ - Designing a system and protocol for communication between RPIs
 
 ### Checklist
 - [ ] Learn to set up RPI with Raspian OS
@@ -26,6 +25,7 @@ This is the software repository for signal processing software for Rasberry Pi a
 - [ ] Purchase SD card
 - [ ] Purchase micro-SD card reader
 - [ ] Figure out which Raspian OS to use
+- [ ] Set up VNC on the RPI
 
 ## Implementing Triangulation Alog
 
