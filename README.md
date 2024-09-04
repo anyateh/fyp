@@ -29,4 +29,4 @@ This is the software repository for signal processing software for Rasberry Pi a
  - Work out an algorithm on triangulation using dummy values.
 
 ### Checklist
-- [ ] Decide on a standardized programming language
+- [x] Decide on a standardized programming language: Python
