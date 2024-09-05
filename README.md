@@ -28,7 +28,9 @@ This is the software repository for signal processing software for Rasberry Pi a
  - [ ] Learn to set up RPI with Raspian OS
  - [ ] Find the link for the suitable SD card - one with sink and number 3 inside
  - [ ] Purchase SD card
+
        ![62147a8a6b48b_red](https://github.com/user-attachments/assets/f25137fb-c40b-4a55-a6c2-506d9531d03e)
+
        **Figure 1** Sample SD card from https://simlimsquare.com.sg/product/sandisk-extreme-32gb-to-1tb-microsdhc-uhs-3-card
  - [ ] Purchase micro-SD card reader
  - [ ] Figure out which Raspian OS to use
