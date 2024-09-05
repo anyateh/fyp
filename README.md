@@ -19,13 +19,18 @@ This is the software repository for signal processing software for Rasberry Pi a
 
  - Designing a system and protocol for communication between RPIs
 
+### Links
+ - https://www.printables.com/model/720951-portable-pi-sdr-case#preview:file-rMomf
+ - https://github.com/cariboulabs/cariboulite
+ - https://github.com/huats-club/rpistarterkit
+
 ### Checklist
-- [ ] Learn to set up RPI with Raspian OS
-- [ ] Find the link for the suitable SD card - one with sink and number 3 inside
-- [ ] Purchase SD card
-- [ ] Purchase micro-SD card reader
-- [ ] Figure out which Raspian OS to use
-- [ ] Set up VNC on the RPI
+ - [ ] Learn to set up RPI with Raspian OS
+ - [ ] Find the link for the suitable SD card - one with sink and number 3 inside
+ - [ ] Purchase SD card
+ - [ ] Purchase micro-SD card reader
+ - [ ] Figure out which Raspian OS to use
+ - [ ] Set up VNC on the RPI
 
 ## Implementing Triangulation Alog
 
