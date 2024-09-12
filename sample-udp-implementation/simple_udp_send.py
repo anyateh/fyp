@@ -3,10 +3,11 @@
 from socket import AF_INET, SOCK_DGRAM, socket
 
 def main() -> None:
-    ip      = "127.0.0.1"
+    # I have a Linux system named "emily", don't judge!
+    ip      = "emily.local"
     port    = 5000
     
-    message = b"This is some text"
+    message = b"Hi Emily! Here is some cake."
 
     sock = socket(AF_INET, SOCK_DGRAM)
     sock.sendto(message, (ip, port))

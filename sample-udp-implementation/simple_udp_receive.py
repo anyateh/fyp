@@ -3,7 +3,8 @@
 from socket import AF_INET, SOCK_DGRAM, socket
 
 def main() -> None:
-    ip      = "127.0.0.1"
+    # I have a Linux system named "emily", don't judge!
+    ip      = "emily.local"
     port    = 5000
 
     sock = socket(AF_INET, SOCK_DGRAM)
