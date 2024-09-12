@@ -26,7 +26,7 @@ This is the software repository for signal processing software for Rasberry Pi a
 
 ### Checklist
  - [ ] Learn to set up RPI with Raspian OS
- - [ ] Find the link for the suitable SD card - one with sink and number 3 inside
+ - [x] Find the link for the suitable SD card - one with sink and number 3 inside
  - [ ] Purchase SD card
         
        ![62147a8a6b48b_red](https://github.com/user-attachments/assets/f25137fb-c40b-4a55-a6c2-506d9531d03e)
@@ -35,6 +35,8 @@ This is the software repository for signal processing software for Rasberry Pi a
  - [ ] Purchase micro-SD card reader
  - [ ] Figure out which Raspian OS to use
  - [ ] Set up VNC on the RPI
+ - [x] Perform a simple UDP transfer
+ - [ ] Set up a more complex UDP communication
 
 ## Implementing Triangulation Alog
 
