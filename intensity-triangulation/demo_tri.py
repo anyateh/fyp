@@ -24,7 +24,7 @@ def gen_one_emitter(wlength:float, r1:RPI, r2:RPI, r3:RPI) -> tuple[float, float
 	d2 = fabs(((em_x - r2.x) ** 2 + (em_y - r2.y) ** 2) ** 0.5)
 	d3 = fabs(((em_x - r3.x) ** 2 + (em_y - r3.y) ** 2) ** 0.5)
 
-	logging.debug(f"d1 = {d1}, d2 = {d2}, d3 = {d3}")
+	logging.debug(f"d1 = {d1}m, d2 = {d2}m, d3 = {d3}m")
 
 	r1.dbm = 2 * 10 * log10(wlength / (4 * pi * d1))
 	r2.dbm = 2 * 10 * log10(wlength / (4 * pi * d2))
@@ -40,15 +40,15 @@ def main() -> None:
 
 	r1, r2, r3 = RPI(), RPI(), RPI()
 
-	r2.x = 250
-	r2.y = 500
+	r2.x = 0
+	r2.y = 50
 
-	r3.x = 500
+	r3.x = 50
 	r3.y = 0
 
 	wlength = 1 / 500_000_000
 
-	logging.debug(gen_one_emitter(wlength, r1, r2, r3))
+	logging.debug("RasPi1: %fdbm, RasPi2: %fdbm, RasPi3: %fdbm" % gen_one_emitter(wlength, r1, r2, r3))
 
 if __name__ == '__main__':
 	main()
