@@ -1,9 +1,9 @@
 #!/usr/bin/env python3
 
 import logging
-from math   import fabs, log10, pi
-from random import uniform
-from sys    import argv
+from   math   import fabs, log10, pi
+from   random import uniform
+from   sys    import argv
 
 class RPI:
 	x:float   = 0
