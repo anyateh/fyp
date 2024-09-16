@@ -25,17 +25,19 @@ This is the software repository for signal processing software for Rasberry Pi a
  - https://github.com/huats-club/rpistarterkit
 
 ### Checklist
- - [ ] Learn to set up RPI with Raspian OS
+ - [x] Learn to set up RPI with Raspian OS
  - [x] Find the link for the suitable SD card - one with sink and number 3 inside
- - [ ] Purchase SD card
+ - [x] Purchase SD card
         
        ![62147a8a6b48b_red](https://github.com/user-attachments/assets/f25137fb-c40b-4a55-a6c2-506d9531d03e)
        
        **Figure 1** Sample SD card from https://simlimsquare.com.sg/product/sandisk-extreme-32gb-to-1tb-microsdhc-uhs-3-card
- - [ ] Purchase micro-SD card reader
- - [ ] Figure out which Raspian OS to use
+ - [x] Purchase micro-SD card reader
+ - [ ] Purchase micro-HDMI adapter
+ - [x] Figure out which Raspian OS to use
  - [ ] Set up VNC on the RPI
  - [x] Perform a simple UDP transfer
+ - [x] Perform a simple TCP transfer
  - [ ] Set up a more complex UDP communication
 
 ## Implementing Triangulation Alog
