@@ -19,30 +19,31 @@ def send_msg(hostname_ip:str, port:int, msg:bytes) -> None:
 	_logger.info(f"Sending message to {hostname_ip}:{port}")
 	sock.sendto(msg, (hostname_ip, port))
 
-def time_echo_udp(hostname_ip:str, port:int) -> None:
+def udp_echo_time_sender(sender_hostname_ip:str, sender_port:int, receiver_hostname_ip:str, receiver_port:int) -> None:
 	unix_time_str = str(floor(time()))
 	sock = socket(AF_INET, SOCK_DGRAM)
-	_logger.info(f"Sending the unix_timestamp to {hostname_ip}:{port}")
+	_logger.info(f"Sending the unix_timestamp to {receiver_hostname_ip}:{receiver_port}")
 	_logger.debug(f"UNIX timestamp str -> {unix_time_str}")
-	sock.sendto(unix_time_str.encode(encoding = "utf-8"), (hostname_ip, port))
+	sock.sendto(unix_time_str.encode(encoding = "utf-8"), (receiver_hostname_ip, receiver_port))
 
-	sock.bind((hostname_ip, port))
+	sock = socket(AF_INET, SOCK_DGRAM)
+	sock.bind((sender_hostname_ip, sender_port))
 
 	sock.setblocking(True)
-	_logger.info(f"Awaiting response via {hostname_ip}:{port}...")
+	_logger.info(f"Awaiting response via {sender_hostname_ip}:{sender_port}...")
 	received_msg, sending_addr = sock.recvfrom(1024)
 
 	_logger.info(f"Received message: '{received_msg}' from {sending_addr}")
 
-def echo_back_time_udp(hostname_ip:str, port:int) -> None:
+def udp_echo_time_receiver(sender_hostname_ip:str, sender_port:int, receiver_hostname_ip:str, receiver_port:int) -> None:
 	sock = socket(AF_INET, SOCK_DGRAM)
-	sock.bind((hostname_ip, port))
+	sock.bind((receiver_hostname_ip, receiver_port))
 
 	sock.setblocking(True)
-	_logger.info(f"Awaiting message via {hostname_ip}:{port}...")
+	_logger.info(f"Awaiting message via {receiver_hostname_ip}:{receiver_port}...")
 	received_msg, sender_addr = sock.recvfrom(1024)
 
 	_logger.info(f"Received message: '{received_msg}' from {sender_addr}")
 
-	_logger.info(f"Echoing '{received_msg}' back to {hostname_ip}")
-	sock.sendto(received_msg, (hostname_ip, port))
+	_logger.info(f"Echoing '{received_msg}' back to {sender_hostname_ip}:{sender_port}")
+	sock.sendto(received_msg, (sender_hostname_ip, sender_port))
