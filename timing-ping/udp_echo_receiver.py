@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 from argparse import ArgumentParser
+from sys import stderr
 
 from udp_echo.udp_echo_time import udp_echo_time_receiver
 
@@ -27,6 +28,7 @@ def main() -> None:
 	listening_hostname, listening_port, echo_back_port = parse_opts()
 
 	while True:
+		print("\n[REMINDER] Press ctrl-c to terminate\n", file = stderr)
 		udp_echo_time_receiver(listening_hostname, listening_port, echo_back_port)
 
 if __name__ == '__main__':

@@ -38,7 +38,7 @@ def udp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 		_logger.info(f"Time measured: {time_taken} seconds")
 		return unix_time_str, received_msg.decode("utf-8") == unix_time_str, time_taken
 	except TimeoutError:
-		_logger.info(f"Timed out waiting response via {own_hostname_ip}:{listening_port}...")
+		_logger.debug(f"Timed out waiting response via {own_hostname_ip}:{listening_port}...")
 		_logger.info("No response")
 		return unix_time_str, False, None
 

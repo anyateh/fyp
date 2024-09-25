@@ -16,7 +16,7 @@ _logger.addHandler(_logger_console_handler)
 _logger_console_handler.setFormatter(logging.Formatter(
 	"[%(levelname)s] %(message)s"
 ))
-_logger.setLevel(logging.DEBUG)
+_logger.setLevel(logging.INFO)
 
 # Return dest_ip, dest_port, own_ip, own_port, n_times
 def parse_opts() -> tuple[str, int, str, int, int]:
