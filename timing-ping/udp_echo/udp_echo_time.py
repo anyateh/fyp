@@ -19,8 +19,6 @@ def udp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 	sock  = socket(AF_INET, SOCK_DGRAM)
 	sock.bind((own_hostname_ip, listening_port))
 
-	# rsock = socket(AF_INET, SOCK_DGRAM)
-	# rsock.bind((own_hostname_ip, listening_port))
 	sock.setblocking(True)
 	sock.settimeout(3)
 
