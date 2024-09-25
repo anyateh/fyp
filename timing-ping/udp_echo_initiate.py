@@ -5,6 +5,9 @@ from statistics import mean
 
 from udp_echo.udp_echo_time import udp_echo_time_sender
 
+DEFAULT_N_TIMES = 5
+DEFAULT_PORT    = 2310
+
 def main() -> None:
 	echo_results = []
 
