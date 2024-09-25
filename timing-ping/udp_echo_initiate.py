@@ -1,12 +1,21 @@
 #!/usr/bin/env python3
 
-import json
+import logging
 from statistics import mean
 
 from udp_echo.udp_echo_time import udp_echo_time_sender
 
 DEFAULT_N_TIMES = 5
 DEFAULT_PORT    = 2310
+
+_logger = logging.getLogger(__name__)
+_logger_console_handler = logging.StreamHandler()
+
+_logger.addHandler(_logger_console_handler)
+_logger_console_handler.setFormatter(logging.Formatter(
+	"[%(levelname)s] %(message)s"
+))
+_logger.setLevel(logging.DEBUG)
 
 def main() -> None:
 	echo_results = []
