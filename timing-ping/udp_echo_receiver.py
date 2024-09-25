@@ -4,7 +4,7 @@ from argparse import ArgumentParser
 
 from udp_echo.udp_echo_time import udp_echo_time_receiver
 
-DEFAULT_PORT    = 2310
+DEFAULT_PORT = 2310
 
 # Return own_ip, own_port, echo_port
 def parse_opts() -> tuple[str, int, int]:
