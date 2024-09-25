@@ -12,11 +12,11 @@ _logger_console_handler.setFormatter(logging.Formatter(
 ))
 _logger.setLevel(logging.DEBUG)
 
-def udp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname_ip:str, listening_port:int) -> tuple[float]:
-	unix_time_str = str(floor(time()))
+def udp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname_ip:str, listening_port:int) -> tuple[str, float]:
+	unix_time_str   = str(floor(time()))
+	unix_time_bytes = unix_time_str.encode("utf-8")
 
 	sock  = socket(AF_INET, SOCK_DGRAM)
-	sock.bind((own_hostname_ip, listening_port))
 
 	rsock = socket(AF_INET, SOCK_DGRAM)
 	rsock.bind((own_hostname_ip, listening_port))
@@ -26,7 +26,7 @@ def udp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 	_logger.info(f"Sending the unix_timestamp to {echo_to_hostname_ip}:{echo_to_port}")
 	_logger.debug(f"UNIX timestamp str -> {unix_time_str}")
 	t0 = time()
-	sock.sendto(unix_time_str.encode(encoding = "utf-8"), (echo_to_hostname_ip, echo_to_port))
+	sock.sendto(unix_time_bytes, (echo_to_hostname_ip, echo_to_port))
 
 	_logger.info(f"Awaiting response via {own_hostname_ip}:{listening_port}...")
 	received_msg, (from_hostname_ip, from_port) = rsock.recvfrom(1024)
@@ -35,7 +35,7 @@ def udp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 
 	_logger.info(f"Received message: '{received_msg}' from {from_hostname_ip}:{from_port}")
 	_logger.info(f"Time measured: {time_taken} seconds")
-	return time_taken
+	return unix_time_str, time_taken
 
 def udp_echo_time_receiver(own_hostname_ip:str, own_port:int, echo_back_port:int) -> None:
 	sock = socket(AF_INET, SOCK_DGRAM)
