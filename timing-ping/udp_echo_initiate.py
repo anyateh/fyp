@@ -43,10 +43,10 @@ def main() -> None:
 	)
 	for n, m, s, t in echo_results:
 		print(
-			n                       .rjust(longest_try),
-			m                       .rjust(longest_msg),
-			("yes"  if s else "no" ).rjust(longest_success_fail),
-			(str(t) if s else "N/A").rjust(longest_time_taken),
+			n                               .rjust(longest_try),
+			m                               .rjust(longest_msg),
+			("yes" if s         else "no"  ).rjust(longest_success_fail),
+			("N/A" if t is None else str(t)).rjust(longest_time_taken),
 			sep = "  "
 		)
 	
