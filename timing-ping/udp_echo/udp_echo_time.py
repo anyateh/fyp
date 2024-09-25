@@ -2,6 +2,7 @@ import logging
 from math import floor
 from time import time
 from socket import AF_INET, gaierror, SOCK_DGRAM, socket
+from typing import Optional
 
 _logger = logging.getLogger(__name__)
 _logger_console_handler = logging.StreamHandler()
@@ -12,7 +13,7 @@ _logger_console_handler.setFormatter(logging.Formatter(
 ))
 _logger.setLevel(logging.DEBUG)
 
-def udp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname_ip:str, listening_port:int) -> tuple[str, bool, float | None]:
+def udp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname_ip:str, listening_port:int) -> tuple[str, bool, Optional[float]]:
 	unix_time_str   = str(floor(time()))
 	unix_time_bytes = unix_time_str.encode("utf-8")
 
