@@ -17,11 +17,12 @@ def udp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 	unix_time_bytes = unix_time_str.encode("utf-8")
 
 	sock  = socket(AF_INET, SOCK_DGRAM)
+	sock.bind((own_hostname_ip, listening_port))
 
-	rsock = socket(AF_INET, SOCK_DGRAM)
-	rsock.bind((own_hostname_ip, listening_port))
-	rsock.setblocking(True)
-	rsock.settimeout(3)
+	# rsock = socket(AF_INET, SOCK_DGRAM)
+	# rsock.bind((own_hostname_ip, listening_port))
+	sock.setblocking(True)
+	sock.settimeout(3)
 
 	_logger.info(f"Sending the unix_timestamp to {echo_to_hostname_ip}:{echo_to_port}")
 	_logger.debug(f"UNIX timestamp str -> {unix_time_str}")
@@ -29,7 +30,7 @@ def udp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 	sock.sendto(unix_time_bytes, (echo_to_hostname_ip, echo_to_port))
 
 	_logger.info(f"Awaiting response via {own_hostname_ip}:{listening_port}...")
-	received_msg, (from_hostname_ip, from_port) = rsock.recvfrom(1024)
+	received_msg, (from_hostname_ip, from_port) = sock.recvfrom(1024)
 	t1 = time()
 	time_taken = t1 - t0
 
