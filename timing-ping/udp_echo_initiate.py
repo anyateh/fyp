@@ -86,8 +86,6 @@ def main() -> None:
 			sep = "  "
 		)
 	
-	# print("Average:", mean(map(lambda a: a[3], filter(lambda a: a[2], echo_results))), "seconds")
-	# print("Success Rate: ", round([i[2] for i in echo_results].count(True) * 100 / len(echo_results), 1), "%", sep = "")
 	print("Average:", mean(i[3] for i in echo_results if i[2]), "seconds")
 	print("Success Rate: ", round(sum(1 for i in echo_results if i[2]) * 100 / len(echo_results), 1), "%", sep = "")
 
