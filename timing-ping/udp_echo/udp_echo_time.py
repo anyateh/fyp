@@ -12,7 +12,7 @@ _logger_console_handler.setFormatter(logging.Formatter(
 ))
 _logger.setLevel(logging.DEBUG)
 
-def udp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname_ip:str, listening_port:int) -> None:
+def udp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname_ip:str, listening_port:int) -> tuple[float]:
 	unix_time_str = str(floor(time()))
 
 	sock  = socket(AF_INET, SOCK_DGRAM)
@@ -35,6 +35,7 @@ def udp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 
 	_logger.info(f"Received message: '{received_msg}' from {from_hostname_ip}:{from_port}")
 	_logger.info(f"Time measured: {time_taken} seconds")
+	return time_taken
 
 def udp_echo_time_receiver(own_hostname_ip:str, own_port:int, echo_back_port:int) -> None:
 	sock = socket(AF_INET, SOCK_DGRAM)
