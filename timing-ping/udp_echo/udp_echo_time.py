@@ -37,15 +37,15 @@ def udp_echo_time_sender(sender_hostname_ip:str, sender_port:int, receiver_hostn
 	_logger.info(f"Received message: '{received_msg}' from {sending_addr}")
 	_logger.info(f"Time measured: {time_taken} seconds")
 
-def udp_echo_time_receiver(sender_hostname_ip:str, sender_port:int, receiver_hostname_ip:str, receiver_port:int) -> None:
+def udp_echo_time_receiver(own_hostname_ip:str, own_port:int, echo_back_port:int) -> None:
 	sock = socket(AF_INET, SOCK_DGRAM)
-	sock.bind((receiver_hostname_ip, receiver_port))
+	sock.bind((own_hostname_ip, own_port))
 
 	sock.setblocking(True)
-	_logger.info(f"Awaiting message via {receiver_hostname_ip}:{receiver_port}...")
-	received_msg, sender_addr = sock.recvfrom(1024)
+	_logger.info(f"Awaiting message via {own_hostname_ip}:{own_port}...")
+	received_msg, (from_hostname_ip, from_port) = sock.recvfrom(1024)
 
-	_logger.info(f"Received message: '{received_msg}' from {sender_addr}")
+	_logger.info(f"Received message: '{received_msg}' from {from_hostname_ip}:{from_port}")
 
-	_logger.info(f"Echoing '{received_msg}' back to {sender_hostname_ip}:{sender_port}")
-	sock.sendto(received_msg, (sender_hostname_ip, sender_port))
+	_logger.info(f"Echoing '{received_msg}' back to {from_hostname_ip}:{echo_back_port}")
+	sock.sendto(received_msg, (from_hostname_ip, echo_back_port))
