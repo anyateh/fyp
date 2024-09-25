@@ -25,9 +25,6 @@ def main() -> None:
 	receiver_hostname = "emma.local"
 	receiver_port     = 2310
 
-	# msg_xchanged, success, time_taken = udp_echo_time_sender(receiver_hostname, receiver_port, sender_hostname, sender_port)
-
-	# print(time_taken)
 	for i in range(n_times):
 		msg_xchanged, success, time_taken = udp_echo_time_sender(receiver_hostname, receiver_port, sender_hostname, sender_port)
 
