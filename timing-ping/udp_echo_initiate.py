@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import logging
+from argparse import ArgumentParser
 from statistics import mean
 
 from udp_echo.udp_echo_time import udp_echo_time_sender
@@ -17,7 +18,37 @@ _logger_console_handler.setFormatter(logging.Formatter(
 ))
 _logger.setLevel(logging.DEBUG)
 
+# Return dest_ip, dest_port, own_ip, own_port, n_times
+def parse_opts() -> tuple[str, int, str, int, int]:
+	aparser = ArgumentParser(prog = "udp_echo_initiate")
+
+	aparser.add_argument('-c', type = int, metavar = "n_times"  , default = DEFAULT_N_TIMES, help = "Number of times to echo.")
+	aparser.add_argument('-p', type = int, metavar = "dest_port", default = DEFAULT_PORT   , help = "Port number to send to.")
+	aparser.add_argument('-l', type = int, metavar = "own_port" , default = None           , help = "Port number to listen from.")
+
+	aparser.add_argument('dest_ip_hstname', help = 'Destination IP/Hostname')
+	aparser.add_argument('own_ip_hstname' , help = 'Assigned IP/Hostname')
+
+	args = aparser.parse_args()
+
+	return args.dest_ip_hstname, args.p, args.own_ip_hstname, args.p if args.l is None else args.l, args.c
+
 def main() -> None:
+	# n_times = 4
+
+	# sender_hostname   = "192.168.1.117"
+	# sender_port       = 2310
+	# receiver_hostname = "emma.local"
+	# receiver_port     = 2310
+
+	receiver_hostname, receiver_port, sender_hostname, sender_port, n_times = parse_opts()
+
+	_logger.debug(f"receiver_hostname -> {receiver_hostname}")
+	_logger.debug(f"receiver_port     -> {receiver_port}")
+	_logger.debug(f"sender_hostname   -> {sender_hostname}")
+	_logger.debug(f"sender_port       -> {sender_port}")
+	_logger.debug(f"n_times           -> {n_times}")
+
 	echo_results = []
 
 	try_col_header       = "Try"
@@ -29,13 +60,6 @@ def main() -> None:
 	longest_msg          = len(msg_col_header)
 	longest_success_fail = len(success_col_header)
 	longest_time_taken   = len(time_col_header)
-
-	n_times = 4
-
-	sender_hostname   = "192.168.1.117"
-	sender_port       = 2310
-	receiver_hostname = "emma.local"
-	receiver_port     = 2310
 
 	for i in range(n_times):
 		msg_xchanged, success, time_taken = udp_echo_time_sender(receiver_hostname, receiver_port, sender_hostname, sender_port)
