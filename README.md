@@ -38,7 +38,9 @@ This is the software repository for signal processing software for Rasberry Pi a
  - [ ] Set up VNC on the RPI
  - [x] Perform a simple UDP transfer
  - [x] Perform a simple TCP transfer
- - [ ] Set up a more complex UDP communication
+ - [x] Set up a more complex UDP communication
+ - [x] Measure echo time for UDP communication
+ - [x] Measure echo time for TCP communication
 
 ## Implementing Triangulation Alog
 
