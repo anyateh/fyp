@@ -4,7 +4,7 @@ import logging
 from argparse import ArgumentParser
 from statistics import mean
 from sys import stderr
-from time import sleep
+from time import sleep, time
 
 from tcp_echo.tcp_echo import tcp_echo_time_sender
 
@@ -57,10 +57,13 @@ def main() -> None:
 	longest_success_fail = len(success_col_header)
 	longest_time_taken   = len(time_col_header)
 
+	had_to_wait_for_reconnection = False
 
+	t0 = time()
 
 	while True:
 		try:
+			t1 = time()
 			echo_results, time_taken_establish, total_time_taken = tcp_echo_time_sender(receiver_hostname, receiver_port, sender_hostname, sender_port, n_times)
 
 			for try_no, msg_xchanged, success, time_taken in echo_results:
@@ -89,8 +92,11 @@ def main() -> None:
 			print("Average echo time:            ", mean(i[3] for i in echo_results if i[2]), "seconds")
 			print("Success rate:                  ", round(sum(1 for i in echo_results if i[2]) * 100 / len(echo_results), 1), "%", sep = "")
 			print("Total time:                   ", total_time_taken, "seconds")
+			print("Had to wait for connection:   ", "yes" if had_to_wait_for_reconnection else "no")
+			print("Time spent waiting to connect:", t1 - t0, "seconds")
 			break
 		except OSError as e:
+			had_to_wait_for_reconnection = True
 			_logger.info(f"{e}")
 			_logger.info(f"Waiting for port {sender_port} to be available again...")
 			sleep(1)
