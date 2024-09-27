@@ -54,6 +54,10 @@ def tcp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 	_logger.info(f"Established time measured: {time_taken_establish} seconds")
 	_logger.info(f"Echo time measured:        {time_taken_echo} seconds")
 	_logger.info(f"Total time measured:       {time_taken_total} seconds")
+
+	_logger.info(f"Closing connection to {echo_to_hostname_ip}:{echo_to_port}")
+	sock.close()
+
 	return unix_time_str, received_msg.decode("utf-8") == unix_time_str, time_taken_establish, [time_taken_echo], time_taken_total
 
 def tcp_echo_time_receiver(own_hostname_ip:str, own_port:int, echo_back_port:int) -> None:
@@ -74,3 +78,6 @@ def tcp_echo_time_receiver(own_hostname_ip:str, own_port:int, echo_back_port:int
 	_logger.info(f"Echoing '{received_msg}' back to {echoer_ip}:{echoer_port}")
 
 	connection.sendall(received_msg)
+
+	_logger.info(f"Closing connection to {echoer_ip}:{echoer_port}")
+	connection.close()
