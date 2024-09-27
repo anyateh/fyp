@@ -14,14 +14,11 @@ _logger_console_handler.setFormatter(logging.Formatter(
 _logger.setLevel(logging.DEBUG)
 
 # Returns 
-#   msg_sent             - str
-#   success              - bool
+#   echo_results         - list[tuple[try_no, msg, success, time_taken]]
 #   time_taken_establish - Optional[float]
-#   time_taken_echo      - list[Optional[float]]
 #   total_time_taken     - Optional[float]
-def tcp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname_ip:str, listening_port:int) -> tuple[str, bool, Optional[float], list[Optional[float]], Optional[float]]:
-	unix_time_str   = str(floor(time()))
-	unix_time_bytes = unix_time_str.encode("utf-8")
+def tcp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname_ip:str, listening_port:int, n_times:int) -> tuple[list[tuple[int, str, bool, Optional[float]]], Optional[float], Optional[float]]:
+	echo_results = []
 
 	sock  = socket(AF_INET, SOCK_STREAM)
 	sock.bind((own_hostname_ip, listening_port))
@@ -36,29 +33,36 @@ def tcp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 
 	t1 = time()
 
-	_logger.info(f"Sending the unix_timestamp to {echo_to_hostname_ip}:{echo_to_port}")
-	_logger.debug(f"UNIX timestamp str -> {unix_time_str}")
-	t2 = time()
-	sock.sendall(unix_time_bytes)
+	for i in range(n_times):
+		unix_time_str   = str(floor(time()))
+		unix_time_bytes = unix_time_str.encode("utf-8")
 
-	_logger.info(f"Awaiting response via {own_hostname_ip}:{listening_port}...")
-	received_msg = sock.recv(1024)
+		_logger.info(f"Sending the unix_timestamp to {echo_to_hostname_ip}:{echo_to_port}")
+		_logger.debug(f"UNIX timestamp str        ->        {unix_time_str}")
+		t2 = time()
+		sock.sendall(unix_time_bytes)
 
-	t3 = time()
+		_logger.info(f"Awaiting response via {own_hostname_ip}:{listening_port}...")
+		received_msg = sock.recv(1024)
 
-	time_taken_echo      = t3 - t2
+		t3 = time()
+
+		echo_results.append((i+1, unix_time_str, received_msg.decode("utf-8") == unix_time_str, t3 - t2))
+		_logger.info(f"Received message:             '{received_msg}'")
+		_logger.info(f"From:                         {echo_to_hostname_ip}:{echo_to_port}")
+		_logger.info(f"Try {i+1} echo time measured: {t3 - t2} seconds")
+
 	time_taken_establish = t1 - t0
 	time_taken_total     = t3 - t0
 
-	_logger.info(f"Received message: '{received_msg}' from {echo_to_hostname_ip}:{echo_to_port}")
-	_logger.info(f"Established time measured: {time_taken_establish} seconds")
-	_logger.info(f"Echo time measured:        {time_taken_echo} seconds")
-	_logger.info(f"Total time measured:       {time_taken_total} seconds")
+	_logger.info(f"Established time measured:    {time_taken_establish} seconds")
+	_logger.info(f"Total time measured:          {time_taken_total} seconds")
 
 	_logger.info(f"Closing connection to {echo_to_hostname_ip}:{echo_to_port}")
 	sock.close()
 
-	return unix_time_str, received_msg.decode("utf-8") == unix_time_str, time_taken_establish, [time_taken_echo], time_taken_total
+	return echo_results, time_taken_establish, time_taken_total
+	# return [i[0] for i in echo_results], [i[1] for i in echo_results], time_taken_establish, [i[2] for i in echo_results], time_taken_total
 
 def tcp_echo_time_receiver(own_hostname_ip:str, own_port:int, echo_back_port:int) -> None:
 	sock = socket(AF_INET, SOCK_STREAM)

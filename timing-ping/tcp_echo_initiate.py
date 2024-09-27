@@ -3,6 +3,8 @@
 import logging
 from argparse import ArgumentParser
 from statistics import mean
+from sys import stderr
+from time import sleep
 
 from tcp_echo.tcp_echo import tcp_echo_time_sender
 
@@ -55,33 +57,43 @@ def main() -> None:
 	longest_success_fail = len(success_col_header)
 	longest_time_taken   = len(time_col_header)
 
-	for i in range(n_times):
-		msg_xchanged, success, time_taken_establish, time_taken_echo, total_time_taken = tcp_echo_time_sender(receiver_hostname, receiver_port, sender_hostname, sender_port)
 
-		echo_results.append((str(i + 1), msg_xchanged, success, time_taken_establish, time_taken_echo, total_time_taken))
 
-		longest_try        = max(longest_try, len(str(i + 1)))
-		longest_msg        = max(longest_msg, len(msg_xchanged))
-		longest_time_taken = max(longest_time_taken, len(str(total_time_taken)))
+	while True:
+		try:
+			echo_results, time_taken_establish, total_time_taken = tcp_echo_time_sender(receiver_hostname, receiver_port, sender_hostname, sender_port, n_times)
+
+			for try_no, msg_xchanged, success, time_taken in echo_results:
+				longest_try        = max(longest_try, len(str(try_no)))
+				longest_msg        = max(longest_msg, len(msg_xchanged))
+				longest_time_taken = max(longest_time_taken, len(str(time_taken)))
 	
-	print(
-		try_col_header    .ljust(longest_try),
-		msg_col_header    .ljust(longest_msg),
-		success_col_header.ljust(longest_success_fail),
-		time_col_header   .ljust(longest_time_taken),
-		sep = "  "
-	)
-	for n, m, s, t_established, t_echo, t in echo_results:
-		print(
-			n                               .rjust(longest_try),
-			m                               .rjust(longest_msg),
-			("yes" if s         else "no"  ).rjust(longest_success_fail),
-			("N/A" if t is None else str(t)).rjust(longest_time_taken),
-			sep = "  "
-		)
+			print(
+				try_col_header    .ljust(longest_try),
+				msg_col_header    .ljust(longest_msg),
+				success_col_header.ljust(longest_success_fail),
+				time_col_header   .ljust(longest_time_taken),
+				sep = "  "
+			)
+			for n, m, s, t in echo_results:
+				print(
+					str(n)                          .rjust(longest_try),
+					m                               .rjust(longest_msg),
+					("yes" if s         else "no"  ).rjust(longest_success_fail),
+					("N/A" if t is None else str(t)).rjust(longest_time_taken),
+					sep = "  "
+				)
 	
-	print("Average:", mean(i[5] for i in echo_results if i[2]), "seconds")
-	print("Success Rate: ", round(sum(1 for i in echo_results if i[2]) * 100 / len(echo_results), 1), "%", sep = "")
+			print("", file = stderr)
+			print("Establishment time:           ", time_taken_establish, "seconds")
+			print("Average echo time:            ", mean(i[3] for i in echo_results if i[2]), "seconds")
+			print("Success rate:                  ", round(sum(1 for i in echo_results if i[2]) * 100 / len(echo_results), 1), "%", sep = "")
+			print("Total time:                   ", total_time_taken, "seconds")
+			break
+		except OSError as e:
+			_logger.info(f"{e}")
+			_logger.info(f"Waiting for port {sender_port} to be available again...")
+			sleep(1)
 
 if __name__ == '__main__':
 	main()
