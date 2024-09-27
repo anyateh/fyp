@@ -77,11 +77,11 @@ def tcp_echo_time_receiver(own_hostname_ip:str, own_port:int) -> None:
 	connection, (echoer_ip, echoer_port) = sock.accept()
 	_logger.info(f"Got connection request from {echoer_ip}:{echoer_port}")
 
-	def sigint_handle(sig, frame):
-		os_write(stderr, f"[INFO] Closing connection to {echoer_ip}:{echoer_port}")
-		connection.close()
+	# def sigint_handle(sig, frame):
+	# 	os_write(stderr, f"[INFO] Closing connection to {echoer_ip}:{echoer_port}")
+	# 	connection.close()
 	
-	signal(SIGINT, sigint_handle)
+	# signal(SIGINT, sigint_handle)
 
 	while True:
 		print("\n[REMINDER] Press ctrl-c to terminate\n", file = stderr)
