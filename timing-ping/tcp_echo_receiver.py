@@ -7,7 +7,7 @@ from time import sleep
 
 from tcp_echo.tcp_echo import tcp_echo_time_receiver
 
-DEFAULT_PORT           = 2310
+DEFAULT_PORT           = 2311
 
 # Return own_ip, own_port
 def parse_opts() -> tuple[str, int]:

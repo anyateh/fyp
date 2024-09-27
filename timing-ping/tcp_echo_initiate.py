@@ -9,7 +9,7 @@ from time import sleep, time
 from tcp_echo.tcp_echo import tcp_echo_time_sender
 
 DEFAULT_N_TIMES        = 5
-DEFAULT_PORT           = 2310
+DEFAULT_PORT           = 2311
 DEFAULT_LISTENING_PORT = 2311
 
 _logger = logging.getLogger(__name__)
@@ -25,9 +25,9 @@ _logger.setLevel(logging.INFO)
 def parse_opts() -> tuple[str, int, str, int, int]:
 	aparser = ArgumentParser(prog = "udp_echo_initiate")
 
-	aparser.add_argument('-c', type = int, metavar = "n_times"  , default = DEFAULT_N_TIMES        , help = "Number of times to echo.")
-	aparser.add_argument('-p', type = int, metavar = "dest_port", default = DEFAULT_PORT           , help = "Port number to send to.")
-	aparser.add_argument('-l', type = int, metavar = "own_port" , default = DEFAULT_LISTENING_PORT , help = "Port number to listen from.")
+	aparser.add_argument('-c', type = int, metavar = "n_times"  , default = DEFAULT_N_TIMES, help = "Number of times to echo.")
+	aparser.add_argument('-p', type = int, metavar = "dest_port", default = DEFAULT_PORT   , help = "Port number to send to.")
+	aparser.add_argument('-l', type = int, metavar = "own_port" , default = None           , help = "Port number to listen from.")
 
 	aparser.add_argument('dest_ip_hstname', help = 'Destination IP/Hostname')
 	aparser.add_argument('own_ip_hstname' , help = 'Assigned IP/Hostname')
