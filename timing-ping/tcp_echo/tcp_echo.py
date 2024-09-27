@@ -65,7 +65,6 @@ def tcp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 	sock.close()
 
 	return echo_results, time_taken_establish, time_taken_total
-	# return [i[0] for i in echo_results], [i[1] for i in echo_results], time_taken_establish, [i[2] for i in echo_results], time_taken_total
 
 def tcp_echo_time_receiver(own_hostname_ip:str, own_port:int) -> None:
 	sock = socket(AF_INET, SOCK_STREAM)
@@ -86,7 +85,6 @@ def tcp_echo_time_receiver(own_hostname_ip:str, own_port:int) -> None:
 	while True:
 		print("\n[REMINDER] Press ctrl-c to terminate\n", file = stderr)
 
-		# _logger.info(f"Awaiting message via {own_hostname_ip}:{own_port}...")
 		received_msg = connection.recv(1024)
 		if not received_msg:
 			_logger.info(f"Closing connection to {echoer_ip}:{echoer_port}")
