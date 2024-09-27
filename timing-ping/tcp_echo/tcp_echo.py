@@ -1,7 +1,9 @@
 import logging
 from math import floor
+from os import write as os_write
 from time import time
 from socket import AF_INET, gaierror, SOCK_STREAM, socket
+from signal import SIGINT, signal
 from sys import stderr
 from typing import Optional
 
@@ -75,6 +77,11 @@ def tcp_echo_time_receiver(own_hostname_ip:str, own_port:int) -> None:
 	connection, (echoer_ip, echoer_port) = sock.accept()
 	_logger.info(f"Got connection request from {echoer_ip}:{echoer_port}")
 
+	def sigint_handle(sig, frame):
+		os_write(stderr, f"[INFO] Closing connection to {echoer_ip}:{echoer_port}")
+		connection.close()
+	
+	signal(SIGINT, sigint_handle)
 
 	while True:
 		print("\n[REMINDER] Press ctrl-c to terminate\n", file = stderr)
