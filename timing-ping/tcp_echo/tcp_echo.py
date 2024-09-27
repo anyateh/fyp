@@ -2,6 +2,7 @@ import logging
 from math import floor
 from time import time
 from socket import AF_INET, gaierror, SOCK_STREAM, socket
+from sys import stderr
 from typing import Optional
 
 _logger = logging.getLogger(__name__)
@@ -64,7 +65,7 @@ def tcp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 	return echo_results, time_taken_establish, time_taken_total
 	# return [i[0] for i in echo_results], [i[1] for i in echo_results], time_taken_establish, [i[2] for i in echo_results], time_taken_total
 
-def tcp_echo_time_receiver(own_hostname_ip:str, own_port:int, echo_back_port:int) -> None:
+def tcp_echo_time_receiver(own_hostname_ip:str, own_port:int) -> None:
 	sock = socket(AF_INET, SOCK_STREAM)
 	sock.bind((own_hostname_ip, own_port))
 	sock.setblocking(True)
@@ -74,14 +75,18 @@ def tcp_echo_time_receiver(own_hostname_ip:str, own_port:int, echo_back_port:int
 	connection, (echoer_ip, echoer_port) = sock.accept()
 	_logger.info(f"Got connection request from {echoer_ip}:{echoer_port}")
 
-	_logger.info(f"Awaiting message via {own_hostname_ip}:{own_port}...")
-	received_msg = connection.recv(1024)
 
-	_logger.info(f"Received message: '{received_msg}' from {echoer_ip}:{echoer_port}")
+	while True:
+		print("\n[REMINDER] Press ctrl-c to terminate\n", file = stderr)
 
-	_logger.info(f"Echoing '{received_msg}' back to {echoer_ip}:{echoer_port}")
+		# _logger.info(f"Awaiting message via {own_hostname_ip}:{own_port}...")
+		received_msg = connection.recv(1024)
+		if not received_msg:
+			_logger.info(f"Closing connection to {echoer_ip}:{echoer_port}")
+			connection.close()
+			break
 
-	connection.sendall(received_msg)
+		_logger.info(f"Received message: '{received_msg}' from {echoer_ip}:{echoer_port}")
 
-	_logger.info(f"Closing connection to {echoer_ip}:{echoer_port}")
-	connection.close()
+		_logger.info(f"Echoing '{received_msg}' back to {echoer_ip}:{echoer_port}")
+		connection.sendall(received_msg)
