@@ -33,12 +33,6 @@ def tcp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 	_logger.info(f"Establishing connection to echo-ee {echo_to_hostname_ip}:{echo_to_port}...")
 	sock.connect((echo_to_hostname_ip, echo_to_port))
 	_logger.info(f"Established connection to echo-ee!")
-	
-	# Waiting connection from echo-ee
-	_logger.info(f"Waiting to hear request from echo-ee {echo_to_hostname_ip}:{echo_to_port}...")
-	sock.listen(1)
-	echoee_connection, (echoee_ip, echoee_port) = sock.accept()
-	_logger.info(f"Got connection request from echo-ee {echoee_ip}:{echoee_port}!")
 
 	t1 = time()
 
@@ -48,7 +42,7 @@ def tcp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 	sock.sendall(unix_time_bytes)
 
 	_logger.info(f"Awaiting response via {own_hostname_ip}:{listening_port}...")
-	received_msg = echoee_connection.recv(1024)
+	received_msg = sock.recv(1024)
 
 	t3 = time()
 
@@ -56,7 +50,7 @@ def tcp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 	time_taken_establish = t1 - t0
 	time_taken_total     = t3 - t0
 
-	_logger.info(f"Received message: '{received_msg}' from {echoee_ip}:{echoee_port}")
+	_logger.info(f"Received message: '{received_msg}' from {echo_to_hostname_ip}:{echo_to_port}")
 	_logger.info(f"Established time measured: {time_taken_establish} seconds")
 	_logger.info(f"Echo time measured:        {time_taken_echo} seconds")
 	_logger.info(f"Total time measured:       {time_taken_total} seconds")
@@ -72,14 +66,11 @@ def tcp_echo_time_receiver(own_hostname_ip:str, own_port:int, echo_back_port:int
 	connection, (echoer_ip, echoer_port) = sock.accept()
 	_logger.info(f"Got connection request from {echoer_ip}:{echoer_port}")
 
-	_logger.info(f"Requesting echo back connection to {echoer_ip}:{echo_back_port}")
-	sock.connect((echoer_ip, echo_back_port))
-	_logger.info(f"Established echo-back connection")
-
 	_logger.info(f"Awaiting message via {own_hostname_ip}:{own_port}...")
 	received_msg = connection.recv(1024)
 
-	_logger.info(f"Received message: '{received_msg}' from {echoer_ip}:{echo_back_port}")
+	_logger.info(f"Received message: '{received_msg}' from {echoer_ip}:{echoer_port}")
 
-	_logger.info(f"Echoing '{received_msg}' back to {echoer_ip}:{echo_back_port}")
-	sock.sendto(received_msg, (echoer_ip, echo_back_port))
+	_logger.info(f"Echoing '{received_msg}' back to {echoer_ip}:{echoer_port}")
+
+	connection.sendall(received_msg)
