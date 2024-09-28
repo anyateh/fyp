@@ -21,7 +21,7 @@ def udp_echo_time_sender(echo_to_hostname_ip:str, echo_to_port:int, own_hostname
 	sock.bind((own_hostname_ip, listening_port))
 
 	sock.setblocking(True)
-	sock.settimeout(3)
+	sock.settimeout(0.3)
 
 	_logger.info(f"Sending the unix_timestamp to {echo_to_hostname_ip}:{echo_to_port}")
 	_logger.debug(f"UNIX timestamp str -> {unix_time_str}")
