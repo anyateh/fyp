@@ -33,7 +33,7 @@ Content-Length: 200\r\n\r
 </html>'''
 
 def start_server() -> socket:
-	listening_ip = "192.168.1.73"
+	listening_ip = "localhost"
 	port         = 2310
 
 	sock = socket(AF_INET, SOCK_STREAM)
