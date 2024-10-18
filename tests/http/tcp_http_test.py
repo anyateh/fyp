@@ -19,7 +19,8 @@ _logger.setLevel(logging.DEBUG)
 
 main_page_response = '''HTTP/1.1 200 OK\r
 Content-Type: text/html\r
-Content-Length: 200\r\n\r
+Content-Length: 200\r
+Connection: close\r\n\r
 <!DOCTYPE html>
 <html lang="en">
 	<head>
