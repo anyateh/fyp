@@ -33,9 +33,9 @@ This is the software repository for signal processing software for Rasberry Pi a
        
        **Figure 1** Sample SD card from https://simlimsquare.com.sg/product/sandisk-extreme-32gb-to-1tb-microsdhc-uhs-3-card
  - [x] Purchase micro-SD card reader
- - [ ] Purchase micro-HDMI adapter
+ - [x] Purchase micro-HDMI adapter
  - [x] Figure out which Raspian OS to use
- - [ ] Set up VNC on the RPI
+ - [x] Set up VNC on the RPI
  - [x] Perform a simple UDP transfer
  - [x] Perform a simple TCP transfer
  - [x] Set up a more complex UDP communication
@@ -48,6 +48,6 @@ This is the software repository for signal processing software for Rasberry Pi a
 
 ### Checklist
 - [x] Decide on a standardized programming language: Python
-- [ ] Implement a simple triangulation program.
+- [x] Implement a simple triangulation program.
 - [ ] Read up of localization techniques not needing de-modulation.
 
