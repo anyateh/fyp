@@ -41,6 +41,8 @@ This is the software repository for signal processing software for Rasberry Pi a
  - [x] Set up a more complex UDP communication
  - [x] Measure echo time for UDP communication
  - [x] Measure echo time for TCP communication
+ - [ ] Set up multi device network communication
+  - [ ] Accepting arbitiary number of devices.
 
 ## Implementing Triangulation Alog
 
