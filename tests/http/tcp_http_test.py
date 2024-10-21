@@ -34,7 +34,7 @@ Connection: close\r\n\r
 </html>'''
 
 def start_server() -> socket:
-	listening_ip = "localhost"
+	listening_ip = "0.0.0.0"
 	port         = 2310
 
 	sock = socket(AF_INET, SOCK_STREAM)
