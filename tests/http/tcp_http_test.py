@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 
+import asyncio
 import logging
 import re
 
@@ -183,5 +184,106 @@ def main() -> None:
 			_logger.error(f"{e}")
 			sleep(1)
 
+# Async version below
+
+async def start_http_server(listening_ip:str = '0.0.0.0', port = 2310) -> socket:
+	sock = socket(AF_INET, SOCK_STREAM)
+
+	sock.bind((listening_ip, port))
+	sock.setblocking(False)
+	sock.settimeout(0.5)
+	sock.listen(1)
+
+	return sock
+
+async def handle_client(connection:socket, client_ip:str, client_port:int, content:bytes) -> None:
+	client_req = "".join(content.decode(encoding = "utf-8"))
+	await asyncio.sleep(0)
+
+	_logger.debug("Received request:")
+	for line in client_req.split('\n'):
+		_logger.debug(f"{line}")
+	
+	_logger.debug(f"from {client_ip}:{client_port}")
+	
+	connection.sendall(main_page_response.encode(encoding = 'utf-8'))
+
+	await asyncio.sleep(0)
+
+	connection.close()
+
+async def accept_new_client(sock:socket) -> tuple[Optional[socket], Optional[str], Optional[int], Optional[bytes]]:
+	try:
+		connection, (client_ip, client_port) = sock.accept()
+
+		_logger.info(f'Oh! Hi there! {client_ip}:{client_port}')
+
+		request_bytes = []
+
+		connection.setblocking(False)
+		connection.settimeout(0.5)
+
+		_logger.debug(f"Attempting to read from {client_ip}:{client_port}...")
+
+		try:
+			data = connection.recv(1024)
+		except TimeoutError:
+			await asyncio.sleep(0)
+
+		request_bytes.extend(list(data))
+
+		while not _is_complete_http_req(request_bytes):
+			_logger.debug(f"Attempting to read from {client_ip}:{client_port}...")
+
+			try:
+				data = connection.recv(1024)
+			except TimeoutError:
+				connection.close()
+				return None, None, None, None
+
+			if not data:
+				await asyncio.sleep(0)
+				break
+
+			request_bytes.extend(list(data))
+			await asyncio.sleep(0)
+	
+		return connection, client_ip, client_port, bytes(request_bytes)
+	except TimeoutError:
+		return None, None, None, None
+
+async def main_loop() -> None:
+	sock = await start_http_server()
+
+	clients = []
+
+	new_client_task = None
+	client_handlers = set()
+
+	def handle_ctrl_c(sig, frame) -> None:
+		close_server(sock)
+		exit(0)
+
+	signal(SIGINT, handle_ctrl_c)
+
+	def client_handler_done(handler_task:asyncio.Task) -> None:
+		client_handlers.discard(handler_task)
+
+	def client_task_done(task:asyncio.Task[tuple[socket, str, int]]) -> None:
+		nonlocal new_client_task
+		new_client_task = None
+		connection, clientip, clientport, content = task.result()
+		if connection:
+			handler_task = asyncio.create_task(handle_client(connection, clientip, clientport, content))
+			handler_task.add_done_callback(client_handler_done)
+			client_handlers.add(handler_task)
+
+	while True:
+		if not new_client_task:
+			new_client_task = asyncio.create_task(accept_new_client(sock))
+			new_client_task.add_done_callback(client_task_done)
+		await asyncio.sleep(0)
+
 if __name__ == '__main__':
-	main()
+	# main()
+	asyncio.run(main_loop())
