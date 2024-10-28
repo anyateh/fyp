@@ -5,7 +5,7 @@ import logging
 import re
 
 from   signal import SIGINT, signal
-from   socket import AF_INET, SOCK_STREAM, socket
+from   socket import AF_INET, AF_INET6, SOCK_STREAM, socket, timeout as sock_timeout
 from   time   import sleep
 from   typing import Iterator, Iterable, Optional
 
@@ -215,6 +215,7 @@ async def handle_client(connection:socket, client_ip:str, client_port:int, conte
 async def accept_new_client(sock:socket) -> tuple[Optional[socket], Optional[str], Optional[int], Optional[bytes]]:
 	try:
 		connection, (client_ip, client_port) = sock.accept()
+		# connection, (client_ip, client_port, flow_info, scope_id) = sock.accept() # IPV6
 
 		_logger.info(f'Oh! Hi there! {client_ip}:{client_port}')
 
