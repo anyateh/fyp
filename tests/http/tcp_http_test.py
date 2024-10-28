@@ -227,7 +227,7 @@ async def accept_new_client(sock:socket) -> tuple[Optional[socket], Optional[str
 
 		try:
 			data = connection.recv(1024)
-		except TimeoutError:
+		except sock_timeout:
 			await asyncio.sleep(0)
 
 		request_bytes.extend(list(data))
@@ -237,7 +237,7 @@ async def accept_new_client(sock:socket) -> tuple[Optional[socket], Optional[str
 
 			try:
 				data = connection.recv(1024)
-			except TimeoutError:
+			except sock_timeout:
 				connection.close()
 				return None, None, None, None
 
@@ -249,7 +249,7 @@ async def accept_new_client(sock:socket) -> tuple[Optional[socket], Optional[str
 			await asyncio.sleep(0)
 	
 		return connection, client_ip, client_port, bytes(request_bytes)
-	except TimeoutError:
+	except sock_timeout:
 		return None, None, None, None
 
 async def main_loop() -> None:
