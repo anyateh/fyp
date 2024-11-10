@@ -6,7 +6,7 @@ from signal import signal, SIGINT
 from socket import AF_INET, SOCK_STREAM, socket
 from typing import Optional
 
-from logger import logger
+from scripts.logger import logger
 
 DEFAULT_LISTEN_IP   = '0.0.0.0'
 DEFAULT_LISTEN_PORT = 3112
