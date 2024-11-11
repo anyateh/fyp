@@ -30,8 +30,18 @@ async def main_loop() -> None:
 
 	await server.start_accepting_clients()
 
+	loop_update_task = None
+
+	def probe_exception(tsk:asyncio.Task) -> None:
+		nonlocal loop_update_task
+		loop_update_task = None
+		tsk.result()
+
 	while True:
-		antes.print_antennas()
+		if not loop_update_task:
+			loop_update_task = asyncio.create_task(antes.loop_ante_updates(server))
+			loop_update_task.add_done_callback(probe_exception)
+
 		await asyncio.sleep(1)
 
 if __name__ == '__main__':
