@@ -7,4 +7,4 @@ logger.addHandler(logger_console_handler)
 logger_console_handler.setFormatter(logging.Formatter(
 	"[%(levelname)s] %(message)s"
 ))
-logger.setLevel(logging.DEBUG)
+logger.setLevel(logging.INFO)
