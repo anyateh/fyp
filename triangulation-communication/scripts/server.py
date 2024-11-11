@@ -7,7 +7,7 @@ from typing import Callable, Optional
 from .logger import logger
 from .packet import DBM_Packet
 
-from .leader_node.manage_antes import decode_packet
+from .leader_node.manage_antes import decode_packet, deregister_ante_node
 
 class TrianClient:
 	hostname_ip:str
@@ -156,3 +156,6 @@ class TrianServer:
 			return None
 		except socket_timeout:
 			return None
+		except BrokenPipeError:
+			del self.clients[client_id]
+			deregister_ante_node(client_id)
