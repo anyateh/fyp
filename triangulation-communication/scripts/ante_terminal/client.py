@@ -40,7 +40,7 @@ class AnteClient:
 		if not header:
 			return None
 
-		pkt_header:DBM_Packet = DBM_Packet.from_bytes(header)
+		pkt_header:DBM_Packet = DBM_Packet.from_bytes(header)[0]
 		if pkt_header.is_login_request_accepted():
 			return pkt_header
 
@@ -52,7 +52,7 @@ class AnteClient:
 		if not header:
 			return None
 		
-		pkt_header:DBM_Packet = DBM_Packet.from_bytes(header)
+		pkt_header:DBM_Packet = DBM_Packet.from_bytes(header)[0]
 
 		if pkt_header.is_dbm_data_request():
 			return pkt_header

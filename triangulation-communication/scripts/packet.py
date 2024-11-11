@@ -114,7 +114,7 @@ class DBM_Packet:
 		# if packet_len - DBM_Packet.PACKET_SIZE != data_size:
 		# 	warn(f"Size of actual data attached with packet of {packet_len - DBM_Packet.PACKET_SIZE} bytes does not match the expected data size of {data_size} bytes.")
 
-		return DBM_Packet(identifier, flags, x_coord, y_coord, frame_id, packet[DBM_Packet.PACKET_SIZE:])
+		return DBM_Packet(identifier, flags, x_coord, y_coord, frame_id, packet[DBM_Packet.PACKET_SIZE:]), data_size
 	
 	def is_login_request(self) -> bool:
 		return self.flags_16b & DBM_Packet.FLAG_LOGON_REQ != 0

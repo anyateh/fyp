@@ -109,13 +109,13 @@ class TrianServer:
 				logger.info(f"Couldn't get header from {client.hostname_ip}:{client.port}")
 				return None
 
-			header_packet:DBM_Packet = DBM_Packet.from_bytes(header)
+			header_packet, reported_data_size = DBM_Packet.from_bytes(header)
 
 			if header_packet.identifier_48b not in self.clients:
 				self.clients[header_packet.identifier_48b] = client
 
-			if header_packet.data_size > 0:
-				data = conn.recv(header_packet.size)
+			if reported_data_size > 0:
+				data = conn.recv(reported_data_size)
 
 				logger.debug(f"Received message from {client.hostname_ip}:{client.port}.")
 
