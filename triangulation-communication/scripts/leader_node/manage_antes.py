@@ -42,9 +42,9 @@ def manage_login_request(packet:DBM_Packet) -> DBM_Packet:
 
 	return response_packet
 
-def register_ante_node(id:int, x:float, y:float) -> bool:
-	if id not in __antennas_registered:
-		__antennas_registered[id] = AntennaNode(id, x, y)
+def register_ante_node(a_id:int, x:float, y:float) -> bool:
+	if a_id not in __antennas_registered:
+		__antennas_registered[a_id] = AntennaNode(a_id, x, y)
 
 	return True
 
