@@ -48,6 +48,10 @@ def register_ante_node(a_id:int, x:float, y:float) -> bool:
 
 	return True
 
+def deregister_ante_node(a_id:int) -> None:
+	if a_id in __antennas_registered:
+		del __antennas_registered[a_id]
+
 async def update_ante_readings(frame_id:int, server:TrianServer) -> None:
 	obtain_data_tasks = []
 	for i in __antennas_registered.values():
