@@ -68,9 +68,11 @@ async def update_ante_readings(frame_id:int, server:TrianServer) -> None:
 		manage_data_packet(i)
 
 async def loop_ante_updates(server:TrianServer) -> None:
-	frame_id = randint(1, (2**48) - 1)
+	global __current_request_id
+	frame_id = randint(1, (2**32) - 1)
 	while True:
-		frame_id = randint(1, (2**48) - 1)
+		frame_id = randint(1, (2**32) - 1)
+		__current_request_id = frame_id
 		await update_ante_readings(frame_id, server)
 		print_antennas()
 		await asyncio.sleep(0.5)
