@@ -26,7 +26,7 @@
 
 from random            import randint
 from typing            import Optional
-from typing_extensions import Self
+# from typing_extensions import Self
 from warnings          import warn
 
 import struct
@@ -100,7 +100,7 @@ class DBM_Packet:
 		return identifier_bytes + flags_bytes + x_coord_bytes + y_coord_bytes + frame_id_bytes + data_size_bytes + self.data
 
 	@staticmethod
-	def from_bytes(packet:bytes) -> Self:
+	def from_bytes(packet:bytes) -> tuple[any, int]:
 		packet_len = len(packet)
 		assert packet_len >= DBM_Packet.PACKET_SIZE
 
@@ -131,11 +131,11 @@ class DBM_Packet:
 		return self.flags_16b & bits_to_check == bits_to_check
 
 	@staticmethod
-	def _create_login_request_fx(identifier:int, x:float, y:float) -> Self:
+	def _create_login_request_fx(identifier:int, x:float, y:float):
 		return DBM_Packet(identifier, DBM_Packet.FLAG_LOGON_REQ, x, y, 0, b'')
 
 	@staticmethod
-	def create_login_request(identifier:Optional[int], x:float, *y:float) -> Self:
+	def create_login_request(identifier:Optional[int], x:float, *y:float):
 		y1 = 0
 		if y:
 			y1 = y[0]
@@ -146,22 +146,22 @@ class DBM_Packet:
 		return DBM_Packet._create_login_request_fx(identifier, x, y1)
 
 	@staticmethod
-	def accept_login_request(identifier:int, x:float, y:float) -> Self:
+	def accept_login_request(identifier:int, x:float, y:float):
 		return DBM_Packet(identifier, DBM_Packet.FLAG_ACCEPT_REQ | DBM_Packet.FLAG_LOGON_REQ, x, y, 0, b'')
 
 	@staticmethod
-	def accept_login_request_and_get_reading(identifier:int, x:float, y:float, frame_id:int) -> Self:
+	def accept_login_request_and_get_reading(identifier:int, x:float, y:float, frame_id:int):
 		return DBM_Packet(identifier, DBM_Packet.FLAG_ACCEPT_REQ | DBM_Packet.FLAG_GET_ANT_SG | DBM_Packet.FLAG_LOGON_REQ, x, y, frame_id, b'')
 
 	@staticmethod
-	def reject_login_request(identifier:int, x:float, y:float) -> Self:
+	def reject_login_request(identifier:int, x:float, y:float):
 		return DBM_Packet(identifier, DBM_Packet.FLAG_REJECT_REQ | DBM_Packet.FLAG_LOGON_REQ, x, y, 0, b'')
 
 	@staticmethod
-	def create_reading_request(identifier:int, x:float, y:float, frame_id:int) -> Self:
+	def create_reading_request(identifier:int, x:float, y:float, frame_id:int):
 		return DBM_Packet(identifier, DBM_Packet.FLAG_GET_ANT_SG, x, y, frame_id, b'')
 
 	# Use double-precision floats
 	@staticmethod
-	def create_power_dbm_data_packet(identifier:int, x:float, y:float, frame_id:int, dbm_reading:float) -> Self:
+	def create_power_dbm_data_packet(identifier:int, x:float, y:float, frame_id:int, dbm_reading:float):
 		return DBM_Packet(identifier, DBM_Packet.FLAG_GET_ANT_SG, x, y, frame_id, struct.pack("<d", dbm_reading))
