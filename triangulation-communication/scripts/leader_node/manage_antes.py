@@ -64,8 +64,10 @@ async def update_ante_readings(frame_id:int, server:TrianServer) -> None:
 	
 	results = await asyncio.gather(*obtain_data_tasks)
 
-	for i in results:
-		manage_data_packet(i)
+	if __current_request_id == frame_id:
+		for i in results:
+			if i:
+				manage_data_packet(i)
 
 async def loop_ante_updates(server:TrianServer) -> None:
 	global __current_request_id
