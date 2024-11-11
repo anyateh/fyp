@@ -6,7 +6,7 @@
 # ################################################################
 # #                      Identifier (31:0)                       #
 # ################################################################
-# #      Identifier (47:32)     ##A|R|   Flags (15:0)    |K|P|G|L#
+# #      Identifier (47:32)     ##A|R|D|   Flags (15:0)  |K|P|G|L#
 # ################################################################
 # #                 Reported X Coordinate (31:0)                 #
 # ################################################################
@@ -36,7 +36,7 @@ class DBM_Packet:
 	# or spoofed MAC address.
 	identifier_48b:int     = 0 # 6 bytes
 	# Flags to turn on or off
-	#  AR..........KPGL
+	#  ARD.........KPGL
 	#   . -> Unused bit
 	#   L -> Log-on request
 	#   G -> Get Antenna Signal Strengths request
@@ -46,6 +46,7 @@ class DBM_Packet:
 	#         itself out of the system. Respond with A flag.
 	#   A -> Request Accepted
 	#   R -> Request Rejected
+	#   D -> Use Dummy values provided
 	flags_16b:int          = 0 # 2 bytes
 	# Reported X coordinate of the antenna node. (Double precision floats)
 	reported_x_coord:float = 0 # 8-byte
@@ -66,6 +67,7 @@ class DBM_Packet:
 	# Flags bitfields
 	FLAG_ACCEPT_REQ = 0x8000
 	FLAG_REJECT_REQ = 0x4000
+	FLAG_DUMMY_VAL  = 0x2000
 
 	FLAG_KICK_ANT   = 0x0008
 	FLAG_PING_ANT   = 0x0004
@@ -111,7 +113,7 @@ class DBM_Packet:
 
 		if packet_len - DBM_Packet.PACKET_SIZE != data_size:
 			warn(f"Size of actual data attached with packet of {packet_len - DBM_Packet.PACKET_SIZE} bytes does not match the expected data size of {data_size} bytes.")
-		
+
 		return DBM_Packet(identifier, flags, x_coord, y_coord, frame_id, packet[DBM_Packet.PACKET_SIZE:])
 
 	@staticmethod
