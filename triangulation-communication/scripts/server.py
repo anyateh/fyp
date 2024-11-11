@@ -51,7 +51,7 @@ class TrianServer:
 		logger.debug("Checking for potential new clients...")
 		try:
 			connection, (client_ip, client_port) = self.sock.accept()
-			logger.debug(f"New Client {client_ip}:{client_port}!")
+			logger.info(f"New Client {client_ip}:{client_port}!")
 			connection.setblocking(False)
 			connection.settimeout(0.5)
 
