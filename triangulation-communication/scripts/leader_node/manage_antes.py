@@ -80,7 +80,7 @@ async def loop_ante_updates(server:TrianServer) -> None:
 		await asyncio.sleep(0.5)
 
 def manage_data_packet(packet:DBM_Packet) -> None:
-	dbm = struct.unpack("<d", packet.data)
+	dbm = struct.unpack("<d", packet.data)[0]
 
 	__antennas_registered[packet.identifier_48b].dbm = dbm
 
