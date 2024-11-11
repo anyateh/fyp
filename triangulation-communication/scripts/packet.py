@@ -111,8 +111,8 @@ class DBM_Packet:
 		frame_id   = struct.unpack("<I", packet[24:28])[0]
 		data_size  = struct.unpack("<I", packet[28:32])[0]
 
-		if packet_len - DBM_Packet.PACKET_SIZE != data_size:
-			warn(f"Size of actual data attached with packet of {packet_len - DBM_Packet.PACKET_SIZE} bytes does not match the expected data size of {data_size} bytes.")
+		# if packet_len - DBM_Packet.PACKET_SIZE != data_size:
+		# 	warn(f"Size of actual data attached with packet of {packet_len - DBM_Packet.PACKET_SIZE} bytes does not match the expected data size of {data_size} bytes.")
 
 		return DBM_Packet(identifier, flags, x_coord, y_coord, frame_id, packet[DBM_Packet.PACKET_SIZE:])
 	
