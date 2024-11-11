@@ -115,6 +115,20 @@ class DBM_Packet:
 			warn(f"Size of actual data attached with packet of {packet_len - DBM_Packet.PACKET_SIZE} bytes does not match the expected data size of {data_size} bytes.")
 
 		return DBM_Packet(identifier, flags, x_coord, y_coord, frame_id, packet[DBM_Packet.PACKET_SIZE:])
+	
+	def is_login_request(self) -> bool:
+		return self.flags_16b & DBM_Packet.FLAG_LOGON_REQ != 0
+
+	def is_login_request_accepted(self) -> bool:
+		bits_to_check = (DBM_Packet.FLAG_ACCEPT_REQ | DBM_Packet.FLAG_LOGON_REQ)
+		return self.flags_16b & bits_to_check == bits_to_check
+
+	def is_dbm_data_request(self) -> bool:
+		return self.flags_16b & DBM_Packet.FLAG_GET_ANT_SG != 0
+
+	def is_dbm_data_packet(self) -> bool:
+		bits_to_check = (DBM_Packet.FLAG_ACCEPT_REQ | DBM_Packet.FLAG_GET_ANT_SG)
+		return self.flags_16b & bits_to_check == bits_to_check
 
 	@staticmethod
 	def _create_login_request_fx(identifier:int, x:float, y:float) -> Self:
@@ -138,6 +152,10 @@ class DBM_Packet:
 	@staticmethod
 	def accept_login_request_and_get_reading(identifier:int, x:float, y:float, frame_id:int) -> Self:
 		return DBM_Packet(identifier, DBM_Packet.FLAG_ACCEPT_REQ | DBM_Packet.FLAG_GET_ANT_SG | DBM_Packet.FLAG_LOGON_REQ, x, y, frame_id, b'')
+
+	@staticmethod
+	def reject_login_request(identifier:int, x:float, y:float) -> Self:
+		return DBM_Packet(identifier, DBM_Packet.FLAG_REJECT_REQ | DBM_Packet.FLAG_LOGON_REQ, x, y, 0, b'')
 
 	@staticmethod
 	def create_reading_request(identifier:int, x:float, y:float, frame_id:int) -> Self:
