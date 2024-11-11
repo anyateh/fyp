@@ -61,8 +61,9 @@ class TrianServer:
 	
 	def __decode_packet_callback(self, tsk:asyncio.Task) -> None:
 		self.tasks.discard(tsk)
-		reply_packet, expecting_response = tsk.result()
-		if reply_packet:
+		response = tsk.result()
+		if response:
+			reply_packet, expecting_response = response
 			send_pkt = asyncio.create_task(self.send_packet_to_client(reply_packet.identifier_48b, reply_packet, expecting_response))
 			send_pkt.add_done_callback(self.__decode_packet_callback)
 			self.tasks.add(send_pkt)
