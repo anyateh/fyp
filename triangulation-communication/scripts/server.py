@@ -1,10 +1,12 @@
 import asyncio
 
-from socket import AF_INET, SOCK_STREAM, socket
+from socket import AF_INET, SOCK_STREAM, socket, timeout as socket_timeout
 from typing import Callable, Optional
 
 from .logger import logger
 from .packet import DBM_Packet
+
+from .leader_node.manage_antes import decode_packet
 
 class TrianClient:
 	hostname_ip:str
@@ -18,11 +20,13 @@ class TrianClient:
 		self.connection  = connection
 
 class TrianServer:
-	hostname_ip:str              = "0.0.0.0"
-	port:int                     = 0
+	hostname_ip:str         = "0.0.0.0"
+	port:int                = 0
 	sock:socket
-	tasks:set[asyncio.coroutine] = set()
-	accepting_clients:bool       = False
+	tasks:set[asyncio.Task] = set()
+	accepting_clients:bool  = False
+
+	clients:dict[int, TrianClient] = {}
 
 	def __init__(self, hostname_ip:str = "0.0.0.0", port:int = 0):
 		self.hostname_ip = hostname_ip
@@ -37,6 +41,8 @@ class TrianServer:
 		return self
 
 	def close(self):
+		for client in self.clients.values():
+			self.close_client(client)
 		self.sock.close()
 		return self
 
@@ -44,13 +50,29 @@ class TrianServer:
 		logger.debug("Checking for potential new clients...")
 		try:
 			connection, (client_ip, client_port) = self.sock.accept()
-			logger.info(f"New Client {client_ip}:{client_port}!")
+			logger.debug(f"New Client {client_ip}:{client_port}!")
 			connection.setblocking(False)
 			connection.settimeout(0.5)
 
 			return TrianClient(client_ip, client_port, connection)
-		except TimeoutError:
+		except socket_timeout:
 			return None
+	
+	def __decode_packet_callback(self, tsk:asyncio.Task) -> None:
+		self.tasks.discard(tsk)
+		reply_packet, expecting_response = tsk.result()
+		if reply_packet:
+			send_pkt = asyncio.create_task(self.send_packet_to_client(reply_packet.identifier_48b, reply_packet, expecting_response))
+			send_pkt.add_done_callback(self.__decode_packet_callback)
+			self.tasks.add(send_pkt)
+
+	def __client_receiver_done(self, tsk:asyncio.Task) -> None:
+		self.tasks.discard(tsk)
+		packet = tsk.result()
+		if packet:
+			decode_packet_task = asyncio.create_task(decode_packet(packet))
+			decode_packet_task.add_done_callback(self.__decode_packet_callback)
+			self.tasks.add(decode_packet_task)
 	
 	async def _search_client_loop(self) -> None:
 		awaiting_client_task = None
@@ -58,10 +80,9 @@ class TrianServer:
 			if awaiting_client_task and awaiting_client_task.done():
 				new_client = awaiting_client_task.result()
 				if new_client:
-					pass
-					# new_client_receiver = asyncio.create_task(receive_client_content(new_client))
-					# new_client_receiver.add_done_callback(lambda tsk: receive_client_content_done(new_client, tsk.result(), tsk, client_tasks))
-					# self.tasks.add(new_client_receiver)
+					new_client_receiver = asyncio.create_task(self._receive_client_content(new_client))
+					new_client_receiver.add_done_callback(self.__client_receiver_done)
+					self.tasks.add(new_client_receiver)
 				awaiting_client_task = None
 			elif not awaiting_client_task:
 				awaiting_client_task = asyncio.create_task(self._listen_for_new_clients())
@@ -78,15 +99,47 @@ class TrianServer:
 		self.accepting_clients = False
 		return self
 
-	async def _receive_client_content(client:TrianClient) -> Optional[bytes]:
+	async def _receive_client_content(self, client:TrianClient) -> Optional[DBM_Packet]:
 		conn = client.connection
 		try:
-			data = conn.recv(1024)
+			header = conn.recv(DBM_Packet.PACKET_SIZE)
 
-			if data:
+			if not header:
+				logger.info(f"Couldn't get header from {client.hostname_ip}:{client.port}")
+				return None
+
+			header_packet:DBM_Packet = DBM_Packet.from_bytes(header)
+
+			if header_packet.identifier_48b not in self.clients:
+				self.clients[header_packet.identifier_48b] = client
+
+			if header_packet.data_size > 0:
+				data = conn.recv(header_packet.size)
+
 				logger.debug(f"Received message from {client.hostname_ip}:{client.port}.")
-				return data
+
+				if data:
+					header_packet.data = data
+					return header_packet
+
+			return header_packet
+		except socket_timeout:
+			return None
+
+	def close_client(self, client:TrianClient) -> None:
+		client.connection.close()
+	
+	async def send_packet_to_client(self, client_id:int, packet:DBM_Packet, expecting_response:bool) -> Optional[DBM_Packet]:
+		client = self.clients[client_id]
+
+		conn   = client.connection
+		try:
+			conn.sendall(bytes(packet))
+			
+			if expecting_response:
+				await asyncio.wait(0)
+				return await self._receive_client_content(client)
 
 			return None
-		except TimeoutError:
+		except socket_timeout:
 			return None
