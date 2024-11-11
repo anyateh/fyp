@@ -1,7 +1,7 @@
 import asyncio
 
 from socket import AF_INET, SOCK_STREAM, socket, timeout as socket_timeout
-from time import time
+# from time import time
 from typing import Callable, Optional
 
 from .logger import logger
@@ -140,7 +140,7 @@ class TrianServer:
 			
 			if expecting_response:
 				await asyncio.sleep(0)
-				t0 = time()
+				# t0 = time()
 				return await self._receive_client_content(client)
 				# while True:
 				# 	logger.debug(f'Waiting for data from {client_id}')
