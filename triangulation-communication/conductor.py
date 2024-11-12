@@ -7,7 +7,7 @@ from signal import signal, SIGINT, SIGTERM
 from scripts.logger import logger
 from scripts.server import TrianServer
 
-import scripts.leader_node.manage_antes as antes
+import scripts.conductor.manage_antes as antes
 
 async def main_loop() -> None:
 	server = TrianServer("0.0.0.0", 32310)

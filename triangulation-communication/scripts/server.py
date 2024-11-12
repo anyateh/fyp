@@ -7,7 +7,7 @@ from typing import Callable, Optional
 from .logger import logger
 from .packet import DBM_Packet
 
-from .leader_node.manage_antes import decode_packet, deregister_ante_node, get_ante_node_coords
+from .conductor.manage_antes import decode_packet, deregister_ante_node, get_ante_node_coords
 
 class TrianClient:
 	hostname_ip:str
