@@ -6,7 +6,7 @@
 # ################################################################
 # #                      Identifier (31:0)                       #
 # ################################################################
-# #      Identifier (47:32)     ##A|R|D|   Flags (15:0)  |K|P|G|L#
+# #      Identifier (47:32)     ##A|R|D|X| Flags (15:0)  |K|P|G|L#
 # ################################################################
 # #                 Reported X Coordinate (31:0)                 #
 # ################################################################
@@ -47,6 +47,7 @@ class DBM_Packet:
 	#   A -> Request Accepted
 	#   R -> Request Rejected
 	#   D -> Use Dummy values provided
+	#   X -> Part of server exit
 	flags_16b:int          = 0 # 2 bytes
 	# Reported X coordinate of the antenna node. (Double precision floats)
 	reported_x_coord:float = 0 # 8-byte
@@ -68,6 +69,7 @@ class DBM_Packet:
 	FLAG_ACCEPT_REQ = 0x8000
 	FLAG_REJECT_REQ = 0x4000
 	FLAG_DUMMY_VAL  = 0x2000
+	FLAG_SVR_EXIT   = 0x1000
 
 	FLAG_KICK_ANT   = 0x0008
 	FLAG_PING_ANT   = 0x0004
@@ -126,8 +128,22 @@ class DBM_Packet:
 	def is_dbm_data_request(self) -> bool:
 		return self.flags_16b & DBM_Packet.FLAG_GET_ANT_SG != 0
 
+	def is_dummy_xy_dbm_data_request(self) -> bool:
+		return self.flags_16b & DBM_Packet.FLAG_GET_ANT_SG != 0
+
 	def is_dbm_data_packet(self) -> bool:
 		bits_to_check = (DBM_Packet.FLAG_ACCEPT_REQ | DBM_Packet.FLAG_GET_ANT_SG)
+		return self.flags_16b & bits_to_check == bits_to_check
+	
+	def is_kick_request(self) -> bool:
+		return self.flags_16b & DBM_Packet.FLAG_KICK_ANT != 0
+
+	def is_server_closing_noti(self) -> bool:
+		bits_to_check = (DBM_Packet.FLAG_SVR_EXIT | DBM_Packet.FLAG_KICK_ANT)
+		return self.flags_16b & bits_to_check == bits_to_check
+
+	def is_server_closing_ack(self) -> bool:
+		bits_to_check = (DBM_Packet.FLAG_ACCEPT_REQ | DBM_Packet.FLAG_SVR_EXIT | DBM_Packet.FLAG_KICK_ANT)
 		return self.flags_16b & bits_to_check == bits_to_check
 
 	@staticmethod
@@ -165,3 +181,15 @@ class DBM_Packet:
 	@staticmethod
 	def create_power_dbm_data_packet(identifier:int, x:float, y:float, frame_id:int, dbm_reading:float):
 		return DBM_Packet(identifier, DBM_Packet.FLAG_GET_ANT_SG, x, y, frame_id, struct.pack("<d", dbm_reading))
+
+	@staticmethod
+	def create_sever_exit_noti(identifier:int, x:float, y:float):
+		return DBM_Packet(identifier, DBM_Packet.FLAG_SVR_EXIT | DBM_Packet.FLAG_KICK_ANT, x, y, 0, b'')
+
+	@staticmethod
+	def create_sever_exit_ack(identifier:int, x:float, y:float):
+		return DBM_Packet(identifier, DBM_Packet.FLAG_ACCEPT_REQ | DBM_Packet.FLAG_SVR_EXIT | DBM_Packet.FLAG_KICK_ANT, x, y, 0, b'')
+
+	@staticmethod
+	def create_sever_exit_ack(identifier:int, x:float, y:float):
+		return DBM_Packet(identifier, DBM_Packet.FLAG_SVR_EXIT | DBM_Packet.FLAG_KICK_ANT, x, y, 0, b'')

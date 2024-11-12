@@ -22,6 +22,7 @@ def main() -> None:
 	def handle_ctrl_c(sig, frame) -> None:
 		antenna_client.close()
 		exit(0)
+
 	signal(SIGINT, handle_ctrl_c)
 
 	login_accept_pkt = antenna_client.request_login()
@@ -32,11 +33,21 @@ def main() -> None:
 		exit(1)
 
 	while True:
-		data_request_pkg = antenna_client.receive_data_request()
-		if not data_request_pkg:
+		data_request_pkt = antenna_client.receive_packet_request()
+		if not data_request_pkt:
 			continue
 
-		fid = data_request_pkg.frame_identifier
+		if data_request_pkt.is_kick_request():
+			logger.debug("Received Kick request")
+			antenna_client.send_server_close_ack()
+			logger.debug("Acknowledgement sent")
+			antenna_client.close()
+			break
+
+		if not data_request_pkt.is_dbm_data_request():
+			continue
+
+		fid = data_request_pkt.frame_identifier
 
 		dbm_measurement = asyncio.run(measure_dbm())
 

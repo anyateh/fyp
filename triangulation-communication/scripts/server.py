@@ -7,7 +7,7 @@ from typing import Callable, Optional
 from .logger import logger
 from .packet import DBM_Packet
 
-from .leader_node.manage_antes import decode_packet, deregister_ante_node
+from .leader_node.manage_antes import decode_packet, deregister_ante_node, get_ante_node_coords
 
 class TrianClient:
 	hostname_ip:str
@@ -41,13 +41,22 @@ class TrianServer:
 		self.sock.listen(1)
 		return self
 
-	def close(self):
-		for client in self.clients.values():
-			self.close_client(client)
+	async def close(self):
+		logger.info("Closing Server")
+		self.stop_accepting_clients()
+		clients = list(self.clients)
+		client_close_awaitables = []
+		for client_id in clients:
+			client_close_awaitables.append(self.close_client(client_id))
+
+		await asyncio.gather(*client_close_awaitables)
+
 		self.sock.close()
 		return self
 
 	async def _listen_for_new_clients(self) -> Optional[TrianClient]:
+		if not self.accepting_clients:
+			return None
 		logger.debug("Checking for potential new clients...")
 		try:
 			connection, (client_ip, client_port) = self.sock.accept()
@@ -128,7 +137,21 @@ class TrianServer:
 		except socket_timeout:
 			return None
 
-	def close_client(self, client:TrianClient) -> None:
+	async def close_client(self, client_id:int) -> None:
+		client = self.clients[client_id]
+
+		x, y = get_ante_node_coords(client_id)
+		deregister_ante_node(client_id)
+
+		svr_close_pkt = DBM_Packet.create_sever_exit_noti(client_id, x, y)
+		logger.debug(f"Sending kick packet to antenna {client_id}")
+		ack_pkt = await self.send_packet_to_client(client_id, svr_close_pkt, True)
+		if ack_pkt and ack_pkt.is_server_closing_noti():
+			logger.debug(f"Received logoff acknowledgement from {client_id}")
+		else:
+			logger.debug(f"No acknowledgement from {client_id}")
+
+		del self.clients[client_id]
 		client.connection.close()
 	
 	async def send_packet_to_client(self, client_id:int, packet:DBM_Packet, expecting_response:bool) -> Optional[DBM_Packet]:
@@ -137,7 +160,7 @@ class TrianServer:
 		conn   = client.connection
 		try:
 			conn.sendall(bytes(packet))
-			
+
 			if expecting_response:
 				await asyncio.sleep(0)
 				# t0 = time()

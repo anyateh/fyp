@@ -46,7 +46,7 @@ class AnteClient:
 
 		return None
 
-	def receive_data_request(self) -> Optional[DBM_Packet]:
+	def receive_packet_request(self) -> Optional[DBM_Packet]:
 		header = self.sock.recv(DBM_Packet.PACKET_SIZE)
 
 		if not header:
@@ -54,11 +54,16 @@ class AnteClient:
 		
 		pkt_header:DBM_Packet = DBM_Packet.from_bytes(header)[0]
 
-		if pkt_header.is_dbm_data_request():
+		if pkt_header:
 			return pkt_header
 
 		return None
 	
 	def send_requested_data(self, frame_id:int, dbm:float) -> None:
 		pkt:DBM_Packet = DBM_Packet.create_power_dbm_data_packet(self.identifier, self.x, self.y, frame_id, dbm)
+		self.sock.sendall(bytes(pkt))
+	
+	def send_server_close_ack(self) -> None:
+		pkt = DBM_Packet.create_sever_exit_ack(self.identifier, self.x, self.y)
+
 		self.sock.sendall(bytes(pkt))

@@ -2,7 +2,7 @@
 
 import asyncio
 
-from signal import signal, SIGINT
+from signal import signal, SIGINT, SIGTERM
 
 from scripts.logger import logger
 from scripts.server import TrianServer
@@ -21,12 +21,21 @@ async def main_loop() -> None:
 			logger.info("Waiting for port to be available again...")
 			await asyncio.sleep(1)
 	
-	def handle_ctrl_c(sig, frame) -> None:
-		server.stop_accepting_clients()
-		server.close()
-		exit(0)
+	keep_server_alive = True
+	ctrl_c_handled    = False
 
-	signal(SIGINT, handle_ctrl_c)
+	async def handle_ctrl_c() -> None:
+		nonlocal ctrl_c_handled
+		if ctrl_c_handled:
+			return
+		ctrl_c_handled = True
+		nonlocal keep_server_alive
+		keep_server_alive = False
+		await antes.stop_ante_updates()
+		await server.close()
+
+	asyncio.get_event_loop().add_signal_handler(SIGINT,  lambda: asyncio.ensure_future(handle_ctrl_c()))
+	asyncio.get_event_loop().add_signal_handler(SIGTERM, lambda: asyncio.ensure_future(handle_ctrl_c()))
 
 	await server.start_accepting_clients()
 
@@ -37,12 +46,15 @@ async def main_loop() -> None:
 		loop_update_task = None
 		tsk.result()
 
-	while True:
+	while keep_server_alive:
 		if not loop_update_task:
 			loop_update_task = asyncio.create_task(antes.loop_ante_updates(server))
 			loop_update_task.add_done_callback(probe_exception)
 
 		await asyncio.sleep(1)
+	
+	if loop_update_task:
+		await asyncio.wait_for(loop_update_task, timeout = None)
 
 if __name__ == '__main__':
 	asyncio.run(main_loop())
