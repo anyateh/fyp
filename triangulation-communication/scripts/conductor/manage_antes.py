@@ -6,7 +6,7 @@ from typing import Optional, TYPE_CHECKING
 
 from ..packet import DBM_Packet
 if TYPE_CHECKING:
-	from ..server import TrianServer
+	from .server import TrianServer
 else:
 	TrianServer = 'TrianServer'
 

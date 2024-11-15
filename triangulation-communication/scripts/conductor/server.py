@@ -4,10 +4,10 @@ from socket import AF_INET, SOCK_STREAM, socket, timeout as socket_timeout
 # from time import time
 from typing import Callable, Optional
 
-from .logger import logger
-from .packet import DBM_Packet
+from ..logger import logger
+from ..packet import DBM_Packet
 
-from .conductor.manage_antes import decode_packet, deregister_ante_node, get_ante_node_coords
+from .manage_antes import decode_packet, deregister_ante_node, get_ante_node_coords
 
 class TrianClient:
 	hostname_ip:str

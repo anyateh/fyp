@@ -5,7 +5,7 @@ import asyncio
 from signal import signal, SIGINT, SIGTERM
 
 from scripts.logger import logger
-from scripts.server import TrianServer
+from scripts.conductor.server import TrianServer
 
 import scripts.conductor.manage_antes as antes
 
