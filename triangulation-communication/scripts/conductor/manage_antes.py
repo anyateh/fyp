@@ -20,6 +20,8 @@ class AntennaNode:
 
 	dbm:Optional[float] = None
 
+	signal_fingerprint:Optional[list[float]] = None
+
 	def __init__(self, id:int, x:float, y:float):
 		self.id = id
 		self.x  = x
