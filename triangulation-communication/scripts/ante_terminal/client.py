@@ -51,7 +51,7 @@ class AnteClient:
 
 		if not header:
 			return None
-		
+
 		pkt_header:DBM_Packet = DBM_Packet.from_bytes(header)[0]
 
 		if pkt_header:
