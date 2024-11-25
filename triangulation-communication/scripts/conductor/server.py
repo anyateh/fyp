@@ -34,7 +34,7 @@ class TrianServer:
 		self.port = port
 		self.sock = socket(AF_INET, SOCK_STREAM)
 		self.sock.setblocking(False)
-		self.sock.settimeout(0.01)
+		self.sock.settimeout(0.001)
 
 	def start(self):
 		self.sock.bind((self.hostname_ip, self.port))
