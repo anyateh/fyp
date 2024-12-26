@@ -73,7 +73,7 @@ class TrianServer:
 		response = tsk.result()
 		if response:
 			reply_packet, expecting_response = response
-			send_pkt = asyncio.create_task(self.send_packet_to_client(reply_packet.identifier_48b, reply_packet, expecting_response))
+			send_pkt = asyncio.create_task(self.send_packet_to_client(reply_packet.identifier_8b, reply_packet, expecting_response))
 			send_pkt.add_done_callback(self.__decode_packet_callback)
 			self.tasks.add(send_pkt)
 
@@ -119,10 +119,10 @@ class TrianServer:
 				logger.info(f"Couldn't get header from {client.hostname_ip}:{client.port}")
 				return None
 
-			header_packet, reported_data_size = DBM_Packet.from_bytes(header)
+			header_packet, reported_data_size = DBM_Packet.from_bytes_with_size(header)
 
-			if header_packet.identifier_48b not in self.clients:
-				self.clients[header_packet.identifier_48b] = client
+			if header_packet.identifier_8b not in self.clients:
+				self.clients[header_packet.identifier_8b] = client
 
 			if reported_data_size > 0:
 				data = conn.recv(reported_data_size)
@@ -140,10 +140,10 @@ class TrianServer:
 	async def close_client(self, client_id:int) -> None:
 		client = self.clients[client_id]
 
-		x, y = get_ante_node_coords(client_id)
+		# x, y = get_ante_node_coords(client_id)
 		deregister_ante_node(client_id)
 
-		svr_close_pkt = DBM_Packet.create_sever_exit_noti(client_id, x, y)
+		svr_close_pkt = DBM_Packet.create_server_exit_noti(client_id)
 		logger.debug(f"Sending kick packet to antenna {client_id}")
 		ack_pkt = await self.send_packet_to_client(client_id, svr_close_pkt, True)
 		if ack_pkt and ack_pkt.is_server_closing_noti():

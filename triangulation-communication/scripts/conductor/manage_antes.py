@@ -38,10 +38,22 @@ async def decode_packet(packet:DBM_Packet) -> tuple[Optional[DBM_Packet], bool]:
 		pass
 
 def manage_login_request(packet:DBM_Packet) -> DBM_Packet:
-	if register_ante_node(packet.identifier_48b, packet.reported_x_coord, packet.reported_y_coord):
-		response_packet:DBM_Packet = DBM_Packet.accept_login_request(packet.identifier_48b, packet.reported_x_coord, packet.reported_y_coord)
+	coord_update = packet.data
+	if not coord_update:
+		# In future, send a coord query
+		response_packet:DBM_Packet = DBM_Packet.reject_login_request(packet.identifier_8b)
+		return response_packet
+
+	x, y = DBM_Packet.unpack_coord_update(coord_update)
+	if x is None or y is None:
+		# In future, send a coord query
+		response_packet:DBM_Packet = DBM_Packet.reject_login_request(packet.identifier_8b)
+		return response_packet
+
+	if register_ante_node(packet.identifier_8b, x, y):
+		response_packet:DBM_Packet = DBM_Packet.accept_login_request(packet.identifier_8b)
 	else:
-		response_packet:DBM_Packet = DBM_Packet.reject_login_request(packet.identifier_48b, packet.reported_x_coord, packet.reported_y_coord)
+		response_packet:DBM_Packet = DBM_Packet.reject_login_request(packet.identifier_8b)
 
 	return response_packet
 
@@ -62,7 +74,7 @@ async def update_ante_readings(frame_id:int, server:TrianServer) -> None:
 	obtain_data_tasks = []
 	for i in __antennas_registered.values():
 		# Send request data packets to all antes
-		request_pkt = DBM_Packet.create_reading_request(i.id, i.x, i.y, frame_id)
+		request_pkt = DBM_Packet.create_reading_request(i.id, frame_id)
 
 		obtain_data_tasks.append(server.send_packet_to_client(i.id, request_pkt, True))
 
@@ -73,7 +85,7 @@ async def update_ante_readings(frame_id:int, server:TrianServer) -> None:
 	if __current_request_id == frame_id:
 		for i in results:
 			if i:
-				manage_data_packet(i)
+				manage_data_packet(i, __current_request_id)
 
 async def loop_ante_updates(server:TrianServer) -> None:
 	global __keep_alive
@@ -81,7 +93,7 @@ async def loop_ante_updates(server:TrianServer) -> None:
 	global __current_request_id
 	frame_id = randint(1, (2**32) - 1)
 	while __keep_alive:
-		frame_id = randint(1, (2**32) - 1)
+		frame_id = randint(1, 255)
 		__current_request_id = frame_id
 		await update_ante_readings(frame_id, server)
 		print_antennas()
@@ -91,14 +103,15 @@ async def stop_ante_updates() -> None:
 	global __keep_alive
 	__keep_alive = False
 
-def manage_data_packet(packet:DBM_Packet) -> None:
-	dbm = struct.unpack("<d", packet.data)[0]
+def manage_data_packet(packet:DBM_Packet, frame_id:int) -> None:
+	# dbm = struct.unpack("<d", packet.data)[0]
+	dbm, received_frame_id = packet.get_dbm_data()
 
-	if packet.identifier_48b in __antennas_registered:
-		__antennas_registered[packet.identifier_48b].dbm = dbm
+	if received_frame_id == frame_id and packet.identifier_8b in __antennas_registered:
+		__antennas_registered[packet.identifier_8b].dbm = dbm
 
-		__antennas_registered[packet.identifier_48b].x = packet.reported_x_coord
-		__antennas_registered[packet.identifier_48b].y = packet.reported_y_coord
+		# __antennas_registered[packet.identifier_8b].x = packet.reported_x_coord
+		# __antennas_registered[packet.identifier_8b].y = packet.reported_y_coord
 
 def print_antennas() -> None:
 	print("---------")
