@@ -135,6 +135,7 @@ def localize_transmitter_pos() -> tuple[Optional[float], Optional[float]]:
 	return estimate_location(__antennas_registered)
 
 def print_antennas() -> None:
+	print("\x1b[2J\x1b[H", end = '', file = stderr)
 	print("---------", file = stderr)
 	print("Antennas:", file = stderr)
 	print("---------", file = stderr)
