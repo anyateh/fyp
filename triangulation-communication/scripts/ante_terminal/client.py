@@ -9,6 +9,7 @@ class AnteClient:
 	identifier:int       = 0
 	x:float              = 0.0
 	y:float              = 0.0
+	gain:float           = 1.0
 	dest_hostname_ip:str = "0.0.0.0"
 	port:int             = 0
 	sock:socket

@@ -14,9 +14,11 @@ __current_request_id  = 0
 __keep_alive = True
 
 class AntennaNode:
-	id:int  = 0
-	x:float = 0.0
-	y:float = 0.0
+	id:int     = 0
+	x:float    = 0.0
+	y:float    = 0.0
+
+	gain:float = 1.0
 
 	dbm:Optional[float] = None
 
