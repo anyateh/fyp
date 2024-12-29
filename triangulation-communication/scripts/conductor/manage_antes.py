@@ -2,6 +2,7 @@ import asyncio
 import struct
 
 from random import randint
+from sys    import stderr
 from typing import Optional, TYPE_CHECKING
 
 from ..packet import DBM_Packet
@@ -9,6 +10,7 @@ if TYPE_CHECKING:
 	from .server import TrianServer
 else:
 	TrianServer = 'TrianServer'
+from .trilateration.trilaterate import estimate_location
 
 __current_request_id  = 0
 __keep_alive = True
@@ -114,10 +116,36 @@ def manage_data_packet(packet:DBM_Packet, frame_id:int) -> None:
 
 		# __antennas_registered[packet.identifier_8b].x = packet.reported_x_coord
 		# __antennas_registered[packet.identifier_8b].y = packet.reported_y_coord
+	
+	if can_perform_localization():
+		localize_transmitter_pos()
+
+def can_perform_localization() -> bool:
+	count = 0
+	for ante in __antennas_registered.values():
+		if ante.dbm is not None:
+			count += 1
+		if count >= 3:
+			return True
+
+	return False
+
+def localize_transmitter_pos() -> tuple[Optional[float], Optional[float]]:
+	# Perform trilateration using data from registered clients
+	return estimate_location(__antennas_registered)
 
 def print_antennas() -> None:
-	print("---------")
-	print("Antennas:")
-	print("---------")
+	print("---------", file = stderr)
+	print("Antennas:", file = stderr)
+	print("---------", file = stderr)
 	for i in __antennas_registered.values():
-		print(f"Ante {i.id}: x = {i.x}, y = {i.y}, dbm = {i.dbm}.")
+		print(f"Ante {i.id}: x = {i.x}, y = {i.y}, dbm = {i.dbm}.", file = stderr)
+
+	if can_perform_localization():
+		print("", file = stderr)
+
+		device_x, device_y = localize_transmitter_pos()
+
+		print("Estimated Location: ", end = '', file = stderr)
+		stderr.flush()
+		print(device_x, device_y)
