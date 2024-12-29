@@ -49,7 +49,7 @@ def main() -> None:
 
 		fid = data_request_pkt.get_frame_id()
 
-		dbm_measurement = asyncio.run(measure_dbm(antenna_client.x, antenna_client.y))
+		dbm_measurement = asyncio.run(measure_dbm(antenna_client))
 
 		antenna_client.send_requested_data(fid, dbm_measurement)
 
