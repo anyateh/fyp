@@ -1,9 +1,12 @@
 import json
 
 from datetime import datetime
-from typing   import TextIO
+from typing   import TextIO, TYPE_CHECKING
 
-from ..manage_antes import AntennaNode
+if TYPE_CHECKING:
+	from ..manage_antes import AntennaNode
+else:
+	AntennaNode = 'AntennaNode'
 
 from ..trilateration.trilaterate import TRANSMITTER_GAIN_DBM, TRANSMITTER_POWER_DBM
 

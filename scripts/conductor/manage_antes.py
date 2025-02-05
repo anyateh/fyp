@@ -12,6 +12,8 @@ else:
 	TrianServer = 'TrianServer'
 from .trilateration.trilaterate import estimate_location
 
+from .dummy.export_antes import export_antes
+
 __current_request_id  = 0
 __keep_alive = True
 
@@ -65,11 +67,15 @@ def register_ante_node(a_id:int, x:float, y:float) -> bool:
 	if a_id not in __antennas_registered:
 		__antennas_registered[a_id] = AntennaNode(a_id, x, y)
 
+		export_antes(__antennas_registered)
+
 	return True
 
 def deregister_ante_node(a_id:int) -> None:
 	if a_id in __antennas_registered:
 		del __antennas_registered[a_id]
+
+		export_antes(__antennas_registered)
 
 def get_ante_node_coords(a_id:int) -> tuple[float, float]:
 	return __antennas_registered[a_id].x, __antennas_registered[a_id].y
@@ -160,3 +166,5 @@ def print_antennas() -> None:
 		print("Need at least three antennas connected before estimation can be shown.\n", file = stderr)
 
 	print("\n\x1b[38:5:147mPress <ctrl-c> to quit this server, and shut down all antennas.\x1b[0m", file = stderr)
+
+	export_antes(__antennas_registered)
