@@ -1,0 +1,70 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[a4paper,margin=0.79in]{geometry}
+\usepackage[T1]{fontenc}
+%\usepackage{indentfirst}
+\usepackage{titlesec}
+
+\pagenumbering{gobble}
+
+\usepackage[normalem]{ulem}
+
+\usepackage{sansmath}  % Enables turning on sans-serif math mode, and using other environments 
+\sansmath % Enable sans-serif math for rest of document
+
+%\sffamily
+
+%\renewcommand{\familydefault}{qag}
+
+%\usepackage[skip=0pt,baselineskip=5pt]{parskip}
+\setlength{\parskip}{5pt}
+\renewcommand\baselinestretch{1.0}
+\raggedbottom
+\usepackage{indentfirst}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\newcommand{\tabitem}{~~\llap{\textbullet}~~}
+
+%\usepackage{enumitem}
+\usepackage{mathrsfs}
+
+\titleformat{\section}
+{\normalfont\bfseries}
+{\thesection\enspace\textemdash}{0.5em}{}
+
+\usepackage{graphicx}
+\graphicspath{ {./} }
+
+%\usepackage{fontspec}
+%\setmainfont{Nunito}
+
+%\usepackage{parskip}
+
+\usepackage{apalike}
+\usepackage{apacite}
+\usepackage{url}
+
+\usepackage[none]{hyphenat}
+
+\begin{document}
+    \begin{flalign*}
+        \frac{\left(x - h\right)^2}{h^2} + \frac{\left(y - v\right)^2}{v^2} &= 1 & \\
+        \frac{\left(x - h\right)^2}{h^2} &= 1 - \frac{\left(y - v\right)^2}{v^2} & \\
+        \left(x - h\right)^2 &= h^2 \left[ 1 - \frac{\left(y - v\right)^2}{v^2} \right] & \\
+        \because y &\in [v, 2v] & \\
+        v \leq y &\leq 2v & \\
+        v - v \leq y - v &\leq 2v - v & \\
+        0 \leq y - v &\leq v & \\
+        0 \leq (y - v)^2 &\leq v^2 & \\
+        0 \leq \frac{(y - v)^2}{v^2} &\leq \frac{v^2}{v^2} & \\
+        0 \leq \frac{(y - v)^2}{v^2} &\leq 1 & \\
+        -1 \leq -\frac{(y - v)^2}{v^2} &\leq 0 & \\
+        0 \leq 1 - \frac{(y - v)^2}{v^2} &\leq 1 & \\
+        1 - \frac{(y - v)^2}{v^2} &\geq 0 & \\
+        x - h &= \pm \sqrt{h^2 \left[ 1 - \frac{\left(y - v\right)^2}{v^2} \right]} & \\
+        x - h &= \pm \sqrt{h^2} \sqrt{ 1 - \frac{\left(y - v\right)^2}{v^2} } & \\
+        x &= \pm h \sqrt{ 1 - \frac{\left(y - v\right)^2}{v^2} } + h & \\
+    \end{flalign*}
+
+\end{document}
