@@ -15,13 +15,18 @@ class RenderBox:
 		self.bounds = BoundingBox(x1, x2, y1, y2)
 		self.previous_bounds = BoundingBox(0, 0, 0, 0)
 
-	def paint(self) -> None:
+	def paint_row(self, row_n:int, y:int) -> str:
 		x1 = self.bounds.absolute_x1()
 		x2 = self.bounds.absolute_x2()
+		return ' ' * (x2 - x1)
+
+	def paint(self) -> None:
+		# x1 = self.bounds.absolute_x1()
+		# x2 = self.bounds.absolute_x2()
 		y1 = self.bounds.absolute_y1()
 		y2 = self.bounds.absolute_y2()
 
-		self.char_rows = [' ' * (x2 - x1)] * (y2 - y1)
+		self.char_rows = [self.paint_row(i, y) for i, y in enumerate(range(y1, y2))]
 
 	def render_row(self, row_n:int, y:int, out:TextIO) -> None:
 		out.write(self.char_rows[row_n])

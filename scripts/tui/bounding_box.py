@@ -1,3 +1,5 @@
+from os import get_terminal_size
+
 class BoundingBox:
 	x1:int
 	x2:int
@@ -20,10 +22,11 @@ class BoundingBox:
 		return self.y2
 
 	def set_box_vertices(self, x1:int, x2:int, y1:int, y2:int) -> None:
-		self.x1 = x1
-		self.x2 = x2
-		self.y1 = y1
-		self.y2 = y2
+		tsize = get_terminal_size()
+		self.x1 = min(max(x1, 0), tsize.columns)
+		self.x2 = min(max(x2, 0), tsize.columns)
+		self.y1 = min(max(y1, 0), tsize.lines)
+		self.y2 = min(max(y2, 0), tsize.lines)
 
 	def unpack_vertices(self) -> tuple[int, int, int, int]:
 		return self.absolute_x1(), self.absolute_x2(),\
@@ -31,7 +34,7 @@ class BoundingBox:
 
 	def notify_resize(self) -> None:
 		pass
-	
+
 class ScaledBoundingBox(BoundingBox):
 	scale_x:float
 	scale_y:float
