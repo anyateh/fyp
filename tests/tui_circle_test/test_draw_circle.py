@@ -1,17 +1,25 @@
+#!/usr/bin/env python3
+
+# To test this code, run
+#     ln -s ../../scripts/tui
+# first
+
 from tui.circle import OutlineEllipse
+from tui.screen import Screen
 
 def main():
-	circle1 = OutlineEllipse(20, 5, 8, 4, 128, 0, 255)
-	circle2 = OutlineEllipse(5, 8, 8, 4, 0, 255, 200)
-	circle3 = OutlineEllipse(170, 10, 8, 4, 128, 0, 255)
+	screen  = Screen()
+	circle1 = OutlineEllipse(20, 5, 9, 4, 128, 0, 255)
+	circle2 = OutlineEllipse(8, 8, 9, 4, 0, 255, 200)
+	circle3 = OutlineEllipse(150, 10, 9, 4, 128, 0, 255)
 
-	circle1.paint()
-	circle2.paint()
-	circle3.paint()
+	screen.add_item(circle1)
+	screen.add_item(circle2)
+	screen.add_item(circle3)
+
+	screen.paint()
 	with open(1, 'w') as out:
-		circle1.render(out)
-		circle2.render(out)
-		circle3.render(out)
+		screen.render(out)
 		out.write("\n")
 
 if __name__ == '__main__':

@@ -1,9 +1,10 @@
 from .colour_render import UniColourRender
 from .render_box    import RenderBox
+from .shape         import Shape
 
-from typing import TextIO
+from typing import Optional, TextIO
 
-class Ellipse(RenderBox):
+class Ellipse(RenderBox, Shape):
 	center_x:int
 	center_y:int
 
@@ -35,7 +36,7 @@ class Ellipse(RenderBox):
 				for y in range(self.center_y - self.y_radius, self.center_y
 						+ self.y_radius + 1)]
 
-	def _determine_vertices(self) -> tuple[int, int, int, int]:
+	def determine_bounding_box_vertices(self) -> tuple[int, int, int, int]:
 		return                                 \
 			self.center_x - self.x_radius,     \
 			self.center_x + self.x_radius + 1, \
@@ -48,7 +49,7 @@ class Ellipse(RenderBox):
 
 		self._update_ellipse_eqn_solns()
 
-		x1, x2, y1, y2 = self._determine_vertices()
+		x1, x2, y1, y2 = self.determine_bounding_box_vertices()
 		self.bounds.set_box_vertices(x1, x2, y1, y2)
 
 	def set_x_radius(self, rad:int) -> None:
@@ -56,7 +57,7 @@ class Ellipse(RenderBox):
 
 		self._update_ellipse_eqn_solns()
 
-		x1, x2, y1, y2 = self._determine_vertices()
+		x1, x2, y1, y2 = self.determine_bounding_box_vertices()
 		self.bounds.set_box_vertices(x1, x2, y1, y2)
 
 	def set_y_radius(self, rad:int) -> None:
@@ -64,8 +65,26 @@ class Ellipse(RenderBox):
 
 		self._update_ellipse_eqn_solns()
 
-		x1, x2, y1, y2 = self._determine_vertices()
+		x1, x2, y1, y2 = self.determine_bounding_box_vertices()
 		self.bounds.set_box_vertices(x1, x2, y1, y2)
+
+	def construct_shape_in_buffer(self) -> None:
+		self.paint()
+
+	def flush_shape_in_buffer(self, out:TextIO) -> None:
+		self.render(out)
+
+	def update_bounding(self,
+		x1_limit:Optional[int] = None, x2_limit:Optional[int] = None,
+		y1_limit:Optional[int] = None, y2_limit:Optional[int] = None) -> None:
+		x1, x2, y1, y2 = self.determine_bounding_box_vertices()
+		self.bounds.set_box_vertices(
+			max(x1, x1_limit), min(x2, x2_limit),
+			max(y1, y1_limit), min(y2, y2_limit)
+		)
+
+	def has_overlap_with(self, shape2) -> bool:
+		return self.bounds.has_overlap_with(shape2.bounds)
 
 class FilledEllipse(Ellipse):
 	fill_col:UniColourRender

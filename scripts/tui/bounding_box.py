@@ -35,6 +35,22 @@ class BoundingBox:
 	def notify_resize(self) -> None:
 		pass
 
+	def __contains__(self, item) -> bool:
+		return item.absolute_x1() >= self.absolute_x1() and \
+			item.absolute_y1() >= self.absolute_y1()    and \
+			item.absolute_x2() <= self.absolute_x2()    and \
+			item.absolute_y2() <= self.absolute_y2()
+
+	def has_overlap_with(self, box) -> bool:
+		x1, x2, y1, y2 = self.unpack_vertices()
+		bx1, bx2, by1, by2 = box.unpack_vertices()
+
+		return (
+			x1 <= bx1 <= x2 or x1 <= bx2 <= x2
+		) and (
+			y1 <= by1 <= y2 or y1 <= by2 <= y2
+		)
+
 class ScaledBoundingBox(BoundingBox):
 	scale_x:float
 	scale_y:float
