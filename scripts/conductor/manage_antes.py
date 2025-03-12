@@ -179,6 +179,14 @@ def print_antennas() -> None:
 		antenna_screen.paint()
 		if buffered_output != None:
 			antenna_screen.render(buffered_output)
+
+			for i in __antennas_registered.values():
+				buffered_output.write("\x1b[{};{}H{}".format(antenna_screen.map_y_to_screen(i.y) + 1, antenna_screen.map_x_to_screen(i.x) + 1, i.id))
+
+			if can_perform_localization():
+				pointx, pointy = localize_transmitter_pos()
+				buffered_output.write("\x1b[{};{}HX".format(antenna_screen.map_y_to_screen(pointy) + 1, antenna_screen.map_x_to_screen(pointx) + 1))
+
 			buffered_output.flush()
 		return
 
