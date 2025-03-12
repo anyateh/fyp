@@ -41,10 +41,10 @@ class AntennaScreen(Screen):
 			if self.ante_max_x != None else x
 		# Lowest Y-coordinate
 		self.ante_min_y = min(self.ante_min_y, y) \
-			if self.ante_min_y != None else x
+			if self.ante_min_y != None else y
 		# Highest Y-coordinate
 		self.ante_max_y = max(self.ante_max_y, y) \
-			if self.ante_max_y != None else x
+			if self.ante_max_y != None else y
 
 	def add_antenna(self, antenna:AntennaNode) -> None:
 		self.antennas.append(antenna)
