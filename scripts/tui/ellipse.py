@@ -180,8 +180,11 @@ class OutlineEllipse(FilledEllipse):
 
 		# return self.fill_col.ansi_set_fg_colour_256() + start_str
 
-		start_x = self.ellipse_eqn_solns[row_n][0]
-		end_x   = self.ellipse_eqn_solns[row_n][1]
+		shape_top = self.center_y - self.y_radius
+		relative_y = y - shape_top
+
+		start_x = self.ellipse_eqn_solns[relative_y][0]
+		end_x   = self.ellipse_eqn_solns[relative_y][1]
 
 		start_x -= bound_x1
 		end_x   -= bound_x1
@@ -219,3 +222,9 @@ class OutlineEllipse(FilledEllipse):
 			("\x1b[{}C".format(chord_len) if chord_len > 0 else ""),
 			("*" if end_x != start_x else "") + self.fill_col.ansi_colour_reset()
 		)
+
+	def paint(self) -> None:
+		y1 = self.bounds.absolute_y1()
+		y2 = self.bounds.absolute_y2()
+
+		self.char_rows = [self.paint_row(i, y) for i, y in enumerate(range(y1, y2))]
