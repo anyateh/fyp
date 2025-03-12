@@ -19,6 +19,14 @@ from .dummy.export_antes import export_antes
 __current_request_id  = 0
 __keep_alive = True
 
+ring_colours = [
+	(66, 129, 164),
+	(72, 169, 166),
+	(169, 153, 137),
+	(212, 180, 131),
+	(193, 102, 107)
+]
+
 class AntennaNode:
 	id:int     = 0
 	x:float    = 0.0
@@ -36,7 +44,11 @@ class AntennaNode:
 		self.id = id
 		self.x  = x
 		self.y  = y
-		self.ring = OutlineEllipse(int(x), int(y), 0, 0, 128, 0, 255)
+
+		global ring_colours
+
+		r, g, b = ring_colours[self.id % len(ring_colours)]
+		self.ring = OutlineEllipse(int(x), int(y), 0, 0, r, g, b)
 
 	def inverse_friis(self) -> float:
 		if self.dbm == None:
