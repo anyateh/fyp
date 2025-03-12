@@ -3,7 +3,7 @@ import struct
 
 from random import randint
 from sys    import stderr
-from typing import Optional, TYPE_CHECKING
+from typing import Optional, TextIO, TYPE_CHECKING
 
 from ..packet import DBM_Packet
 if TYPE_CHECKING:
@@ -46,14 +46,14 @@ class AntennaNode:
 __antennas_registered:dict[int, AntennaNode] = {}
 
 antenna_screen = AntennaScreen()
-show_screen    = False
+show_screen    = True
 
 lowest_x_coord  = 0.0
 highest_x_coord = 0.0
 lowest_y_coord  = 0.0
 highest_y_coord = 0.0
 
-buffered_output = None
+buffered_output:Optional[TextIO] = None
 
 # Return reply_packet, expecting_response
 async def decode_packet(packet:DBM_Packet) -> tuple[Optional[DBM_Packet], bool]:
@@ -126,6 +126,7 @@ async def loop_ante_updates(server:TrianServer) -> None:
 	global __current_request_id
 	frame_id = randint(1, (2**32) - 1)
 
+	global buffered_output
 	buffered_output = open(stderr.fileno(), 'w')
 
 	while __keep_alive:
