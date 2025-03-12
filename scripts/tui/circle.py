@@ -86,6 +86,9 @@ class Ellipse(RenderBox, Shape):
 	def has_overlap_with(self, shape2) -> bool:
 		return self.bounds.has_overlap_with(shape2.bounds)
 
+	def blank_painted_region(self, out:TextIO) -> None:
+		self.tape_over(out)
+
 class FilledEllipse(Ellipse):
 	fill_col:UniColourRender
 

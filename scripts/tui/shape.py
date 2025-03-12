@@ -23,3 +23,7 @@ class Shape(ABC):
 	@abstractmethod
 	def has_overlap_with(self, shape2) -> bool:
 		pass
+
+	@abstractmethod
+	def blank_painted_region(self, out:TextIO) -> None:
+		pass

@@ -72,6 +72,9 @@ class Screen:
 			self.clear(out)
 			self.due_to_clear = False
 
+		for entry in filter(lambda a: a[1], self.layers):
+			entry[0].blank_painted_region(out)
+
 		for entry in self.layers:
 			if entry[1]:
 				entry[0].construct_shape_in_buffer()

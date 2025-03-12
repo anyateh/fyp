@@ -30,7 +30,7 @@ class RenderBox:
 		out.write(self.char_rows[row_n])
 
 	def render(self, out:TextIO) -> None:
-		self.tape_over(out)
+		# self.tape_over(out)
 		leftmost_x = self.bounds.absolute_x1()
 		for n, row in enumerate(range(self.bounds.absolute_y1(), self.bounds.absolute_y2())):
 			out.write(f"\x1b[{row + 1};{leftmost_x + 1}H")
