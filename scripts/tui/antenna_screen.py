@@ -97,12 +97,14 @@ class AntennaScreen(Screen):
 			self.y_scale = -1.0
 
 	def map_x_to_screen(self, x:float) -> int:
-		return int((x - self.x_offset) * self.x_scale)
+		return int((x - self.x_offset) * self.x_scale) + self.padding_x
 
 	def map_y_to_screen(self, y:float) -> int:
-		return int((y - self.y_offset) * self.y_scale)
+		return int((y - self.y_offset) * self.y_scale) + self.padding_y
 
 	def update_antenna(self, antenna:AntennaNode) -> None:
 		antenna.ring.set_center(self.map_x_to_screen(antenna.x), self.map_y_to_screen(antenna.y))
 		antenna.ring.set_x_radius(int(antenna.inverse_friis() * self.x_scale))
-		antenna.ring.set_y_radius(int(antenna.inverse_friis() * self.y_scale))
+		antenna.ring.set_y_radius(int(abs(antenna.inverse_friis() * self.y_scale)))
+
+		# print(self.x_scale, self.y_scale, self.x_offset, self.y_offset, file = stderr)
