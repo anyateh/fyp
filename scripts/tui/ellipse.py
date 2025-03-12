@@ -23,12 +23,26 @@ class Ellipse(RenderBox, Shape):
 		self._update_ellipse_eqn_solns()
 
 	def _determine_ellipse_eqn_solns(self, y:int) -> tuple[int, int]:
+		if self.y_radius == 0.0:
+			return 0.0, 0.0
+
 		x_minus_center_x_nosign_solution = self.x_radius               \
 				* (1 - (y - self.center_y)**2 / self.y_radius**2)**0.5
 
 		return \
 			round(-x_minus_center_x_nosign_solution + self.center_x), \
 			round( x_minus_center_x_nosign_solution + self.center_x)
+
+	def _determine_ellipse_eqn_solns_y(self, x:int) -> tuple[int, int]:
+		if self.x_radius == 0.0:
+			return 0.0, 0.0
+
+		y_minus_center_y_nosign_solution = self.y_radius               \
+				* (1 - (x - self.center_x)**2 / self.x_radius**2)**0.5
+
+		return \
+			round(-y_minus_center_y_nosign_solution + self.center_y), \
+			round( y_minus_center_y_nosign_solution + self.center_y)
 
 	def _update_ellipse_eqn_solns(self) -> None:
 		self.ellipse_eqn_solns = \
@@ -98,16 +112,17 @@ class FilledEllipse(Ellipse):
 		self.fill_col = UniColourRender(r, g, b)
 
 	def paint_row(self, row_n:int, y:int) -> str:
+		if self.x_radius == 0.0 or self.y_radius == 0:
+			return ""
+
 		bound_x1 = self.bounds.absolute_x1()
 		bound_x2 = self.bounds.absolute_x2()
 
 		if bound_x2 - bound_x1 <= 0:
 			return ""
 
-		yr_sqrt_1_min_k = self.x_radius * (1 - (y - self.center_y)**2 / self.y_radius**2)**0.5
-
-		start_x = min(max(self.ellipse_eqn_solns[row_n][0], bound_x1), bound_x2)
-		end_x   = min(max(self.ellipse_eqn_solns[row_n][1], bound_x1), bound_x2)
+		start_x  = min(max(self.ellipse_eqn_solns[row_n][0], bound_x1), bound_x2)
+		end_x    = min(max(self.ellipse_eqn_solns[row_n][1], bound_x1), bound_x2)
 		start_x -= bound_x1
 		end_x   -= bound_x1
 
@@ -152,6 +167,9 @@ class OutlineEllipse(FilledEllipse):
 			+ "*" * (start_x_draw_end - start_x)
 
 	def paint_row(self, row_n:int, y:int) -> str:
+		if self.x_radius == 0.0 or self.y_radius == 0:
+			return ""
+
 		bound_x1 = self.bounds.absolute_x1()
 		bound_x2 = self.bounds.absolute_x2()
 

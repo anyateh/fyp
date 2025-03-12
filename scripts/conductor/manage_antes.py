@@ -7,10 +7,12 @@ from typing import Optional, TYPE_CHECKING
 
 from ..packet import DBM_Packet
 if TYPE_CHECKING:
-	from .server import TrianServer
+	from .server              import TrianServer
 else:
-	TrianServer = 'TrianServer'
-from .trilateration.trilaterate import estimate_location
+	TrianServer   = 'TrianServer'
+from .trilateration.trilaterate import estimate_location, inv_friis
+from ..tui.ellipse        import OutlineEllipse
+from ..tui.antenna_screen import AntennaScreen
 
 from .dummy.export_antes import export_antes
 
@@ -28,12 +30,30 @@ class AntennaNode:
 
 	signal_fingerprint:Optional[list[float]] = None
 
+	ring:OutlineEllipse
+
 	def __init__(self, id:int, x:float, y:float):
 		self.id = id
 		self.x  = x
 		self.y  = y
+		self.ring = OutlineEllipse(int(x), int(y), 0, 0, 128, 0, 255)
+
+	def inverse_friis(self) -> float:
+		if self.dbm == None:
+			return 0.0
+		return inv_friis(self.dbm, self.gain)
 
 __antennas_registered:dict[int, AntennaNode] = {}
+
+antenna_screen = AntennaScreen()
+show_screen    = False
+
+lowest_x_coord  = 0.0
+highest_x_coord = 0.0
+lowest_y_coord  = 0.0
+highest_y_coord = 0.0
+
+buffered_output = None
 
 # Return reply_packet, expecting_response
 async def decode_packet(packet:DBM_Packet) -> tuple[Optional[DBM_Packet], bool]:
@@ -65,7 +85,9 @@ def manage_login_request(packet:DBM_Packet) -> DBM_Packet:
 
 def register_ante_node(a_id:int, x:float, y:float) -> bool:
 	if a_id not in __antennas_registered:
-		__antennas_registered[a_id] = AntennaNode(a_id, x, y)
+		new_antenna = AntennaNode(a_id, x, y)
+		__antennas_registered[a_id] = new_antenna
+		antenna_screen.add_antenna(new_antenna)
 
 		export_antes(__antennas_registered)
 
@@ -73,6 +95,7 @@ def register_ante_node(a_id:int, x:float, y:float) -> bool:
 
 def deregister_ante_node(a_id:int) -> None:
 	if a_id in __antennas_registered:
+		antenna_screen.remove_antenna(__antennas_registered[a_id])
 		del __antennas_registered[a_id]
 
 		export_antes(__antennas_registered)
@@ -102,12 +125,18 @@ async def loop_ante_updates(server:TrianServer) -> None:
 	__keep_alive = True
 	global __current_request_id
 	frame_id = randint(1, (2**32) - 1)
+
+	buffered_output = open(stderr.fileno(), 'w')
+
 	while __keep_alive:
 		frame_id = randint(1, 255)
 		__current_request_id = frame_id
 		await update_ante_readings(frame_id, server)
 		print_antennas()
 		await asyncio.sleep(0.5)
+
+	buffered_output.close()
+	buffered_output = None
 
 async def stop_ante_updates() -> None:
 	global __keep_alive
@@ -141,6 +170,17 @@ def localize_transmitter_pos() -> tuple[Optional[float], Optional[float]]:
 	return estimate_location(__antennas_registered)
 
 def print_antennas() -> None:
+	if show_screen:
+		if antenna_screen.dimensions_disparity_detected():
+			antenna_screen.on_resize()
+		antenna_screen.update_antennas()
+
+		antenna_screen.paint()
+		if buffered_output != None:
+			antenna_screen.render(buffered_output)
+			buffered_output.flush()
+		return
+
 	print("\x1b[2J\x1b[H", end = '',              file = stderr)
 	print("\x1b[30;46m Antennas Begin \x1b[0m\n", file = stderr)
 	for i in __antennas_registered.values():

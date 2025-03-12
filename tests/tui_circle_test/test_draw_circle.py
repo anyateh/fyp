@@ -4,13 +4,13 @@
 #     ln -s ../../scripts/tui
 # first
 
-from tui.circle import OutlineEllipse
-from tui.screen import Screen
+from tui.ellipse import OutlineEllipse
+from tui.screen  import Screen
 
 def main():
 	screen  = Screen()
 	circle1 = OutlineEllipse(20, 5, 9, 4, 128, 0, 255)
-	circle2 = OutlineEllipse(8, 8, 9, 4, 0, 255, 200)
+	circle2 = OutlineEllipse(8, 8, 9, 4, 24, 156, 127)
 	circle3 = OutlineEllipse(150, 10, 9, 4, 128, 0, 255)
 
 	screen.add_item(circle1)
