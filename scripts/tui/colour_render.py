@@ -10,7 +10,7 @@ class UniColourRender:
 
 	@staticmethod
 	def ansi_216_cols_from_rgb(r:int, g:int, b:int) -> int:
-		return 16 + 36 * (r // 5) + 6 * (g // 5) + (b // 5)
+		return 16 + 36 * (r // 51) + 6 * (g // 51) + (b // 51)
 
 	def ansi_set_fg_colour_256(self) -> str:
 		return f'\x1b[38:5:{UniColourRender.ansi_216_cols_from_rgb(self.r, self.g, self.b)}m'
