@@ -231,30 +231,4 @@ def print_antennas() -> None:
 
 		buffered_output.flush()
 
-	# print("\x1b[2J\x1b[H", end = '',              file = stderr)
-	# print("\x1b[30;46m Antennas Begin \x1b[0m\n", file = stderr)
-	# for i in __antennas_registered.values():
-	# 	dbm_str = f'\x1b[1;32m{i.dbm}\x1b[0m' if i.dbm != None else "\x1b[1;31mno value\x1b[0m"
-	# 	print(f"Ante {i.id}: x = {i.x}, y = {i.y}, dbm = {dbm_str}.", file = stderr)
-
-	# print("\n\x1b[30;46m Antennas End \x1b[0m",              file = stderr)
-	# print("\x1b[38:5:147m" + "\u2584" * 21 + "\x1b[0m",      file = stderr)
-	# print("\x1b[1;30;48:5:147m EE4002D FYP Project \x1b[0m", file = stderr)
-	# print("\x1b[38:5:147m" + "\u2580" * 21 + "\x1b[0m",      file = stderr)
-	# print("\x1b[38:5:147mYou may not see all antennas above because scrolling have not been implemented.", file = stderr)
-
-	# if can_perform_localization():
-	# 	print("The estimated location is below:\n", file = stderr)
-
-	# 	device_x, device_y = (f"\x1b[1;30;48:5:111m {i} \x1b[0m" if i != None else "\x1b[1;30;48:5:161m invalid \x1b[0m" for i in localize_transmitter_pos())
-
-	# 	# print("Estimated Location: ", end = '', file = stderr)
-	# 	stderr.flush()
-	# 	print(f"\x1b[38:5:147mX =", device_x, file = stderr)
-	# 	print(f"\x1b[38:5:147mY =", device_y, file = stderr)
-	# else:
-	# 	print("Need at least three antennas connected before estimation can be shown.\n", file = stderr)
-
-	# print("\n\x1b[38:5:147mPress <ctrl-c> to quit this server, and shut down all antennas.\x1b[0m", file = stderr)
-
 	export_antes(__antennas_registered)

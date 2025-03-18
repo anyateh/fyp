@@ -5,12 +5,14 @@ import asyncio
 from signal import signal, SIGINT, SIGTERM
 from sys    import stderr
 
-from scripts.logger import logger
+from scripts.logger import logger, set_colour_formatting
 from scripts.conductor.server import TrianServer
 
 import scripts.conductor.manage_antes as antes
 
 async def main_loop() -> None:
+	set_colour_formatting()
+
 	server = TrianServer("0.0.0.0", 32310)
 
 	while True:

@@ -6,12 +6,14 @@ from sys import argv, stderr
 
 from scripts.ante_terminal.client import AnteClient
 from scripts.ante_terminal.obtain_signal import measure_dbm
-from scripts.logger import logger
+from scripts.logger import logger, set_colour_formatting
 
 def print_usage(arg0:str) -> None:
 	print('usage:', arg0, 'id', 'x', 'y', 'ip_hostname', 'port', file = stderr)
 
 def main() -> None:
+	set_colour_formatting()
+
 	if len(argv) < 6:
 		print_usage(argv[0])
 		return
