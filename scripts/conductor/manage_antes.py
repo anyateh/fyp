@@ -173,7 +173,7 @@ def can_perform_localization() -> bool:
 	for ante in __antennas_registered.values():
 		if ante.dbm is not None:
 			count += 1
-		if count >= 3:
+		if count >= 2:
 			return True
 
 	return False

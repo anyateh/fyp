@@ -28,7 +28,7 @@ def estimate_location(antennas:dict[int, AntennaNode]) -> tuple[Optional[float],
 		remaining_antennas = {k:v for k, v in antennas.items() if v.dbm is not None}
 		del remaining_antennas[ref_ant_id]
 
-		assert len(remaining_antennas) >= 2
+		# assert len(remaining_antennas) >= 2
 
 		x0_x_2, y0_x_2 = ref_ant.x * 2, ref_ant.y * 2
 		d0_sq, x0_sq, y0_sq = inv_friis(ref_ant.dbm, ref_ant.gain) ** 2, ref_ant.x ** 2, ref_ant.y ** 2
