@@ -33,8 +33,25 @@ def estimate_location(antennas:dict[int, AntennaNode]) -> tuple[Optional[float],
 		x0_x_2, y0_x_2 = ref_ant.x * 2, ref_ant.y * 2
 		d0_sq, x0_sq, y0_sq = inv_friis(ref_ant.dbm, ref_ant.gain) ** 2, ref_ant.x ** 2, ref_ant.y ** 2
 
-		left_side_matrix_rows  = np.array([[i.x * 2 - x0_x_2, i.y * 2 - y0_x_2] for i in remaining_antennas.values()])
-		right_side_matrix_rows = np.array([d0_sq - inv_friis(i.dbm, i.gain) ** 2 - x0_sq + i.x ** 2 - y0_sq + i.y ** 2 for i in remaining_antennas.values()])
+		matrix_rhs = lambda i: d0_sq - inv_friis(i.dbm, i.gain) ** 2 - x0_sq + i.x ** 2 - y0_sq + i.y ** 2
+
+		if len(remaining_antennas) == 1:
+			second_antenna = next(iter(remaining_antennas.values()))
+			tri_mat_rhs = matrix_rhs(second_antenna)
+			y1_m_y0 = second_antenna.y - ref_ant.y
+			x1_m_x0 = second_antenna.x - ref_ant.x
+
+			lingrad_between_ants = y1_m_y0 / x1_m_x0
+
+			x_estimate = (tri_mat_rhs/(2 * y1_m_y0) + ref_ant.x*lingrad_between_ants - ref_ant.y) / (lingrad_between_ants + 1/lingrad_between_ants)
+
+			return x_estimate, ((x_estimate - ref_ant.x) * lingrad_between_ants + ref_ant.y)
+
+		left_side_matrix_rows  = np.array([
+			[i.x * 2 - x0_x_2, i.y * 2 - y0_x_2]
+			for i in remaining_antennas.values()
+		])
+		right_side_matrix_rows = np.array([matrix_rhs(i) for i in remaining_antennas.values()])
 
 		return tuple(np.linalg.lstsq(left_side_matrix_rows, right_side_matrix_rows, rcond = None)[0])
 

@@ -1,0 +1,76 @@
+\documentclass[12pt,a4paper]{article}
+\usepackage[a4paper,margin=0.79in]{geometry}
+\usepackage[T1]{fontenc}
+%\usepackage{indentfirst}
+\usepackage{titlesec}
+
+\pagenumbering{gobble}
+
+\usepackage[normalem]{ulem}
+
+\usepackage{sansmath}  % Enables turning on sans-serif math mode, and using other environments 
+\sansmath % Enable sans-serif math for rest of document
+
+%\sffamily
+
+%\renewcommand{\familydefault}{qag}
+
+%\usepackage[skip=0pt,baselineskip=5pt]{parskip}
+\setlength{\parskip}{5pt}
+\renewcommand\baselinestretch{1.0}
+\raggedbottom
+\usepackage{indentfirst}
+
+\usepackage{amsmath}
+\usepackage{amssymb}
+
+\newcommand{\tabitem}{~~\llap{\textbullet}~~}
+
+%\usepackage{enumitem}
+\usepackage{mathrsfs}
+
+\titleformat{\section}
+{\normalfont\bfseries}
+{\thesection\enspace\textemdash}{0.5em}{}
+
+\usepackage{graphicx}
+\graphicspath{ {./} }
+
+%\usepackage{fontspec}
+%\setmainfont{Nunito}
+
+%\usepackage{parskip}
+
+\usepackage{apalike}
+\usepackage{apacite}
+\usepackage{url}
+
+\usepackage[none]{hyphenat}
+
+\begin{document}
+    \begin{flalign*}
+		d_i &= \frac{\lambda}{4\pi \left(10^{\frac{P_r - P_t - G_t - G_r}{20}}\right)} & 
+    \end{flalign*}
+    \begin{flalign*}
+		\begin{pmatrix}
+			2x_1 - 2x_0 & 2y_1 - 2y_0 
+		\end{pmatrix} &=
+		\begin{pmatrix}
+			d_0^2 - d_1^2 - x_0^2 + x_1^2 - y_0^2 + y_1^2
+		\end{pmatrix} & 
+    \end{flalign*}
+    \begin{flalign*}
+		2\left(x_1 - x_0\right)x + 2\left(y_1 - y_0\right)y &= d_0^2 - d_1^2 - x_0^2 + x_1^2 - y_0^2 + y_1^2 & \\
+		2\left(y_1 - y_0\right)y &= d_0^2 - d_1^2 - x_0^2 + x_1^2 - y_0^2 + y_1^2 - 2\left(x_1 - x_0\right)x & \\
+		y &= \frac{d_0^2 - d_1^2 - x_0^2 + x_1^2 - y_0^2 + y_1^2 - 2\left(x_1 - x_0\right)x}{2\left(y_1 - y_0\right)} & \\
+		y &= \frac{d_0^2 - d_1^2 - x_0^2 + x_1^2 - y_0^2 + y_1^2}{2\left(y_1 - y_0\right)} - \frac{2\left(x_1 - x_0\right)x}{2\left(y_1 - y_0\right)} & \\
+		y &= \frac{d_0^2 - d_1^2 - x_0^2 + x_1^2 - y_0^2 + y_1^2}{2\left(y_1 - y_0\right)} - \frac{\left(x_1 - x_0\right)x}{\left(y_1 - y_0\right)} & \\
+		y &= \frac{d_0^2 - d_1^2 - x_0^2 + x_1^2 - y_0^2 + y_1^2}{2\left(y_1 - y_0\right)} - \frac{x_1 - x_0}{y_1 - y_0}x & \\
+		g &= \frac{y_1 - y_0}{x_1 - x_0} & \\
+		y - y_0 &= g\left(x - x_0\right) & \\
+		y &= \left(\frac{y_1 - y_0}{x_1 - x_0}\right)\left(x - x_0\right) + y_0 & \\
+		y &= \frac{y_1 - y_0}{x_1 - x_0}x - \frac{y_1 - y_0}{x_1 - x_0}x_0 + y_0 & \\
+		\frac{d_0^2 - d_1^2 - x_0^2 + x_1^2 - y_0^2 + y_1^2}{2\left(y_1 - y_0\right)} - \frac{x_1 - x_0}{y_1 - y_0}x &= \frac{y_1 - y_0}{x_1 - x_0}x - \frac{y_1 - y_0}{x_1 - x_0}x_0 + y_0 & \\
+		\frac{d_0^2 - d_1^2 - x_0^2 + x_1^2 - y_0^2 + y_1^2}{2\left(y_1 - y_0\right)} + \frac{y_1 - y_0}{x_1 - x_0}x_0 - y_0 &= \frac{y_1 - y_0}{x_1 - x_0}x + \frac{x_1 - x_0}{y_1 - y_0}x & \\
+    \end{flalign*}
+\end{document}
