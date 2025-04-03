@@ -170,10 +170,16 @@ def manage_data_packet(packet:DBM_Packet, frame_id:int) -> None:
 
 def can_perform_localization() -> bool:
 	count = 0
+	first_ante = None
 	for ante in __antennas_registered.values():
 		if ante.dbm is not None:
+			if not first_ante:
+				first_ante = ante
 			count += 1
 		if count >= 2:
+			return ante.y != first_ante.y and ante.x != first_ante.x
+
+		if count > 2:
 			return True
 
 	return False
