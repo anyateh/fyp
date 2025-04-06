@@ -5,6 +5,7 @@ from random import randint
 from sys    import stderr
 from typing import Optional, TextIO, TYPE_CHECKING
 
+from .average_fifo import AverageFIFO
 from ..packet import DBM_Packet
 if TYPE_CHECKING:
 	from .server              import TrianServer
@@ -36,6 +37,8 @@ class AntennaNode:
 
 	dbm:Optional[float] = None
 
+	dbm_avg:AverageFIFO = AverageFIFO(4)
+
 	signal_fingerprint:Optional[list[float]] = None
 
 	ring:OutlineEllipse
@@ -53,7 +56,14 @@ class AntennaNode:
 	def inverse_friis(self) -> float:
 		if self.dbm == None:
 			return 0.0
-		return inv_friis(self.dbm, self.gain)
+		return inv_friis(self.dbm_avg.avg(), self.gain)
+
+	def update_reading_avg(self) -> None:
+		if self.dbm is None:
+			self.dbm_avg.clear()
+			return
+
+		self.dbm_avg.add(self.dbm)
 
 __antennas_registered:dict[int, AntennaNode] = {}
 
@@ -207,7 +217,7 @@ def print_antennas() -> None:
 		buffered_output.write("\x1b[30;46m Antennas Begin \x1b[0m\n\n")
 
 		for i in __antennas_registered.values():
-			dbm_str = f'\x1b[1;32m{i.dbm}\x1b[0m' if i.dbm != None else "\x1b[1;31mno value\x1b[0m"
+			dbm_str = f'\x1b[1;32m{i.dbm_avg.avg()}\x1b[0m' if i.dbm != None else "\x1b[1;31mno value\x1b[0m"
 			buffered_output.write(f"Ante {i.id}: x = {i.x}, y = {i.y}, dbm = {dbm_str}.\n")
 
 		buffered_output.write("\n\x1b[30;46m Antennas End \x1b[0m\n")

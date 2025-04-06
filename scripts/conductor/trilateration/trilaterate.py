@@ -31,10 +31,10 @@ def estimate_location(antennas:dict[int, AntennaNode]) -> tuple[Optional[float],
 		assert len(remaining_antennas) >= 2
 
 		x0_x_2, y0_x_2 = ref_ant.x * 2, ref_ant.y * 2
-		d0_sq, x0_sq, y0_sq = inv_friis(ref_ant.dbm, ref_ant.gain) ** 2, ref_ant.x ** 2, ref_ant.y ** 2
+		d0_sq, x0_sq, y0_sq = inv_friis(ref_ant.dbm_avg.avg(), ref_ant.gain) ** 2, ref_ant.x ** 2, ref_ant.y ** 2
 
 		left_side_matrix_rows  = np.array([[i.x * 2 - x0_x_2, i.y * 2 - y0_x_2] for i in remaining_antennas.values()])
-		right_side_matrix_rows = np.array([d0_sq - inv_friis(i.dbm, i.gain) ** 2 - x0_sq + i.x ** 2 - y0_sq + i.y ** 2 for i in remaining_antennas.values()])
+		right_side_matrix_rows = np.array([d0_sq - inv_friis(i.dbm_avg.avg(), i.gain) ** 2 - x0_sq + i.x ** 2 - y0_sq + i.y ** 2 for i in remaining_antennas.values()])
 
 		return tuple(np.linalg.lstsq(left_side_matrix_rows, right_side_matrix_rows, rcond = None)[0])
 
