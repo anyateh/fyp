@@ -1,9 +1,10 @@
 import asyncio
+import json
 import struct
 
 from random import randint
 from sys    import stderr
-from typing import Optional, TextIO, TYPE_CHECKING
+from typing import Any, Optional, TextIO, TYPE_CHECKING
 
 from .average_fifo import AverageFIFO
 from ..packet import DBM_Packet
@@ -64,6 +65,15 @@ class AntennaNode:
 			return
 
 		self.dbm_avg.add(self.dbm)
+
+	def convert_to_json_obj(self) -> dict[str, Any]:
+		return {
+			'id': self.id,
+			'x': self.x,
+			'y': self.y,
+			'dbm': self.dbm,
+			'r': self.inverse_friis()
+		}
 
 __antennas_registered:dict[int, AntennaNode] = {}
 
@@ -191,6 +201,18 @@ def can_perform_localization() -> bool:
 def localize_transmitter_pos() -> tuple[Optional[float], Optional[float]]:
 	# Perform trilateration using data from registered clients
 	return estimate_location(__antennas_registered)
+
+def gen_json_update() -> str:
+	d = {
+		"estimated_sources": {},
+		"antennas": {k:v.convert_to_json_obj() for k, v in __antennas_registered.items()}
+	}
+
+	if can_perform_localization():
+		pointx, pointy = localize_transmitter_pos()
+		d["estimated_sources"][0] = {"id": 0, "x": pointx, "y": pointy}
+
+	return json.dumps(d)
 
 def print_antennas() -> None:
 	if show_screen:
