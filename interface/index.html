@@ -270,7 +270,34 @@
 					fetch("upd.json").then(x => x.json()).then(x => parse_updates(x));
 				}
 
-				var update_tmr = setInterval(get_updates, 500);
+				var wsocket = null;
+				var socket_active = false;
+
+				function sock_start(event) {
+					socket_active = true;
+				}
+
+				function sock_receive_updates(event) {
+					parse_updates(JSON.parse(event.data));
+				}
+
+				function sock_stopped(event) {
+					socket_active = false;
+				}
+
+				function attempt_new_socket() {
+					if (!socket_active) {
+						wsocket = new WebSocket("upd.json");
+						wsocket.onopen = sock_start;
+						wsocket.onclose = sock_stopped;
+						wsocket.onerror = sock_stopped;
+						wsocket.onmessage = sock_receive_updates;
+					}
+				}
+
+				// var update_tmr = setInterval(get_updates, 500);
+				var update_tmr = setInterval(attempt_new_socket, 5000);
+				attempt_new_socket();
 
 				// window.paint_elements = paint_elements;
 				points[0].insert_point(document.getElementById("Map"));
