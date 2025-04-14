@@ -1,6 +1,6 @@
 import asyncio
 
-from socket import AF_INET, SOCK_STREAM, socket, timeout as socket_timeout
+from socket import AF_INET, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR, socket, timeout as socket_timeout
 # from time import time
 from typing import Callable, Optional
 
@@ -33,6 +33,7 @@ class TrianServer:
 		self.hostname_ip = hostname_ip
 		self.port = port
 		self.sock = socket(AF_INET, SOCK_STREAM)
+		self.sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 		self.sock.setblocking(False)
 		self.sock.settimeout(0.001)
 

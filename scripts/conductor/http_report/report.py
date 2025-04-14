@@ -1,6 +1,6 @@
-from socket import AF_INET, socket, SOCK_STREAM, timeout
 from base64 import b64encode
 from hashlib import sha1
+from socket import AF_INET, socket, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR, timeout
 from sys import stderr
 from threading import Thread
 from typing import Callable, Iterable, Optional
@@ -57,6 +57,7 @@ def start_server() -> socket:
 	port         = 32311
 
 	sock = socket(AF_INET, SOCK_STREAM)
+	sock.setsockopt(SOL_SOCKET, SO_REUSEADDR, 1)
 	sock.bind((listening_ip, port))
 	sock.listen(1)
 
