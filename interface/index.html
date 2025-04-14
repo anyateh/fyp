@@ -238,7 +238,7 @@
 							anchors[antenna_id].set_radius(updated_info.r);
 							anchors[antenna_id].is_active = true;
 							anchors[antenna_id].update_element();
-							return;
+							continue;
 						}
 
 						anchors[antenna_id] = new Anchor(antenna_id, updated_info.x, updated_info.y);
@@ -257,7 +257,7 @@
 							points[point_id].set_coord(updated_info.x, updated_info.y);
 							points[point_id].is_active = true;
 							points[point_id].update_element();
-							return;
+							continue;
 						}
 
 						points[point_id] = new Point(point_id, updated_info.x, updated_info.y);
