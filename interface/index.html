@@ -36,35 +36,41 @@
 
 			.map-whole .x-axis,
 			.map-whole .y-axis {
+				left: 0;
+				bottom: 0;
 				position: absolute;
 				border: 2px dashed #444;
 				font-size: 0;
 			}
 
 			.map-whole .x-axis {
-				top: calc(50% - 1px);
-				left: 0;
+				/* top: calc(50% - 1px); */
 				width: 100%;
 				height: 0;
+				background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='black' stroke-width='10' stroke-dasharray='5 20' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e");
 			}
 
 			.map-whole .y-axis {
-				top: 0;
-				left: calc(50% - 1px);
+				/* left: calc(50% - 1px); */
 				width: 0;
 				height: 100%;
+				background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='black' stroke-width='10' stroke-dasharray='5 20' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e");
 			}
 
+			.map-viewport .anchor-centre,
 			.map-viewport .point {
 				position: absolute;
+				left: 0;
+				bottom: 0;
 				width: 10px;
 				height: 10px;
 				border-radius: 5px;
 				background-color: #e5e5e5;
+				will-change: transform, opacity;
 			}
 
 			.map-viewport .inactive {
-				opacity: 0.5;;
+				opacity: 0.5;
 			}
 
 			.map-viewport .hidden {
@@ -72,16 +78,17 @@
 			}
 
 			.map-viewport .ring {
+				left: 0;
+				bottom: 0;
 				position: absolute;
 				border-radius: 100%;
 				border: 4px dotted #e5e5e5;
+				transform-origin: center;
+				will-change: transform, opacity;
 			}
 		</style>
 		<main class="map-viewport">
-			<div id="Map" class="map-whole">
-				<div class="x-axis"></div>
-				<div class="y-axis"></div>
-			</div>
+			<div id="Map" class="map-whole"></div>
 		</main>
 		<script type="text/javascript">
 			// (function(){
@@ -107,6 +114,12 @@
 				var estimated_x     = 0;
 				var estimated_y     = 0;
 
+				var map = document.getElementById("Map");
+				var axes = {
+					x: document.createElement("div"),
+					y: document.createElement("div")
+				};
+
 				function Anchor(id, x, y) {
 					this.id = id;
 					this.x  = x;
@@ -115,7 +128,7 @@
 					this.radius = null;
 
 					this.element = document.createElement('div');
-					this.element.classList.add("point");
+					this.element.classList.add("anchor-centre");
 
 					this.circle_element = document.createElement("div");
 					this.circle_element.classList.add("ring");
@@ -126,34 +139,31 @@
 				}
 
 				Anchor.prototype.update_element = function() {
-					if (this.is_active) {
+					if (this.is_active || this.radius == null) {
 						this.element.classList.remove("inactive");
 						this.circle_element.classList.remove("inactive");
 					} else {
 						this.element.classList.add("inactive");
 						this.circle_element.classList.add("inactive");
-						return;
 					}
 
-					var bound_box = this.element.getBoundingClientRect();
+					// if (this.radius == null) {
+					// 	this.circle_element.classList.add("hidden");
+					// 	return;
+					// }
 
-					this.element.style.left = ((this.x * viewport_scale_x) - bound_box.width / 2) + "px";
-					this.element.style.bottom = ((this.y * viewport_scale_y) - bound_box.height / 2) + "px";
-
-					if (this.radius == null) {
-						this.circle_element.classList.add("hidden");
-						return;
-					}
-
-					this.circle_element.classList.remove("hidden");
+					// this.circle_element.classList.remove("hidden");
 
 					this.circle_element.style.width = (2 * this.radius * viewport_scale_x) + "px";
 					this.circle_element.style.height = (2 * this.radius * viewport_scale_y) + "px";
 
+					var bound_box = this.element.getBoundingClientRect();
 					var circle_box = this.circle_element.getBoundingClientRect();
 
-					this.circle_element.style.left = ((this.x * viewport_scale_x) - circle_box.width / 2) + "px";
-					this.circle_element.style.bottom = ((this.y * viewport_scale_y) - circle_box.height / 2) + "px";
+					this.element.style.left = ((this.x * viewport_scale_x) - bound_box.width / 2 + viewport_offset_x) + "px";
+					this.element.style.bottom = ((this.y * viewport_scale_y) - bound_box.height / 2 + viewport_offset_y) + "px";
+					this.circle_element.style.left = ((this.x * viewport_scale_x) - circle_box.width / 2 + viewport_offset_x) + "px";
+					this.circle_element.style.bottom = ((this.y * viewport_scale_y) - circle_box.height / 2 + viewport_offset_y) + "px";
 				};
 
 				Anchor.prototype.set_coord = function(x, y) {
@@ -187,13 +197,12 @@
 						this.element.classList.remove("inactive");
 					} else {
 						this.element.classList.add("inactive");
-						return;
 					}
 
 					var bound_box = this.element.getBoundingClientRect();
 
-					this.element.style.left = (this.x * viewport_scale_x - bound_box.width / 2) + "px";
-					this.element.style.bottom = (this.y * viewport_scale_y - bound_box.height / 2) + "px";
+					this.element.style.left = (this.x * viewport_scale_x - bound_box.width / 2 + viewport_offset_x) + "px";
+					this.element.style.bottom = (this.y * viewport_scale_y - bound_box.height / 2 + viewport_offset_y) + "px";
 				};
 
 				Point.prototype.set_coord = function(x, y) {
@@ -213,13 +222,15 @@
 				};
 
 				function paint_elements() {
-					for (var anchor_key in anchors) {
-						document.getElementById("Map").appendChild(anchors[anchor_key].element);
+					for (var anchor_id in anchors) {
+						anchors[anchor_id].update_element();
 					}
 
-					for (var point_key in points) {
-						document.getElementById("Map").appendChild(points[point_key].element);
+					for (var point_id in points) {
+						points[point_id].update_element();
 					}
+
+					update_axes();
 				}
 
 				function parse_updates(json_update) {
@@ -237,13 +248,13 @@
 							anchors[antenna_id].set_coord(updated_info.x, updated_info.y);
 							anchors[antenna_id].set_radius(updated_info.r);
 							anchors[antenna_id].is_active = true;
-							anchors[antenna_id].update_element();
+							// anchors[antenna_id].update_element();
 							continue;
 						}
 
 						anchors[antenna_id] = new Anchor(antenna_id, updated_info.x, updated_info.y);
 						anchors[antenna_id].set_radius(updated_info.r);
-						anchors[antenna_id].insert_point(document.getElementById("Map"));
+						anchors[antenna_id].insert_point(map);
 					}
 
 					for (let point_id in points) {
@@ -256,13 +267,15 @@
 						if (points.hasOwnProperty(point_id)) {
 							points[point_id].set_coord(updated_info.x, updated_info.y);
 							points[point_id].is_active = true;
-							points[point_id].update_element();
+							// points[point_id].update_element();
 							continue;
 						}
 
 						points[point_id] = new Point(point_id, updated_info.x, updated_info.y);
-						points[point_id].insert_point(document.getElementById("Map"));
+						points[point_id].insert_point(map);
 					}
+
+					paint_elements();
 				}
 				// window.parse_updates = parse_updates;
 
@@ -295,11 +308,30 @@
 					}
 				}
 
+				function setup_axes() {
+					var x_axis = document.createElement('div');
+					x_axis.classList.add("x-axis");
+					map.appendChild(x_axis);
+
+					var y_axis = document.createElement('div');
+					y_axis.classList.add("y-axis");
+					map.appendChild(y_axis);
+
+					return {x: x_axis, y: y_axis};
+				}
+
+				function update_axes() {
+					axes.x.style.transform = "translateY(" + (-viewport_offset_y) + "px)";
+					axes.y.style.transform = "translateX(" + (viewport_offset_x) + "px)";
+				}
+
 				// var update_tmr = setInterval(get_updates, 500);
 				var update_tmr = setInterval(attempt_new_socket, 5000);
 				attempt_new_socket();
 
 				// window.paint_elements = paint_elements;
+				axes = setup_axes();
+				points[0].is_active = false;
 				points[0].insert_point(document.getElementById("Map"));
 			// })();
 		</script>
