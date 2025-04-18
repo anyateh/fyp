@@ -6,6 +6,7 @@ from ..manage_antes import gen_json_update
 
 __base_frontend_dir = "interface"
 __index_html_file = path.join(__base_frontend_dir, "index.html")
+__js_queue_js_file = path.join(__base_frontend_dir, "js", "queue.js")
 
 class Supplier:
 	content_fx:Optional[Callable[[], bytes]]
@@ -79,3 +80,14 @@ def upd_json_supplier() -> bytes:
 	return gen_json_update().encode(encoding = 'utf-8')
 
 db_table['/upd.json'] = DB_Resource("/upd.json", "application/json", Supplier(upd_json_supplier, None), False)
+
+def queue_js_supplier() -> bytes:
+	with open(__js_queue_js_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def queue_js_supplier_time() -> int:
+	return int(path.getmtime(__js_queue_js_file))
+
+db_table['/js/queue.js'] = DB_Resource("/js/queue.js", "text/javascript", Supplier(queue_js_supplier, queue_js_supplier_time))

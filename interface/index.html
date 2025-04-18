@@ -5,6 +5,8 @@
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
 		<title>Demo</title>
 
+		<script type="text/javascript" src="js/queue.js"></script>
+
 		<style type="text/css">
 			html, body {
 				background-color: #282828;
@@ -120,6 +122,20 @@
 					y: document.createElement("div")
 				};
 
+				var dragging_mode = false;
+				var start_dragging_offsets = {
+					x: 0, y: 0,
+					mouse_x: 0, mouse_y: 0
+				};
+				// var milliseconds_per_count = 100;
+				var milliseconds_per_frame = 16.7; // To be determined automatically
+				var dragging_deccel = 0.08; // Pixels per frame per frame
+				var dragging_prev_offset_coord = {x: 0, y: 0};
+				var dragging_upd_time = {prev: 0, now: 0};
+				var dragging_coast_velocity = {x: 0, y: 0}; // Pixels per frame
+				var dragging_prev_coords_queue = new Queue(4);
+				var dragging_timing_now = 0;
+
 				function Anchor(id, x, y) {
 					this.id = id;
 					this.x  = x;
@@ -233,6 +249,169 @@
 					update_axes();
 				}
 
+				function set_zoom_scale(zx, zy) {
+					viewport_scale_x = zx;
+					viewport_scale_y = zy;
+
+					paint_elements();
+				}
+
+				function zoom_map(amt) {
+					var offset = amt * 0.2 / 180;
+
+					set_zoom_scale(viewport_scale_x + offset, viewport_scale_y + offset);
+				}
+
+				function map_wheel_event(event) {
+					zoom_map(event.deltaY);
+				}
+
+				map.addEventListener("wheel", map_wheel_event);
+
+				function adjust_frame_scale_with_points() {
+					var map_box = map.getBoundingClientRect();
+
+					var min_x = null;
+					var min_y = null;
+					var max_x = null;
+					var max_y = null;
+
+					for (var anchor_id in anchors) {
+						if (min_x == null || anchors[anchor_id].x < min_x) {
+							min_x = anchors[anchor_id].x;
+						}
+						if (min_y == null || anchors[anchor_id].y < min_y) {
+							min_y = anchors[anchor_id].y;
+						}
+						if (max_x == null || anchors[anchor_id].x > max_x) {
+							max_x = anchors[anchor_id].x;
+						}
+						if (max_y == null || anchors[anchor_id].y > max_y) {
+							max_y = anchors[anchor_id].y;
+						}
+					}
+				}
+
+				function calc_millis_per_frame() {
+					return new Promise(function(resolve, reject) {
+						var t0 = null;
+						function after_one_frame_callback() {
+							var t1 = performance.now();
+							resolve(t1 - t0);
+						}
+						t0 = performance.now();
+						requestAnimationFrame(after_one_frame_callback);
+					});
+				}
+
+				function get_velo_time_diff() {
+					return (dragging_upd_time.now - dragging_upd_time.prev) / milliseconds_per_frame;
+				}
+
+				function calc_dragging_velocity_x(time_diff) {
+					return (viewport_offset_x - dragging_prev_offset_coord.x)
+						 / time_diff;
+				}
+
+				function calc_dragging_velocity_y(time_diff) {
+					return (viewport_offset_y - dragging_prev_offset_coord.y)
+						 / time_diff;
+				}
+
+				function dec_stop_at_0(n, decby) {
+					if (Math.abs(n) < Math.abs(decby)) {
+						return 0;
+					}
+					if (n < 0) {
+						return n + decby;
+					}
+					return n - decby;
+				}
+
+				function gliding_update() {
+					viewport_offset_x += dragging_coast_velocity.x;
+					viewport_offset_y += dragging_coast_velocity.y;
+					dragging_coast_velocity.x = dec_stop_at_0(dragging_coast_velocity.x, dragging_deccel);
+					dragging_coast_velocity.y = dec_stop_at_0(dragging_coast_velocity.y, dragging_deccel);
+					if (!dragging_mode && (dragging_coast_velocity.x != 0 || dragging_coast_velocity.y != 0))
+						requestAnimationFrame(gliding_update);
+				}
+
+				function dragging_update(x_offset, y_offset) {
+					var x = start_dragging_offsets.x;
+					var y = start_dragging_offsets.y;
+
+					dragging_prev_offset_coord.x = viewport_offset_x;
+					dragging_prev_offset_coord.y = viewport_offset_y;
+
+					dragging_prev_coords_queue.enqueue({
+						x: viewport_offset_x,
+						y: viewport_offset_y,
+						time: dragging_timing_now
+					});
+					dragging_timing_now = performance.now();
+
+					viewport_offset_x = x + x_offset;
+					viewport_offset_y = y + y_offset;
+
+					dragging_upd_time.prev = dragging_upd_time.now;
+					dragging_upd_time.now = performance.now();
+
+
+					paint_elements();
+				}
+
+				function activate_dragging_mode(mouse_x, mouse_y) {
+					dragging_mode = true;
+					start_dragging_offsets.x = viewport_offset_x;
+					start_dragging_offsets.y = viewport_offset_y;
+					start_dragging_offsets.mouse_x = mouse_x;
+					start_dragging_offsets.mouse_y = mouse_y;
+					dragging_prev_offset_coord.x = viewport_offset_x;
+					dragging_prev_offset_coord.y = viewport_offset_y;
+					dragging_prev_coords_queue.clear();
+
+					// Use slightly different timings
+					dragging_upd_time.prev = performance.now();
+					dragging_upd_time.now = performance.now();
+
+					map.addEventListener("mousemove", map_mousemove_event);
+				}
+
+				function deactivate_dragging_mode() {
+					dragging_mode = false;
+					map.removeEventListener("mousemove", map_mousemove_event);
+
+					var time_diff = get_velo_time_diff();
+					if (time_diff == 0) {
+						dragging_coast_velocity.x = 0;
+						dragging_coast_velocity.y = 0;
+					} else {
+						dragging_coast_velocity.x = calc_dragging_velocity_x(time_diff);
+						dragging_coast_velocity.y = calc_dragging_velocity_y(time_diff);
+
+						requestAnimationFrame(gliding_update);
+					}
+				}
+
+				function map_mousedown_event(event) {
+					if (!dragging_mode)
+						activate_dragging_mode(event.clientX, event.clientY);
+				}
+
+				function map_mousemove_event(event) {
+					dragging_update(event.clientX - start_dragging_offsets.mouse_x, start_dragging_offsets.mouse_y - event.clientY);
+				}
+
+				function map_mouseup_event(event) {
+					if (dragging_mode)
+						deactivate_dragging_mode();
+				}
+
+				map.addEventListener("mousedown", map_mousedown_event);
+				map.addEventListener("mouseup", map_mouseup_event);
+				map.addEventListener("mouseleave", map_mouseup_event);
+
 				function parse_updates(json_update) {
 					// upd_obj = JSON.parse(json_update);
 					upd_obj = json_update;
@@ -330,6 +509,9 @@
 				attempt_new_socket();
 
 				// window.paint_elements = paint_elements;
+				calc_millis_per_frame().then(function(ms) {
+					milliseconds_per_frame = ms;
+				});
 				axes = setup_axes();
 				points[0].is_active = false;
 				points[0].insert_point(document.getElementById("Map"));
