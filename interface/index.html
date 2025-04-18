@@ -257,7 +257,7 @@
 				}
 
 				function zoom_map(amt) {
-					var offset = amt * 0.2 / 180;
+					var offset = -amt * 0.2 / 180;
 
 					set_zoom_scale(viewport_scale_x + offset, viewport_scale_y + offset);
 				}
@@ -268,7 +268,18 @@
 
 				map.addEventListener("wheel", map_wheel_event);
 
+				function is_empty_obj(obj) {
+					for (let p in obj) {
+						if (obj.hasOwnProperty(p)) {
+							return false;
+						}
+					}
+					return true;
+				}
+
 				function adjust_frame_scale_with_points() {
+					if (is_empty_obj(anchors));
+						return;
 					var map_box = map.getBoundingClientRect();
 
 					var min_x = null;
@@ -290,6 +301,22 @@
 							max_y = anchors[anchor_id].y;
 						}
 					}
+
+					if (min_x == null || min_y == null || max_x == null || max_y == null) {
+						return;
+					}
+
+					var x_scale = (max_x - min_x == 0) ? viewport_scale_x
+						: (map_box.width - viewport_padding_x - viewport_offset_x)
+						 / (max_x - min_x);
+					var y_scale = (max_y - min_y == 0) ? viewport_scale_y
+						: (map_box.height - viewport_padding_y - viewport_offset_y)
+						 / (max_y - min_y);
+
+					set_zoom_scale(x_scale, y_scale);
+
+					viewport_offset_x = min_x + viewport_padding_x;
+					viewport_offset_y = min_y + viewport_padding_y;
 				}
 
 				function calc_millis_per_frame() {
@@ -434,6 +461,7 @@
 						anchors[antenna_id] = new Anchor(antenna_id, updated_info.x, updated_info.y);
 						anchors[antenna_id].set_radius(updated_info.r);
 						anchors[antenna_id].insert_point(map);
+						adjust_frame_scale_with_points();
 					}
 
 					for (let point_id in points) {
@@ -515,6 +543,7 @@
 				axes = setup_axes();
 				points[0].is_active = false;
 				points[0].insert_point(document.getElementById("Map"));
+				adjust_frame_scale_with_points();
 			// })();
 		</script>
 	</body>
