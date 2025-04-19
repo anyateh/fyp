@@ -160,6 +160,9 @@ async def update_ante_readings(frame_id:int, server:TrianServer) -> None:
 			if i:
 				manage_data_packet(i, __current_request_id)
 
+	for i in __antennas_registered.values():
+		i.update_reading_avg()
+
 async def loop_ante_updates(server:TrianServer) -> None:
 	global __keep_alive
 	__keep_alive = True
