@@ -9,9 +9,11 @@
 
 		<style type="text/css">
 			html, body {
-				background-color: #282828;
+				/* background-color: #282828; */
+				background-color: #38353b;
 				margin: 0;
 				padding: 0;
+				color: #ddd;
 			}
 		</style>
 	</head>
@@ -43,6 +45,7 @@
 				position: absolute;
 				border: 2px dashed #444;
 				font-size: 0;
+				z-index: 0;
 			}
 
 			.map-whole .x-axis {
@@ -68,6 +71,7 @@
 				height: 10px;
 				border-radius: 5px;
 				background-color: #e5e5e5;
+				z-index: 3;
 				will-change: transform, opacity;
 			}
 
@@ -88,6 +92,20 @@
 				transform-origin: center;
 				will-change: transform, opacity;
 			}
+
+			.map-viewport .anchor-centre-label,
+			.map-viewport .point-label {
+				position: absolute;
+				left: 0;
+				bottom: 0;
+				padding: 0.5em 1em;
+				background-color: #493f73;
+				/* border: 2px solid #8F77F8; */
+				border-radius: 0.8em;
+				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+				color: #ddd5ff;
+				z-index: 4;
+			}
 		</style>
 		<main class="map-viewport">
 			<div id="Map" class="map-whole"></div>
@@ -102,8 +120,8 @@
 				var viewport_offset_x = 0;
 				var viewport_offset_y = 0;
 
-				var viewport_padding_x = 20;
-				var viewport_padding_y = 20;
+				var viewport_padding_x = 40;
+				var viewport_padding_y = 40;
 
 				// var viewport_width  = 1;
 				// var viewport_height = 1;
@@ -149,10 +167,15 @@
 					this.circle_element = document.createElement("div");
 					this.circle_element.classList.add("ring");
 
+					this.label = document.createElement("div");
+					this.label.classList.add("anchor-centre-label");
+
 					this.is_active = true;
 
 					this.update_element();
 				}
+
+				Anchor.prototype.label_margin = 30;
 
 				Anchor.prototype.update_element = function() {
 					if (this.is_active || this.radius == null) {
@@ -162,6 +185,10 @@
 						this.element.classList.add("inactive");
 						this.circle_element.classList.add("inactive");
 					}
+
+					var label_txt = "id: " + this.id + ", x: " + this.x + ", y: " + this.y;
+					if (this.label.innerText != label_txt)
+						this.label.innerText = label_txt;
 
 					// if (this.radius == null) {
 					// 	this.circle_element.classList.add("hidden");
@@ -175,11 +202,20 @@
 
 					var bound_box = this.element.getBoundingClientRect();
 					var circle_box = this.circle_element.getBoundingClientRect();
+					var label_box = this.label.getBoundingClientRect();
+
+					var point_x = (this.x * viewport_scale_x) + viewport_offset_x;
+					var point_y = (this.y * viewport_scale_y) + viewport_offset_y;
 
 					this.element.style.left = ((this.x * viewport_scale_x) - bound_box.width / 2 + viewport_offset_x) + "px";
 					this.element.style.bottom = ((this.y * viewport_scale_y) - bound_box.height / 2 + viewport_offset_y) + "px";
 					this.circle_element.style.left = ((this.x * viewport_scale_x) - circle_box.width / 2 + viewport_offset_x) + "px";
 					this.circle_element.style.bottom = ((this.y * viewport_scale_y) - circle_box.height / 2 + viewport_offset_y) + "px";
+					this.label.style.transform = "translate("
+						+ (point_x - label_box.width / 2)
+						+ "px, "
+						+ -(point_y - this.label_margin - label_box.height)
+						+ "px)";
 				};
 
 				Anchor.prototype.set_coord = function(x, y) {
@@ -194,7 +230,32 @@
 				Anchor.prototype.insert_point = function(to_insert_into) {
 					to_insert_into.appendChild(this.element);
 					to_insert_into.appendChild(this.circle_element);
+					to_insert_into.appendChild(this.label);
 					this.update_element();
+				};
+
+				Anchor.prototype.get_graphical_x = function() {
+					return (this.x * viewport_scale_x) + viewport_offset_x;
+				};
+
+				Anchor.prototype.get_graphical_y = function() {
+					return (this.y * viewport_scale_y) + viewport_offset_y;
+				};
+
+				Anchor.prototype.get_min_graphical_x = function() {
+					return this.get_graphical_x() - this.label.getBoundingClientRect().width / 2;
+				};
+
+				Anchor.prototype.get_max_graphical_x = function() {
+					return this.get_graphical_x() + this.label.getBoundingClientRect().width / 2;
+				};
+
+				Anchor.prototype.get_min_graphical_y = function() {
+					return this.get_graphical_y() - this.element.getBoundingClientRect().height / 2;
+				};
+
+				Anchor.prototype.get_max_graphical_y = function() {
+					return this.get_graphical_y() + this.label_margin + this.label.getBoundingClientRect().height;
 				};
 
 				function Point(id, x, y) {
@@ -205,8 +266,13 @@
 					this.element = document.createElement('div');
 					this.element.classList.add("point");
 
+					this.label = document.createElement("div");
+					this.label.classList.add("point-label");
+
 					this.is_active = true;
 				}
+
+				Point.prototype.label_margin = 30;
 
 				Point.prototype.update_element = function() {
 					if (this.is_active) {
@@ -215,10 +281,28 @@
 						this.element.classList.add("inactive");
 					}
 
-					var bound_box = this.element.getBoundingClientRect();
+					var label_txt = "id: " + this.id + ", x: " + this.x + ", y: " + this.y;
+					if (this.label.innerText != label_txt)
+						this.label.innerText = label_txt;
 
-					this.element.style.left = (this.x * viewport_scale_x - bound_box.width / 2 + viewport_offset_x) + "px";
-					this.element.style.bottom = (this.y * viewport_scale_y - bound_box.height / 2 + viewport_offset_y) + "px";
+					var bound_box = this.element.getBoundingClientRect();
+					var label_box = this.label.getBoundingClientRect();
+
+					var point_x = (this.x * viewport_scale_x) + viewport_offset_x;
+					var point_y = (this.y * viewport_scale_y) + viewport_offset_y;
+
+					// this.element.style.left = (point_x - bound_box.width / 2) + "px";
+					// this.element.style.bottom = (point_y - bound_box.height / 2) + "px";
+					this.element.style.transform = "translate("
+						+ (point_x - bound_box.width / 2)
+						+ "px, "
+						+ -(point_y - bound_box.height / 2)
+						+ "px)";
+					this.label.style.transform = "translate("
+						+ (point_x - label_box.width / 2)
+						+ "px, "
+						+ -(point_y - this.label_margin - label_box.height)
+						+ "px)";
 				};
 
 				Point.prototype.set_coord = function(x, y) {
@@ -228,6 +312,7 @@
 
 				Point.prototype.insert_point = function(to_insert_into) {
 					to_insert_into.appendChild(this.element);
+					to_insert_into.appendChild(this.label);
 					this.update_element();
 				};
 
@@ -278,8 +363,9 @@
 				}
 
 				function adjust_frame_scale_with_points() {
-					if (is_empty_obj(anchors));
+					if (is_empty_obj(anchors))
 						return;
+
 					var map_box = map.getBoundingClientRect();
 
 					var min_x = null;
