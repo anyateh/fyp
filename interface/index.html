@@ -147,11 +147,11 @@
 				};
 				// var milliseconds_per_count = 100;
 				var milliseconds_per_frame = 16.7; // To be determined automatically
-				var dragging_deccel = 0.08; // Pixels per frame per frame
+				var dragging_deccel_factor = 0.02; // Pixels per frame per frame
 				var dragging_prev_offset_coord = {x: 0, y: 0};
 				var dragging_upd_time = {prev: 0, now: 0};
 				var dragging_coast_velocity = {x: 0, y: 0}; // Pixels per frame
-				var dragging_prev_coords_queue = new Queue(4);
+				var dragging_prev_coords_queue = new Queue(3);
 				var dragging_timing_now = 0;
 
 				function Anchor(id, x, y) {
@@ -425,17 +425,26 @@
 					});
 				}
 
+				function get_coasting_deccel(velo) {
+					return dragging_deccel_factor * velo;
+				}
+
 				function get_velo_time_diff() {
-					return (dragging_upd_time.now - dragging_upd_time.prev) / milliseconds_per_frame;
+					// return (dragging_upd_time.now - dragging_upd_time.prev) / milliseconds_per_frame;
+					return (dragging_timing_now - dragging_prev_coords_queue.peek().time) / milliseconds_per_frame;
 				}
 
 				function calc_dragging_velocity_x(time_diff) {
-					return (viewport_offset_x - dragging_prev_offset_coord.x)
+					// return (viewport_offset_x - dragging_prev_offset_coord.x)
+					// 	 / time_diff;
+					return (viewport_offset_x - dragging_prev_coords_queue.peek().x)
 						 / time_diff;
 				}
 
 				function calc_dragging_velocity_y(time_diff) {
-					return (viewport_offset_y - dragging_prev_offset_coord.y)
+					// return (viewport_offset_y - dragging_prev_offset_coord.y)
+					// 	 / time_diff;
+					return (viewport_offset_y - dragging_prev_coords_queue.peek().y)
 						 / time_diff;
 				}
 
@@ -443,17 +452,17 @@
 					if (Math.abs(n) < Math.abs(decby)) {
 						return 0;
 					}
-					if (n < 0) {
-						return n + decby;
-					}
+					// if (n < 0) {
+					// 	return n + decby;
+					// }
 					return n - decby;
 				}
 
 				function gliding_update() {
 					viewport_offset_x += dragging_coast_velocity.x;
 					viewport_offset_y += dragging_coast_velocity.y;
-					dragging_coast_velocity.x = dec_stop_at_0(dragging_coast_velocity.x, dragging_deccel);
-					dragging_coast_velocity.y = dec_stop_at_0(dragging_coast_velocity.y, dragging_deccel);
+					dragging_coast_velocity.x = dec_stop_at_0(dragging_coast_velocity.x, get_coasting_deccel(dragging_coast_velocity.x));
+					dragging_coast_velocity.y = dec_stop_at_0(dragging_coast_velocity.y, get_coasting_deccel(dragging_coast_velocity.y));
 					if (!dragging_mode && (dragging_coast_velocity.x != 0 || dragging_coast_velocity.y != 0))
 						requestAnimationFrame(gliding_update);
 				}
@@ -525,8 +534,10 @@
 				}
 
 				function map_mouseup_event(event) {
-					if (dragging_mode)
+					if (dragging_mode) {
+						dragging_update(event.clientX - start_dragging_offsets.mouse_x, start_dragging_offsets.mouse_y - event.clientY);
 						deactivate_dragging_mode();
+					}
 				}
 
 				map.addEventListener("mousedown", map_mousedown_event);
