@@ -447,7 +447,7 @@
 
 					for (let i = n_existing; i < n_buff; i++) {
 						var tn = document.createTextNode(anchor_json.avg_fifo.buffer[i]);
-						var prop = this.gen_debug_prop(i + 1, tn);
+						var prop = this.gen_debug_prop("Buffer #" + i, tn);
 						this.avg_fifo_debug_buffer_ele.appendChild(prop);
 						this.debug_avg_fifo_buffer_props.push({
 							prop: prop,
