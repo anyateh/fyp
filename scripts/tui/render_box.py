@@ -13,7 +13,7 @@ class RenderBox:
 
 	def __init__(self, x1:int, x2:int, y1:int, y2:int):
 		self.bounds = BoundingBox(x1, x2, y1, y2)
-		self.painted_bounds = BoundingBox(x1, x2, y1, y2)
+		self.painted_bounds = None
 
 	def paint_row(self, row_n:int, y:int) -> str:
 		x1 = self.bounds.absolute_x1()
@@ -47,3 +47,5 @@ class RenderBox:
 		for row in range(y1, y2):
 			out.write(f"\x1b[{row + 1};{x1 + 1}H")
 			out.write(" " * (x2 - x1))
+
+		self.painted_bounds = None

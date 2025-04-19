@@ -1,0 +1,1007 @@
+<!DOCTYPE html>
+<html lang="en">
+	<head>
+		<meta charset="UTF-8">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<title>Demo</title>
+
+		<!-- <link rel="preconnect" href="https://fonts.googleapis.com">
+		<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+		<link href="https://fonts.googleapis.com/css2?family=Overpass:ital,wght@0,100..900;1,100..900&display=swap" rel="stylesheet"> -->
+		<link href="css/scrollbar.css" rel="stylesheet">
+		<link href="fonts/overpass.css" rel="stylesheet">
+		<script type="text/javascript" src="js/queue.js"></script>
+
+		<style type="text/css">
+			html {
+				/* background-color: #282828; */
+				/* background-color: #38353b; */
+				background-color: #342f46;  /* fallback for old browsers */
+				background-image: linear-gradient(to right, #342f46, #441969); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
+				color: #ddd;
+				font-family: 'Overpass', sans-serif;
+			}
+
+			html, body {
+				margin: 0;
+				padding: 0;
+			}
+
+			h1 {
+				font-size: 1.2em;
+			}
+		</style>
+	</head>
+	<body>
+		<style type="text/css">
+			.map-viewport {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				overflow: hidden;
+				-webkit-user-select: none;
+				user-select: none;
+			}
+
+			.map-viewport .map-whole {
+				position: absolute;
+				top: 0;
+				left: 0;
+				width: 100%;
+				height: 100%;
+				background-image: -webkit-linear-gradient(135deg, #1f163f, #2a1c37);  /* Chrome 10-25, Safari 5.1-6 */
+				background-image: linear-gradient(135deg, #1f163f, #2a1c37); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+			}
+
+			.map-whole .x-axis,
+			.map-whole .y-axis {
+				left: 0;
+				bottom: 0;
+				position: absolute;
+				border: 2px dashed #3b2660;
+				font-size: 0;
+				z-index: 0;
+			}
+
+			.map-whole .x-axis {
+				/* top: calc(50% - 1px); */
+				width: 100%;
+				height: 0;
+				/* background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='black' stroke-width='10' stroke-dasharray='5 20' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e"); */
+			}
+
+			.map-whole .y-axis {
+				/* left: calc(50% - 1px); */
+				width: 0;
+				height: 100%;
+				/* background-image: url("data:image/svg+xml,%3csvg width='100%25' height='100%25' xmlns='http://www.w3.org/2000/svg'%3e%3crect width='100%25' height='100%25' fill='none' stroke='black' stroke-width='10' stroke-dasharray='5 20' stroke-dashoffset='0' stroke-linecap='butt'/%3e%3c/svg%3e"); */
+			}
+
+			.map-viewport .anchor-centre,
+			.map-viewport .point {
+				position: absolute;
+				left: 0;
+				bottom: 0;
+				width: 10px;
+				height: 10px;
+				border-radius: 5px;
+				background-color: #e5e5e5;
+				z-index: 3;
+				will-change: transform, opacity;
+			}
+
+			.map-viewport .inactive {
+				opacity: 0.5;
+			}
+
+			.map-viewport .hidden {
+				display: none;
+			}
+
+			.map-viewport .ring {
+				left: 0;
+				bottom: 0;
+				position: absolute;
+				border-radius: 100%;
+				border: 4px dotted #6a6590;
+				transform-origin: center;
+				will-change: transform, opacity;
+			}
+
+			.map-viewport .anchor-centre-label,
+			.map-viewport .point-label {
+				position: absolute;
+				left: 0;
+				bottom: 0;
+				padding: 0.5em 1em;
+				background-color: #493f73;
+				/* border: 2px solid #8F77F8; */
+				border-radius: 0.8em;
+				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+				color: #ddd5ff;
+				text-align: center;
+				z-index: 4;
+			}
+
+			.map-viewport .anchor-centre-label {
+				background-color: #3d3e73;
+				color: #d5e0ff;
+			}
+
+			.map-viewport .anchor-centre-label .label-heading,
+			.map-viewport .point-label .label-heading {
+				font-weight: bold;
+			}
+
+			.hambuger-menu {
+				position: fixed;
+				top: 1em;
+				left: 1em;
+				width: 1em;
+				height: 1em;
+				padding: 1em;
+				border-radius: 1em;
+				background-color: #493f73;
+				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+				z-index: 10;
+			}
+
+			.hambuger-menu .line-1,
+			.hambuger-menu .line-2,
+			.hambuger-menu .line-3 {
+				position: absolute;
+				width: calc(100% - 2rem);
+				left: 1rem;
+				font-size: 0;
+				height: 3px;
+				border-radius: 1.5px;
+				background-color: #ddd;
+				transition: transform 0.35s ease, opacity 0.35s ease;
+				transform-origin: center;
+			}
+
+			.hambuger-menu .line-1 {
+				top: 1rem;
+			}
+
+			.hambuger-menu .line-2 {
+				top: calc(50% - 1.5px);
+			}
+
+			.hambuger-menu .line-3 {
+				bottom: 1rem;
+			}
+
+			.hambuger-menu.opened .line-1 {
+				transform: translateY(calc(0.5rem - 50%)) rotate(45deg);
+			}
+
+			.hambuger-menu.opened .line-2 {
+				transform: translateX(-0.5rem);
+				opacity: 0;
+			}
+
+			.hambuger-menu.opened .line-3 {
+				transform: translateY(calc(-0.5rem + 50%)) rotate(-45deg);
+			}
+
+			.menu-contents {
+				position: fixed;
+				/* display: flexbox;
+				flex-direction: column; */
+				top: 0;
+				left: 0;
+				width: 100%;
+				max-width: 400px;
+				height: 100%;
+				padding: 1em;
+				box-sizing: border-box;
+				border-radius: 1em;
+				/* background-color: #493f73; */
+				background-color: transparent;
+				overflow-x: visible;
+				overflow-y: auto;
+				z-index: 9;
+				transition: transform 0.35s ease, opacity 0.35s ease;
+				direction: rtl;
+			}
+
+			.menu-contents.hidden {
+				transform: translateX(-100%);
+				opacity: 0;
+			}
+
+			.hambuger-menu.dragging-mode,
+			.menu-contents.dragging-mode {
+				pointer-events: none;
+			}
+
+			.menu-contents .tile:first-child {
+				margin-top: 4rem;
+			}
+
+			.menu-contents .tile {
+				padding: 1em;
+				border-radius: 1em;
+				background-color: #493f73;
+				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+				direction: ltr;
+			}
+
+			.menu-contents .tile .title {
+				font-weight: bold;
+				cursor: pointer;
+			}
+
+			.menu-contents .anchor-debug-info {
+				margin: 1em 0;
+				padding: 1em;
+				border-radius: 1em;
+				background-color: #6a6590;
+				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+			}
+
+			.menu-contents .anchor-debug-info .title {
+				margin: 0;
+			}
+
+			.menu-contents .anchor-debug-prop {
+				margin: 1em 0;
+			}
+
+			.menu-contents .anchor-debug-prop .prop-name {
+				font-weight: bold;
+			}
+
+			.menu-contents .anchor-debug-prop .prop-value {
+				text-align: right;
+			}
+
+			.floating-title {
+				position: fixed;
+				left: 5rem; /* With Hamburger Menu */
+				/* left: 1rem; */ /* Without Hamburger Menu */
+				top: 1rem;
+				background-color: #493f73;
+				padding: 1em;
+				height: 1em;
+				border-radius: 1em;
+				pointer-events: none;
+				z-index: 10;
+			}
+
+			.floating-title h1 {
+				margin: 0;
+				font-size: 1em;
+			}
+		</style>
+		<main class="map-viewport">
+			<div id="Map" class="map-whole"></div>
+		</main>
+		<nav id="HamburgerMenu" class="hambuger-menu">
+			<div class="line-1"></div>
+			<div class="line-2"></div>
+			<div class="line-3"></div>
+		</nav>
+		<header class="floating-title">
+			<h1>EE4002D Real-time Stage Tracking</h1>
+		</header>
+		<aside id="ToolsMenu" class="menu-contents hidden">
+			<div id="AnchorDebugInfo" class="tile">
+				<span class="title">Debug</span>
+			</div>
+		</aside>
+		<script type="text/javascript">
+			// (function(){
+				var map_width  = 1;
+				var map_height = 1;
+
+				var viewport_scale_x  = 10.0;
+				var viewport_scale_y  = 10.0;
+				var viewport_offset_x = 0;
+				var viewport_offset_y = 0;
+
+				var viewport_padding_x = 40;
+				var viewport_padding_y = 40;
+
+				// var viewport_width  = 1;
+				// var viewport_height = 1;
+				// var viewport_x      = 0;
+				// var viewport_y      = 0;
+
+				// var actual_x        = 0;
+				// var actual_y        = 0;
+
+				var estimated_x     = 0;
+				var estimated_y     = 0;
+
+				var map = document.getElementById("Map");
+				var axes = {
+					x: document.createElement("div"),
+					y: document.createElement("div")
+				};
+				var hamburger_menu = document.getElementById("HamburgerMenu");
+				var menu_contents = document.getElementById("ToolsMenu");
+				var anchor_debug_element = document.getElementById("AnchorDebugInfo");
+
+				var dragging_mode = false;
+				var start_dragging_offsets = {
+					x: 0, y: 0,
+					mouse_x: 0, mouse_y: 0
+				};
+				// var milliseconds_per_count = 100;
+				var milliseconds_per_frame = 16.7; // To be determined automatically
+				var dragging_deccel_factor = 0.1; // Hooke's constant
+				var dragging_prev_offset_coord = {x: 0, y: 0};
+				var dragging_upd_time = {prev: 0, now: 0};
+				var dragging_coast_velocity = {x: 0, y: 0}; // Pixels per frame
+				var dragging_prev_coords_queue = new Queue(3);
+				var dragging_timing_now = 0;
+
+				function Anchor(id, x, y) {
+					this.id = id;
+					this.x  = x;
+					this.y  = y;
+
+					this.dbm = null;
+					this.radius = null;
+					this.radius_w_avg = null;
+
+					this.element = document.createElement('div');
+					this.element.classList.add("anchor-centre");
+
+					this.circle_element = document.createElement("div");
+					this.circle_element.classList.add("ring");
+
+					this.label_line_1 = document.createElement("span");
+					this.label_line_1.classList.add("label-heading");
+					this.label_line_1.innerText = "Antenna #" + this.id;
+
+					this.label_line_2 = document.createTextNode("x: " + this.x + "m, y: " + this.y + "m");
+
+					this.label = document.createElement("div");
+					this.label.classList.add("anchor-centre-label");
+					this.label.appendChild(this.label_line_1);
+					this.label.appendChild(document.createElement("br"));
+					this.label.appendChild(this.label_line_2);
+
+					this.is_active = true;
+
+					this.debug_setup();
+
+					this.update_element(true);
+				}
+
+				Anchor.prototype.label_margin = 30;
+
+				Anchor.prototype.gen_debug_prop = function(prop_title_str, value_text_node) {
+					var prop = document.createElement('div');
+					prop.classList.add("anchor-debug-prop");
+					this.debug_element.appendChild(prop);
+
+					var prop_title = document.createElement("div");
+					prop_title.classList.add("prop-name");
+					prop_title.appendChild(document.createTextNode(prop_title_str));
+					prop.appendChild(prop_title);
+
+					var prop_val = document.createElement("div");
+					prop_val.classList.add("prop-value");
+					prop.appendChild(prop_val);
+
+					prop_val.appendChild(value_text_node);
+
+					return prop;
+				};
+
+				Anchor.prototype.debug_setup = function() {
+					this.debug_element = document.createElement('details');
+					this.debug_element.classList.add("anchor-debug-info");
+
+					var title = document.createElement('summary');
+					title.classList.add('title');
+					title.innerText = "Antenna #" + this.id;
+					this.debug_element.appendChild(title);
+
+					this.debug_x_tn = document.createTextNode(this.x + "m");
+					this.debug_y_tn = document.createTextNode(this.y + "m");
+					this.debug_dbm_tn = document.createTextNode(this.dbm + "dBm");
+					this.debug_r_tn = document.createTextNode(this.radius + "m");
+					this.debug_r_w_avg_tn = document.createTextNode(this.radius_w_avg + "m");
+
+					this.debug_avg_fifo_buffer_props = [];
+					this.debug_avg_fifo_capacity_tn = document.createTextNode("N/A");
+					this.debug_avg_fifo_ptr_tn = document.createTextNode("N/A");
+					this.debug_avg_fifo_sum_tn = document.createTextNode("N/A");
+
+					this.debug_element.appendChild(this.gen_debug_prop("X Coordinate", this.debug_x_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("Y Coordinate", this.debug_y_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("dBm", this.debug_dbm_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("Radius", this.debug_r_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("Radius (After AverageFIFO)", this.debug_r_w_avg_tn));
+
+					this.avg_fifo_debug_buffer_ele = document.createElement("div");
+					this.debug_element.appendChild(this.avg_fifo_debug_buffer_ele);
+					this.debug_element.appendChild(this.gen_debug_prop("AverageFIFO Capacity", this.debug_avg_fifo_capacity_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("AverageFIFO Dequeue Pointer", this.debug_avg_fifo_ptr_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("AverageFIFO Sum", this.debug_avg_fifo_sum_tn));
+				};
+
+				Anchor.prototype.insert_debug = function(insert_to) {
+					insert_to.appendChild(this.debug_element);
+				}
+
+				Anchor.prototype.debug_avg_fifo_buffer_update = function(anchor_json) {
+					var n_buff = anchor_json.avg_fifo.buffer.length;
+					if (n_buff < this.debug_avg_fifo_buffer_props.length) {
+						for (let i = n_buff; i < this.debug_avg_fifo_buffer_props.length; i++) {
+							this.debug_avg_fifo_buffer_props[i].prop.parentNode.removeChild(this.debug_avg_fifo_buffer_props[i].prop);
+							this.debug_avg_fifo_buffer_props.pop();
+						}
+					}
+
+					for (let i = 0; i < this.debug_avg_fifo_buffer_props.length; i++) {
+						this.debug_avg_fifo_buffer_props[i].tn.textContent = anchor_json.avg_fifo.buffer[i];
+					}
+
+					var n_existing = this.debug_avg_fifo_buffer_props.length;
+
+					for (let i = n_existing; i < n_buff; i++) {
+						var tn = document.createTextNode(anchor_json.avg_fifo.buffer[i]);
+						var prop = this.gen_debug_prop("Buffer #" + i, tn);
+						this.avg_fifo_debug_buffer_ele.appendChild(prop);
+						this.debug_avg_fifo_buffer_props.push({
+							prop: prop,
+							tn: tn
+						});
+					}
+				};
+
+				Anchor.prototype.update_debug_elements = function(anchor_json) {
+					this.debug_x_tn.textContent = anchor_json.x + "m";
+					this.debug_y_tn.textContent = anchor_json.y + "m";
+					this.debug_dbm_tn.textContent = anchor_json.dbm + "dBm";
+					this.debug_r_tn.textContent = anchor_json.r + "m";
+					this.debug_r_w_avg_tn.textContent = anchor_json.r_w_avg + "m";
+
+					this.debug_avg_fifo_capacity_tn.textContent = anchor_json.avg_fifo.capacity;
+					this.debug_avg_fifo_ptr_tn.textContent = anchor_json.avg_fifo.ptr;
+					this.debug_avg_fifo_sum_tn.textContent = anchor_json.avg_fifo.sum;
+
+					this.debug_avg_fifo_buffer_update(anchor_json);
+				};
+
+				Anchor.prototype.update_element = function(update_radius) {
+					if (this.is_active || this.radius == null) {
+						this.element.classList.remove("inactive");
+						this.circle_element.classList.remove("inactive");
+					} else {
+						this.element.classList.add("inactive");
+						this.circle_element.classList.add("inactive");
+					}
+
+					var label_txt = "x: " + this.x + "m, y: " + this.y + "m";
+					if (this.label_line_2.textContent != label_txt)
+						this.label_line_2.textContent = label_txt;
+
+					// if (this.radius == null) {
+					// 	this.circle_element.classList.add("hidden");
+					// 	return;
+					// }
+
+					// this.circle_element.classList.remove("hidden");
+
+					if (update_radius) {
+						this.circle_element.style.width = (2 * this.radius * viewport_scale_x) + "px";
+						this.circle_element.style.height = (2 * this.radius * viewport_scale_y) + "px";
+					}
+
+					var bound_box = this.element.getBoundingClientRect();
+					var circle_box = this.circle_element.getBoundingClientRect();
+					var label_box = this.label.getBoundingClientRect();
+
+					var point_x = (this.x * viewport_scale_x) + viewport_offset_x;
+					var point_y = (this.y * viewport_scale_y) + viewport_offset_y;
+
+					// this.element.style.left = ((this.x * viewport_scale_x) - bound_box.width / 2 + viewport_offset_x) + "px";
+					// this.element.style.bottom = ((this.y * viewport_scale_y) - bound_box.height / 2 + viewport_offset_y) + "px";
+					// this.circle_element.style.left = ((this.x * viewport_scale_x) - circle_box.width / 2 + viewport_offset_x) + "px";
+					// this.circle_element.style.bottom = ((this.y * viewport_scale_y) - circle_box.height / 2 + viewport_offset_y) + "px";
+					this.element.style.transform = "translate("
+						+ (point_x - bound_box.width / 2)
+						+ "px, "
+						+ -(point_y - bound_box.height / 2)
+						+ "px)";
+					this.circle_element.style.transform = "translate("
+						+ (point_x - circle_box.width / 2)
+						+ "px, "
+						+ -(point_y - circle_box.height / 2)
+						+ "px)";
+					this.label.style.transform = "translate("
+						+ (point_x - label_box.width / 2)
+						+ "px, "
+						+ -(point_y - this.label_margin - label_box.height)
+						+ "px)";
+				};
+
+				Anchor.prototype.set_coord = function(x, y) {
+					this.x = x;
+					this.y = y;
+				};
+
+				Anchor.prototype.set_radius = function(x, y) {
+					this.radius = x;
+				};
+
+				Anchor.prototype.insert_point = function(to_insert_into) {
+					to_insert_into.appendChild(this.element);
+					to_insert_into.appendChild(this.circle_element);
+					to_insert_into.appendChild(this.label);
+					this.update_element(true);
+				};
+
+				Anchor.prototype.get_graphical_x = function() {
+					return (this.x * viewport_scale_x) + viewport_offset_x;
+				};
+
+				Anchor.prototype.get_graphical_y = function() {
+					return (this.y * viewport_scale_y) + viewport_offset_y;
+				};
+
+				Anchor.prototype.get_min_graphical_x = function() {
+					return this.get_graphical_x() - this.label.getBoundingClientRect().width / 2;
+				};
+
+				Anchor.prototype.get_max_graphical_x = function() {
+					return this.get_graphical_x() + this.label.getBoundingClientRect().width / 2;
+				};
+
+				Anchor.prototype.get_min_graphical_y = function() {
+					return this.get_graphical_y() - this.element.getBoundingClientRect().height / 2;
+				};
+
+				Anchor.prototype.get_max_graphical_y = function() {
+					return this.get_graphical_y() + this.label_margin + this.label.getBoundingClientRect().height;
+				};
+
+				function Point(id, x, y) {
+					this.id = id;
+					this.x  = x;
+					this.y  = y;
+
+					this.element = document.createElement('div');
+					this.element.classList.add("point");
+
+					this.label_line_1 = document.createElement("span");
+					this.label_line_1.classList.add("label-heading");
+					this.label_line_1.innerText = "Estimated Point #" + this.id;
+
+					this.label_line_2 = document.createTextNode("x: " + this.x + "m, y: " + this.y + "m");
+
+					this.label = document.createElement("div");
+					this.label.classList.add("point-label");
+					this.label.appendChild(this.label_line_1);
+					this.label.appendChild(document.createElement("br"));
+					this.label.appendChild(this.label_line_2);
+
+					this.is_active = true;
+				}
+
+				Point.prototype.label_margin = 30;
+
+				Point.prototype.update_element = function() {
+					if (this.is_active) {
+						this.element.classList.remove("inactive");
+					} else {
+						this.element.classList.add("inactive");
+					}
+
+					var label_txt = "x: " + this.x + "m, y: " + this.y + "m";
+					if (this.label_line_2.textContent != label_txt)
+						this.label_line_2.textContent = label_txt;
+
+					var bound_box = this.element.getBoundingClientRect();
+					var label_box = this.label.getBoundingClientRect();
+
+					var point_x = (this.x * viewport_scale_x) + viewport_offset_x;
+					var point_y = (this.y * viewport_scale_y) + viewport_offset_y;
+
+					// this.element.style.left = (point_x - bound_box.width / 2) + "px";
+					// this.element.style.bottom = (point_y - bound_box.height / 2) + "px";
+					this.element.style.transform = "translate("
+						+ (point_x - bound_box.width / 2)
+						+ "px, "
+						+ -(point_y - bound_box.height / 2)
+						+ "px)";
+					this.label.style.transform = "translate("
+						+ (point_x - label_box.width / 2)
+						+ "px, "
+						+ -(point_y - this.label_margin - label_box.height)
+						+ "px)";
+				};
+
+				Point.prototype.set_coord = function(x, y) {
+					this.x = x;
+					this.y = y;
+				};
+
+				Point.prototype.insert_point = function(to_insert_into) {
+					to_insert_into.appendChild(this.element);
+					to_insert_into.appendChild(this.label);
+					this.update_element();
+				};
+
+				var anchors = {};
+
+				var points = {
+					0: new Point(0, 25, 12)
+				};
+
+				function paint_elements(resize_circles) {
+					for (var anchor_id in anchors) {
+						anchors[anchor_id].update_element(resize_circles);
+					}
+
+					for (var point_id in points) {
+						points[point_id].update_element();
+					}
+
+					update_axes();
+				}
+
+				function open_hamburger_menu() {
+					hamburger_menu.classList.add("opened");
+					menu_contents.classList.remove("hidden");
+				}
+
+				function close_hamburger_menu() {
+					hamburger_menu.classList.remove("opened");
+					menu_contents.classList.add("hidden");
+				}
+
+				function toggle_hamburger_menu() {
+					if (hamburger_menu.classList.contains("opened")) {
+						close_hamburger_menu();
+					} else {
+						open_hamburger_menu();
+					}
+				}
+
+				hamburger_menu.addEventListener("click", toggle_hamburger_menu);
+
+				function set_zoom_scale(zx, zy) {
+					viewport_scale_x = zx;
+					viewport_scale_y = zy;
+
+					paint_elements(true);
+				}
+
+				function zoom_map(amt) {
+					var offset = -amt * 0.2 / 180;
+
+					set_zoom_scale(viewport_scale_x + offset, viewport_scale_y + offset);
+				}
+
+				function map_wheel_event(event) {
+					zoom_map(event.deltaY);
+				}
+
+				map.addEventListener("wheel", map_wheel_event);
+
+				function is_empty_obj(obj) {
+					for (let p in obj) {
+						if (obj.hasOwnProperty(p)) {
+							return false;
+						}
+					}
+					return true;
+				}
+
+				function adjust_frame_scale_with_points() {
+					if (is_empty_obj(anchors))
+						return;
+
+					var map_box = map.getBoundingClientRect();
+
+					var min_x = null;
+					var min_y = null;
+					var max_x = null;
+					var max_y = null;
+
+					for (var anchor_id in anchors) {
+						if (min_x == null || anchors[anchor_id].x < min_x) {
+							min_x = anchors[anchor_id].x;
+						}
+						if (min_y == null || anchors[anchor_id].y < min_y) {
+							min_y = anchors[anchor_id].y;
+						}
+						if (max_x == null || anchors[anchor_id].x > max_x) {
+							max_x = anchors[anchor_id].x;
+						}
+						if (max_y == null || anchors[anchor_id].y > max_y) {
+							max_y = anchors[anchor_id].y;
+						}
+					}
+
+					if (min_x == null || min_y == null || max_x == null || max_y == null) {
+						return;
+					}
+
+					var plot_w = max_x - min_x;
+					var plot_h = max_y - min_y;
+
+					var x_scale = (max_x - min_x == 0) ? viewport_scale_x
+						: (map_box.width - viewport_padding_x - viewport_offset_x)
+						 / plot_w;
+					var y_scale = (max_y - min_y == 0) ? viewport_scale_y
+						: (map_box.height - viewport_padding_y - viewport_offset_y)
+						 / plot_h;
+
+					var scale_factor = Math.min(x_scale, y_scale);
+
+					var plot_scaled_w = plot_w * scale_factor;
+					var plot_scaled_h = plot_h * scale_factor;
+
+					set_zoom_scale(scale_factor, scale_factor);
+
+					viewport_offset_x = min_x + viewport_padding_x + (map_box.width - plot_scaled_w) / 2;
+					viewport_offset_y = min_y + viewport_padding_y + (map_box.height - plot_scaled_h) / 2;
+				}
+
+				function calc_millis_per_frame() {
+					return new Promise(function(resolve, reject) {
+						var t0 = null;
+						function after_one_frame_callback() {
+							var t1 = performance.now();
+							resolve(t1 - t0);
+						}
+						t0 = performance.now();
+						requestAnimationFrame(after_one_frame_callback);
+					});
+				}
+
+				function get_coasting_deccel(velo) {
+					// if (velo > -0.1) {
+					// 	return dragging_deccel_factor * -0.1;
+					// }
+					// if (velo < 0.1) {
+					// 	return dragging_deccel_factor * 0.1;
+					// }
+					return dragging_deccel_factor * velo;
+				}
+
+				function get_velo_time_diff() {
+					// return (dragging_upd_time.now - dragging_upd_time.prev) / milliseconds_per_frame;
+					return (dragging_timing_now - dragging_prev_coords_queue.peek().time) / milliseconds_per_frame;
+				}
+
+				function calc_dragging_velocity_x(time_diff) {
+					// return (viewport_offset_x - dragging_prev_offset_coord.x)
+					// 	 / time_diff;
+					return (viewport_offset_x - dragging_prev_coords_queue.peek().x)
+						 / time_diff;
+				}
+
+				function calc_dragging_velocity_y(time_diff) {
+					// return (viewport_offset_y - dragging_prev_offset_coord.y)
+					// 	 / time_diff;
+					return (viewport_offset_y - dragging_prev_coords_queue.peek().y)
+						 / time_diff;
+				}
+
+				function dec_stop_at_0(n, decby) {
+					if (Math.abs(n) < Math.abs(decby)) {
+						return 0;
+					}
+					// if (n < 0) {
+					// 	return n + decby;
+					// }
+					return n - decby;
+				}
+
+				function gliding_update() {
+					viewport_offset_x += dragging_coast_velocity.x;
+					viewport_offset_y += dragging_coast_velocity.y;
+					dragging_coast_velocity.x = dec_stop_at_0(dragging_coast_velocity.x, get_coasting_deccel(dragging_coast_velocity.x));
+					dragging_coast_velocity.y = dec_stop_at_0(dragging_coast_velocity.y, get_coasting_deccel(dragging_coast_velocity.y));
+					if (!dragging_mode && (dragging_coast_velocity.x != 0 || dragging_coast_velocity.y != 0))
+						requestAnimationFrame(gliding_update);
+				}
+
+				function dragging_update(x_offset, y_offset) {
+					var x = start_dragging_offsets.x;
+					var y = start_dragging_offsets.y;
+
+					dragging_prev_offset_coord.x = viewport_offset_x;
+					dragging_prev_offset_coord.y = viewport_offset_y;
+
+					dragging_prev_coords_queue.enqueue({
+						x: viewport_offset_x,
+						y: viewport_offset_y,
+						time: dragging_timing_now
+					});
+					dragging_timing_now = performance.now();
+
+					viewport_offset_x = x + x_offset;
+					viewport_offset_y = y + y_offset;
+
+					dragging_upd_time.prev = dragging_upd_time.now;
+					dragging_upd_time.now = performance.now();
+
+
+					paint_elements(false);
+				}
+
+				function activate_dragging_mode(mouse_x, mouse_y) {
+					dragging_mode = true;
+					start_dragging_offsets.x = viewport_offset_x;
+					start_dragging_offsets.y = viewport_offset_y;
+					start_dragging_offsets.mouse_x = mouse_x;
+					start_dragging_offsets.mouse_y = mouse_y;
+					dragging_prev_offset_coord.x = viewport_offset_x;
+					dragging_prev_offset_coord.y = viewport_offset_y;
+					dragging_prev_coords_queue.clear();
+
+					// Use slightly different timings
+					dragging_upd_time.prev = performance.now();
+					dragging_upd_time.now = performance.now();
+
+					map.addEventListener("mousemove", map_mousemove_event);
+
+					hamburger_menu.classList.add("dragging-mode");
+					menu_contents.classList.add("dragging-mode");
+				}
+
+				function deactivate_dragging_mode() {
+					dragging_mode = false;
+					map.removeEventListener("mousemove", map_mousemove_event);
+
+					var time_diff = get_velo_time_diff();
+					if (time_diff == 0) {
+						dragging_coast_velocity.x = 0;
+						dragging_coast_velocity.y = 0;
+					} else {
+						dragging_coast_velocity.x = calc_dragging_velocity_x(time_diff);
+						dragging_coast_velocity.y = calc_dragging_velocity_y(time_diff);
+
+						requestAnimationFrame(gliding_update);
+					}
+
+					hamburger_menu.classList.remove("dragging-mode");
+					menu_contents.classList.remove("dragging-mode");
+				}
+
+				function map_mousedown_event(event) {
+					if (!dragging_mode)
+						activate_dragging_mode(event.clientX, event.clientY);
+				}
+
+				function map_mousemove_event(event) {
+					dragging_update(event.clientX - start_dragging_offsets.mouse_x, start_dragging_offsets.mouse_y - event.clientY);
+				}
+
+				function map_mouseup_event(event) {
+					if (dragging_mode) {
+						dragging_update(event.clientX - start_dragging_offsets.mouse_x, start_dragging_offsets.mouse_y - event.clientY);
+						deactivate_dragging_mode();
+					}
+				}
+
+				map.addEventListener("mousedown", map_mousedown_event);
+				map.addEventListener("mouseup", map_mouseup_event);
+				map.addEventListener("mouseleave", map_mouseup_event);
+
+				function parse_updates(json_update) {
+					// upd_obj = JSON.parse(json_update);
+					upd_obj = json_update;
+
+					for (let antenna_id in anchors) {
+						anchors[antenna_id].is_active = false;
+					}
+
+					for (let antenna_id in upd_obj.antennas) {
+						let updated_info = upd_obj.antennas[antenna_id];
+
+						if (anchors.hasOwnProperty(antenna_id)) {
+							anchors[antenna_id].set_coord(updated_info.x, updated_info.y);
+							anchors[antenna_id].set_radius(updated_info.r);
+							anchors[antenna_id].is_active = true;
+							// anchors[antenna_id].update_element();
+							anchors[antenna_id].update_debug_elements(updated_info);
+							continue;
+						}
+
+						anchors[antenna_id] = new Anchor(antenna_id, updated_info.x, updated_info.y);
+						anchors[antenna_id].set_radius(updated_info.r);
+						anchors[antenna_id].insert_point(map);
+						adjust_frame_scale_with_points();
+						anchors[antenna_id].insert_debug(anchor_debug_element);
+						anchors[antenna_id].update_debug_elements(updated_info);
+					}
+
+					for (let point_id in points) {
+						points[point_id].is_active = false;
+					}
+
+					for (let point_id in upd_obj.estimated_sources) {
+						let updated_info = upd_obj.estimated_sources[point_id];
+
+						if (points.hasOwnProperty(point_id)) {
+							points[point_id].set_coord(updated_info.x, updated_info.y);
+							points[point_id].is_active = true;
+							// points[point_id].update_element();
+							continue;
+						}
+
+						points[point_id] = new Point(point_id, updated_info.x, updated_info.y);
+						points[point_id].insert_point(map);
+					}
+
+					paint_elements(true);
+				}
+				// window.parse_updates = parse_updates;
+
+				function get_updates() {
+					fetch("upd.json").then(x => x.json()).then(x => parse_updates(x));
+				}
+
+				var wsocket = null;
+				var socket_active = false;
+
+				function sock_start(event) {
+					socket_active = true;
+				}
+
+				function sock_receive_updates(event) {
+					parse_updates(JSON.parse(event.data));
+				}
+
+				function sock_stopped(event) {
+					socket_active = false;
+				}
+
+				function attempt_new_socket() {
+					if (!socket_active) {
+						wsocket = new WebSocket("upd.json");
+						wsocket.onopen = sock_start;
+						wsocket.onclose = sock_stopped;
+						wsocket.onerror = sock_stopped;
+						wsocket.onmessage = sock_receive_updates;
+					}
+				}
+
+				function setup_axes() {
+					var x_axis = document.createElement('div');
+					x_axis.classList.add("x-axis");
+					map.appendChild(x_axis);
+
+					var y_axis = document.createElement('div');
+					y_axis.classList.add("y-axis");
+					map.appendChild(y_axis);
+
+					return {x: x_axis, y: y_axis};
+				}
+
+				function update_axes() {
+					axes.x.style.transform = "translateY(" + -(viewport_offset_y - 2) + "px)";
+					axes.y.style.transform = "translateX(" + (viewport_offset_x - 2) + "px)";
+				}
+
+				// var update_tmr = setInterval(get_updates, 500);
+				var update_tmr = setInterval(attempt_new_socket, 5000);
+				attempt_new_socket();
+
+				// window.paint_elements = paint_elements;
+				calc_millis_per_frame().then(function(ms) {
+					milliseconds_per_frame = ms;
+				});
+				axes = setup_axes();
+				points[0].is_active = false;
+				points[0].insert_point(document.getElementById("Map"));
+				adjust_frame_scale_with_points();
+			// })();
+		</script>
+	</body>
+</html>

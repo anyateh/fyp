@@ -1,10 +1,12 @@
 import asyncio
+import json
 import struct
 
 from random import randint
 from sys    import stderr
-from typing import Optional, TextIO, TYPE_CHECKING
+from typing import Any, Optional, TextIO, TYPE_CHECKING
 
+from .average_fifo import AverageFIFO
 from ..packet import DBM_Packet
 if TYPE_CHECKING:
 	from .server              import TrianServer
@@ -36,6 +38,8 @@ class AntennaNode:
 
 	dbm:Optional[float] = None
 
+	inv_friis_avg:AverageFIFO = AverageFIFO(4)
+
 	signal_fingerprint:Optional[list[float]] = None
 
 	ring:OutlineEllipse
@@ -47,6 +51,8 @@ class AntennaNode:
 
 		global ring_colours
 
+		self.inv_friis_avg = AverageFIFO(4)
+
 		r, g, b = ring_colours[self.id % len(ring_colours)]
 		self.ring = OutlineEllipse(int(x), int(y), 0, 0, r, g, b)
 
@@ -55,10 +61,35 @@ class AntennaNode:
 			return 0.0
 		return inv_friis(self.dbm, self.gain)
 
+	def update_reading_avg(self) -> None:
+		if self.dbm is None:
+			self.inv_friis_avg.clear()
+			return
+
+		self.inv_friis_avg.add(self.inverse_friis())
+
+	def convert_to_json_obj(self) -> dict[str, Any]:
+		return {
+			'id': self.id,
+			'x': self.x,
+			'y': self.y,
+			'dbm': self.dbm,
+			'r': None if self.dbm == None else self.inverse_friis(),
+			'r_w_avg': None if self.dbm == None else self.inv_friis_avg.avg(),
+			'avg_fifo': {
+				'buffer': self.inv_friis_avg.buffer,
+				'n_items': len(self.inv_friis_avg.buffer),
+				'capacity': self.inv_friis_avg.capacity,
+				'ptr': self.inv_friis_avg.current_ptr,
+				'sum': self.inv_friis_avg.readings_sum
+			}
+		}
+
 __antennas_registered:dict[int, AntennaNode] = {}
 
 antenna_screen = AntennaScreen()
-show_screen    = True
+show_screen    = False
+use_avg        = False
 
 lowest_x_coord  = 0.0
 highest_x_coord = 0.0
@@ -132,6 +163,9 @@ async def update_ante_readings(frame_id:int, server:TrianServer) -> None:
 			if i:
 				manage_data_packet(i, __current_request_id)
 
+	for i in __antennas_registered.values():
+		i.update_reading_avg()
+
 async def loop_ante_updates(server:TrianServer) -> None:
 	global __keep_alive
 	__keep_alive = True
@@ -186,7 +220,19 @@ def can_perform_localization() -> bool:
 
 def localize_transmitter_pos() -> tuple[Optional[float], Optional[float]]:
 	# Perform trilateration using data from registered clients
-	return estimate_location(__antennas_registered)
+	return estimate_location(__antennas_registered, use_avg)
+
+def gen_json_update() -> str:
+	d = {
+		"estimated_sources": {},
+		"antennas": {k:v.convert_to_json_obj() for k, v in __antennas_registered.items()}
+	}
+
+	if can_perform_localization():
+		pointx, pointy = localize_transmitter_pos()
+		d["estimated_sources"][0] = {"id": 0, "x": pointx, "y": pointy}
+
+	return json.dumps(d)
 
 def print_antennas() -> None:
 	if show_screen:
