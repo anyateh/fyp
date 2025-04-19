@@ -152,7 +152,7 @@
 				};
 				// var milliseconds_per_count = 100;
 				var milliseconds_per_frame = 16.7; // To be determined automatically
-				var dragging_deccel_factor = 0.02; // Pixels per frame per frame
+				var dragging_deccel_factor = 0.1; // Hooke's constant
 				var dragging_prev_offset_coord = {x: 0, y: 0};
 				var dragging_upd_time = {prev: 0, now: 0};
 				var dragging_coast_velocity = {x: 0, y: 0}; // Pixels per frame
@@ -431,6 +431,12 @@
 				}
 
 				function get_coasting_deccel(velo) {
+					// if (velo > -0.1) {
+					// 	return dragging_deccel_factor * -0.1;
+					// }
+					// if (velo < 0.1) {
+					// 	return dragging_deccel_factor * 0.1;
+					// }
 					return dragging_deccel_factor * velo;
 				}
 
