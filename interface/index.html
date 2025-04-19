@@ -109,7 +109,13 @@
 				border-radius: 0.8em;
 				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 				color: #ddd5ff;
+				text-align: center;
 				z-index: 4;
+			}
+
+			.map-viewport .anchor-centre-label .label-heading,
+			.map-viewport .point-label .label-heading {
+				font-weight: bold;
 			}
 		</style>
 		<main class="map-viewport">
@@ -172,8 +178,17 @@
 					this.circle_element = document.createElement("div");
 					this.circle_element.classList.add("ring");
 
+					this.label_line_1 = document.createElement("span");
+					this.label_line_1.classList.add("label-heading");
+					this.label_line_1.innerText = "Antenna #" + this.id;
+
+					this.label_line_2 = document.createTextNode("x: " + this.x + "m, y: " + this.y + "m");
+
 					this.label = document.createElement("div");
 					this.label.classList.add("anchor-centre-label");
+					this.label.appendChild(this.label_line_1);
+					this.label.appendChild(document.createElement("br"));
+					this.label.appendChild(this.label_line_2);
 
 					this.is_active = true;
 
@@ -191,9 +206,9 @@
 						this.circle_element.classList.add("inactive");
 					}
 
-					var label_txt = "id: " + this.id + ", x: " + this.x + ", y: " + this.y;
-					if (this.label.innerText != label_txt)
-						this.label.innerText = label_txt;
+					var label_txt = "x: " + this.x + "m, y: " + this.y + "m";
+					if (this.label_line_2.textContent != label_txt)
+						this.label_line_2.textContent = label_txt;
 
 					// if (this.radius == null) {
 					// 	this.circle_element.classList.add("hidden");
@@ -281,8 +296,17 @@
 					this.element = document.createElement('div');
 					this.element.classList.add("point");
 
+					this.label_line_1 = document.createElement("span");
+					this.label_line_1.classList.add("label-heading");
+					this.label_line_1.innerText = "Estimated Point #" + this.id;
+
+					this.label_line_2 = document.createTextNode("x: " + this.x + "m, y: " + this.y + "m");
+
 					this.label = document.createElement("div");
 					this.label.classList.add("point-label");
+					this.label.appendChild(this.label_line_1);
+					this.label.appendChild(document.createElement("br"));
+					this.label.appendChild(this.label_line_2);
 
 					this.is_active = true;
 				}
@@ -296,9 +320,9 @@
 						this.element.classList.add("inactive");
 					}
 
-					var label_txt = "id: " + this.id + ", x: " + this.x + ", y: " + this.y;
-					if (this.label.innerText != label_txt)
-						this.label.innerText = label_txt;
+					var label_txt = "x: " + this.x + "m, y: " + this.y + "m";
+					if (this.label_line_2.textContent != label_txt)
+						this.label_line_2.textContent = label_txt;
 
 					var bound_box = this.element.getBoundingClientRect();
 					var label_box = this.label.getBoundingClientRect();
