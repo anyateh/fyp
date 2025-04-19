@@ -9,6 +9,7 @@ class AverageFIFO:
 
 	def __init__(self, last_n_readings:int = 16) -> None:
 		self.capacity = last_n_readings
+		self.buffer = []
 
 	def __increment_ptr(self) -> None:
 		self.current_ptr += 1
