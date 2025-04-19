@@ -206,6 +206,7 @@
 				overflow-y: auto;
 				z-index: 9;
 				transition: transform 0.35s ease, opacity 0.35s ease;
+				direction: rtl;
 			}
 
 			.menu-contents.hidden {
@@ -227,6 +228,7 @@
 				border-radius: 1em;
 				background-color: #493f73;
 				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
+				direction: ltr;
 			}
 
 			.menu-contents .tile .title {
@@ -469,7 +471,7 @@
 					this.debug_avg_fifo_sum_tn.textContent = anchor_json.avg_fifo.sum;
 
 					this.debug_avg_fifo_buffer_update(anchor_json);
-				}
+				};
 
 				Anchor.prototype.update_element = function(update_radius) {
 					if (this.is_active || this.radius == null) {
