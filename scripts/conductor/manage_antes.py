@@ -210,8 +210,8 @@ def can_perform_localization() -> bool:
 			if not first_ante:
 				first_ante = ante
 			count += 1
-		if count >= 2:
-			return ante.y != first_ante.y and ante.x != first_ante.x
+		if count == 2:
+			return ante.y != first_ante.y or ante.x != first_ante.x
 
 		if count > 2:
 			return True

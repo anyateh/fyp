@@ -36,14 +36,22 @@ def estimate_location(antennas:dict[int, AntennaNode], use_avg:bool = False) -> 
 		# d0_sq, x0_sq, y0_sq = inv_friis(ref_ant.dbm, ref_ant.gain) ** 2, ref_ant.x ** 2, ref_ant.y ** 2
 		d0_sq, x0_sq, y0_sq = get_inv_frii_fx(ref_ant) ** 2, ref_ant.x ** 2, ref_ant.y ** 2
 
-<<<<<<< HEAD
-		matrix_rhs = lambda i: d0_sq - inv_friis(i.dbm, i.gain) ** 2 - x0_sq + i.x ** 2 - y0_sq + i.y ** 2
+		matrix_rhs = lambda i: d0_sq - get_inv_frii_fx(i) ** 2 - x0_sq + i.x ** 2 - y0_sq + i.y ** 2
 
 		if len(remaining_antennas) == 1:
 			second_antenna = next(iter(remaining_antennas.values()))
+
 			tri_mat_rhs = matrix_rhs(second_antenna)
 			y1_m_y0 = second_antenna.y - ref_ant.y
 			x1_m_x0 = second_antenna.x - ref_ant.x
+
+			if y1_m_y0 == 0:
+				x_estimate = tri_mat_rhs / (2 * x1_m_x0)
+				return x_estimate, ref_ant.y
+
+			if x1_m_x0 == 0:
+				y_estimate = tri_mat_rhs / (2 * y1_m_y0)
+				return ref_ant.x, y_estimate
 
 			lingrad_between_ants = y1_m_y0 / x1_m_x0
 
@@ -56,10 +64,6 @@ def estimate_location(antennas:dict[int, AntennaNode], use_avg:bool = False) -> 
 			for i in remaining_antennas.values()
 		])
 		right_side_matrix_rows = np.array([matrix_rhs(i) for i in remaining_antennas.values()])
-=======
-		left_side_matrix_rows  = np.array([[i.x * 2 - x0_x_2, i.y * 2 - y0_x_2] for i in remaining_antennas.values()])
-		right_side_matrix_rows = np.array([d0_sq - get_inv_frii_fx(i) ** 2 - x0_sq + i.x ** 2 - y0_sq + i.y ** 2 for i in remaining_antennas.values()])
->>>>>>> main
 
 		return tuple(np.linalg.lstsq(left_side_matrix_rows, right_side_matrix_rows, rcond = None)[0])
 
