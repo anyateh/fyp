@@ -209,12 +209,12 @@
 
 					this.is_active = true;
 
-					this.update_element();
+					this.update_element(true);
 				}
 
 				Anchor.prototype.label_margin = 30;
 
-				Anchor.prototype.update_element = function() {
+				Anchor.prototype.update_element = function(update_radius) {
 					if (this.is_active || this.radius == null) {
 						this.element.classList.remove("inactive");
 						this.circle_element.classList.remove("inactive");
@@ -234,8 +234,10 @@
 
 					// this.circle_element.classList.remove("hidden");
 
-					this.circle_element.style.width = (2 * this.radius * viewport_scale_x) + "px";
-					this.circle_element.style.height = (2 * this.radius * viewport_scale_y) + "px";
+					if (update_radius) {
+						this.circle_element.style.width = (2 * this.radius * viewport_scale_x) + "px";
+						this.circle_element.style.height = (2 * this.radius * viewport_scale_y) + "px";
+					}
 
 					var bound_box = this.element.getBoundingClientRect();
 					var circle_box = this.circle_element.getBoundingClientRect();
@@ -278,7 +280,7 @@
 					to_insert_into.appendChild(this.element);
 					to_insert_into.appendChild(this.circle_element);
 					to_insert_into.appendChild(this.label);
-					this.update_element();
+					this.update_element(true);
 				};
 
 				Anchor.prototype.get_graphical_x = function() {
@@ -378,9 +380,9 @@
 					0: new Point(0, 25, 12)
 				};
 
-				function paint_elements() {
+				function paint_elements(resize_circles) {
 					for (var anchor_id in anchors) {
-						anchors[anchor_id].update_element();
+						anchors[anchor_id].update_element(resize_circles);
 					}
 
 					for (var point_id in points) {
@@ -394,7 +396,7 @@
 					viewport_scale_x = zx;
 					viewport_scale_y = zy;
 
-					paint_elements();
+					paint_elements(true);
 				}
 
 				function zoom_map(amt) {
@@ -550,7 +552,7 @@
 					dragging_upd_time.now = performance.now();
 
 
-					paint_elements();
+					paint_elements(false);
 				}
 
 				function activate_dragging_mode(mouse_x, mouse_y) {
@@ -649,7 +651,7 @@
 						points[point_id].insert_point(map);
 					}
 
-					paint_elements();
+					paint_elements(true);
 				}
 				// window.parse_updates = parse_updates;
 
