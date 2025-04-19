@@ -7,6 +7,7 @@ from ..manage_antes import gen_json_update
 __base_frontend_dir = "interface"
 __index_html_file = path.join(__base_frontend_dir, "index.html")
 __js_queue_js_file = path.join(__base_frontend_dir, "js", "queue.js")
+__css_scrollbar_css_file = path.join(__base_frontend_dir, "css", "scrollbar.css")
 
 __fonts_overpass_css_file = path.join(__base_frontend_dir, "fonts", "overpass.css")
 __fonts_overpass_qFdB35WCmI96Ajtm81GgY93qxycJ_woff2_file = \
@@ -113,6 +114,17 @@ def queue_js_supplier_time() -> int:
 	return int(path.getmtime(__js_queue_js_file))
 
 db_table['/js/queue.js'] = DB_Resource("/js/queue.js", "text/javascript", Supplier(queue_js_supplier, queue_js_supplier_time))
+
+def scrollbar_css_supplier() -> bytes:
+	with open(__css_scrollbar_css_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def scrollbar_css_supplier_time() -> int:
+	return int(path.getmtime(__css_scrollbar_css_file))
+
+db_table['/css/scrollbar.css'] = DB_Resource("/css/scrollbar.css", "text/css", Supplier(scrollbar_css_supplier, scrollbar_css_supplier_time))
 
 def fonts_overpass_css_supplier() -> bytes:
 	with open(__fonts_overpass_css_file, 'rb') as f:
