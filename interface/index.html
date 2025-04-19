@@ -134,10 +134,159 @@
 			.map-viewport .point-label .label-heading {
 				font-weight: bold;
 			}
+
+			.hambuger-menu {
+				position: fixed;
+				top: 1em;
+				left: 1em;
+				width: 1em;
+				height: 1em;
+				padding: 1em;
+				border-radius: 1em;
+				background-color: #493f73;
+				z-index: 10;
+			}
+
+			.hambuger-menu .line-1,
+			.hambuger-menu .line-2,
+			.hambuger-menu .line-3 {
+				position: absolute;
+				width: calc(100% - 2rem);
+				left: 1rem;
+				font-size: 0;
+				height: 3px;
+				border-radius: 1.5px;
+				background-color: #ddd;
+				transition: transform 0.35s ease, opacity 0.35s ease;
+				transform-origin: center;
+			}
+
+			.hambuger-menu .line-1 {
+				top: 1rem;
+			}
+
+			.hambuger-menu .line-2 {
+				top: calc(50% - 1.5px);
+			}
+
+			.hambuger-menu .line-3 {
+				bottom: 1rem;
+			}
+
+			.hambuger-menu.opened .line-1 {
+				transform: translateY(calc(0.5rem - 50%)) rotate(45deg);
+			}
+
+			.hambuger-menu.opened .line-2 {
+				transform: translateX(-0.5rem);
+				opacity: 0;
+			}
+
+			.hambuger-menu.opened .line-3 {
+				transform: translateY(calc(-0.5rem + 50%)) rotate(-45deg);
+			}
+
+			.menu-contents {
+				position: fixed;
+				/* display: flexbox;
+				flex-direction: column; */
+				top: 0;
+				left: 0;
+				width: 100%;
+				max-width: 400px;
+				height: 100%;
+				padding: 1em;
+				box-sizing: border-box;
+				border-radius: 1em;
+				/* background-color: #493f73; */
+				background-color: transparent;
+				overflow-x: visible;
+				overflow-y: auto;
+				z-index: 9;
+				transition: transform 0.35s ease, opacity 0.35s ease;
+			}
+
+			.menu-contents.hidden {
+				transform: translateX(-100%);
+				opacity: 0;
+			}
+
+			.hambuger-menu.dragging-mode,
+			.menu-contents.dragging-mode {
+				pointer-events: none;
+			}
+
+			.menu-contents .tile:first-child {
+				margin-top: 4rem;
+			}
+
+			.menu-contents .tile {
+				padding: 1em;
+				border-radius: 1em;
+				background-color: #493f73;
+			}
+
+			.menu-contents .tile .title {
+				font-weight: bold;
+			}
+
+			.menu-contents .anchor-debug-info {
+				margin: 1em 0;
+				padding: 1em;
+				border-radius: 1em;
+				background-color: #6a6590;
+			}
+
+			.menu-contents .anchor-debug-info .title {
+				margin: 0;
+			}
+
+			.menu-contents .anchor-debug-prop {
+				margin: 1em 0;
+			}
+
+			.menu-contents .anchor-debug-prop .prop-name {
+				font-weight: bold;
+			}
+
+			.menu-contents .anchor-debug-prop .prop-value {
+				text-align: right;
+			}
+
+			.floating-title {
+				position: fixed;
+				left: 5rem; /* With Hamburger Menu */
+				/* left: 1rem; */ /* Without Hamburger Menu */
+				top: 1rem;
+				background-color: #493f73;
+				padding: 1em;
+				height: 1em;
+				border-radius: 1em;
+				pointer-events: none;
+				z-index: 10;
+			}
+
+			.floating-title h1 {
+				margin: 0;
+				font-size: 1em;
+			}
 		</style>
 		<main class="map-viewport">
 			<div id="Map" class="map-whole"></div>
 		</main>
+		<nav id="HamburgerMenu" class="hambuger-menu">
+			<div class="line-1"></div>
+			<div class="line-2"></div>
+			<div class="line-3"></div>
+		</nav>
+		<header class="floating-title">
+			<h1>EE4002D Real-time Stage Tracking</h1>
+		</header>
+		<aside id="ToolsMenu" class="menu-contents hidden">
+			<div id="AnchorDebugInfo" class="tile">
+				<span class="title">Debug</span>
+			</div>
+		</aside>
 		<script type="text/javascript">
 			// (function(){
 				var map_width  = 1;
@@ -167,6 +316,9 @@
 					x: document.createElement("div"),
 					y: document.createElement("div")
 				};
+				var hamburger_menu = document.getElementById("HamburgerMenu");
+				var menu_contents = document.getElementById("ToolsMenu");
+				var anchor_debug_element = document.getElementById("AnchorDebugInfo");
 
 				var dragging_mode = false;
 				var start_dragging_offsets = {
@@ -187,7 +339,9 @@
 					this.x  = x;
 					this.y  = y;
 
+					this.dbm = null;
 					this.radius = null;
+					this.radius_w_avg = null;
 
 					this.element = document.createElement('div');
 					this.element.classList.add("anchor-centre");
@@ -209,10 +363,108 @@
 
 					this.is_active = true;
 
+					this.debug_setup();
+
 					this.update_element(true);
 				}
 
 				Anchor.prototype.label_margin = 30;
+
+				Anchor.prototype.gen_debug_prop = function(prop_title_str, value_text_node) {
+					var prop = document.createElement('div');
+					prop.classList.add("anchor-debug-prop");
+					this.debug_element.appendChild(prop);
+
+					var prop_title = document.createElement("div");
+					prop_title.classList.add("prop-name");
+					prop_title.appendChild(document.createTextNode(prop_title_str));
+					prop.appendChild(prop_title);
+
+					var prop_val = document.createElement("div");
+					prop_val.classList.add("prop-value");
+					prop.appendChild(prop_val);
+
+					prop_val.appendChild(value_text_node);
+
+					return prop;
+				};
+
+				Anchor.prototype.debug_setup = function() {
+					this.debug_element = document.createElement('details');
+					this.debug_element.classList.add("anchor-debug-info");
+
+					var title = document.createElement('summary');
+					title.classList.add('title');
+					title.innerText = "Antenna #" + this.id;
+					this.debug_element.appendChild(title);
+
+					this.debug_x_tn = document.createTextNode(this.x + "m");
+					this.debug_y_tn = document.createTextNode(this.y + "m");
+					this.debug_dbm_tn = document.createTextNode(this.dbm + "dBm");
+					this.debug_r_tn = document.createTextNode(this.radius + "m");
+					this.debug_r_w_avg_tn = document.createTextNode(this.radius_w_avg + "m");
+
+					this.debug_avg_fifo_buffer_props = [];
+					this.debug_avg_fifo_capacity_tn = document.createTextNode("N/A");
+					this.debug_avg_fifo_ptr_tn = document.createTextNode("N/A");
+					this.debug_avg_fifo_sum_tn = document.createTextNode("N/A");
+
+					this.debug_element.appendChild(this.gen_debug_prop("X Coordinate", this.debug_x_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("Y Coordinate", this.debug_y_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("dBm", this.debug_dbm_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("Radius", this.debug_r_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("Radius (After AverageFIFO)", this.debug_r_w_avg_tn));
+
+					this.avg_fifo_debug_buffer_ele = document.createElement("div");
+					this.debug_element.appendChild(this.avg_fifo_debug_buffer_ele);
+					this.debug_element.appendChild(this.gen_debug_prop("AverageFIFO Capacity", this.debug_avg_fifo_capacity_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("AverageFIFO Dequeue Pointer", this.debug_avg_fifo_ptr_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("AverageFIFO Sum", this.debug_avg_fifo_sum_tn));
+				};
+
+				Anchor.prototype.insert_debug = function(insert_to) {
+					insert_to.appendChild(this.debug_element);
+				}
+
+				Anchor.prototype.debug_avg_fifo_buffer_update = function(anchor_json) {
+					var n_buff = anchor_json.avg_fifo.buffer.length;
+					if (n_buff < this.debug_avg_fifo_buffer_props.length) {
+						for (let i = n_buff; i < this.debug_avg_fifo_buffer_props.length; i++) {
+							this.debug_avg_fifo_buffer_props[i].prop.parentNode.removeChild(this.debug_avg_fifo_buffer_props[i].prop);
+							this.debug_avg_fifo_buffer_props.pop();
+						}
+					}
+
+					for (let i = 0; i < this.debug_avg_fifo_buffer_props.length; i++) {
+						this.debug_avg_fifo_buffer_props[i].tn.textContent = anchor_json.avg_fifo.buffer[i];
+					}
+
+					var n_existing = this.debug_avg_fifo_buffer_props.length;
+
+					for (let i = n_existing; i < n_buff; i++) {
+						var tn = document.createTextNode(anchor_json.avg_fifo.buffer[i]);
+						var prop = this.gen_debug_prop(i + 1, tn);
+						this.avg_fifo_debug_buffer_ele.appendChild(prop);
+						this.debug_avg_fifo_buffer_props.push({
+							prop: prop,
+							tn: tn
+						});
+					}
+				};
+
+				Anchor.prototype.update_debug_elements = function(anchor_json) {
+					this.debug_x_tn.textContent = anchor_json.x + "m";
+					this.debug_y_tn.textContent = anchor_json.y + "m";
+					this.debug_dbm_tn.textContent = anchor_json.dbm + "dBm";
+					this.debug_r_tn.textContent = anchor_json.r + "m";
+					this.debug_r_w_avg_tn.textContent = anchor_json.r_w_avg + "m";
+
+					this.debug_avg_fifo_capacity_tn.textContent = anchor_json.avg_fifo.capacity;
+					this.debug_avg_fifo_ptr_tn.textContent = anchor_json.avg_fifo.ptr;
+					this.debug_avg_fifo_sum_tn.textContent = anchor_json.avg_fifo.sum;
+
+					this.debug_avg_fifo_buffer_update(anchor_json);
+				}
 
 				Anchor.prototype.update_element = function(update_radius) {
 					if (this.is_active || this.radius == null) {
@@ -392,6 +644,26 @@
 					update_axes();
 				}
 
+				function open_hamburger_menu() {
+					hamburger_menu.classList.add("opened");
+					menu_contents.classList.remove("hidden");
+				}
+
+				function close_hamburger_menu() {
+					hamburger_menu.classList.remove("opened");
+					menu_contents.classList.add("hidden");
+				}
+
+				function toggle_hamburger_menu() {
+					if (hamburger_menu.classList.contains("opened")) {
+						close_hamburger_menu();
+					} else {
+						open_hamburger_menu();
+					}
+				}
+
+				hamburger_menu.addEventListener("click", toggle_hamburger_menu);
+
 				function set_zoom_scale(zx, zy) {
 					viewport_scale_x = zx;
 					viewport_scale_y = zy;
@@ -570,6 +842,9 @@
 					dragging_upd_time.now = performance.now();
 
 					map.addEventListener("mousemove", map_mousemove_event);
+
+					hamburger_menu.classList.add("dragging-mode");
+					menu_contents.classList.add("dragging-mode");
 				}
 
 				function deactivate_dragging_mode() {
@@ -586,6 +861,9 @@
 
 						requestAnimationFrame(gliding_update);
 					}
+
+					hamburger_menu.classList.remove("dragging-mode");
+					menu_contents.classList.remove("dragging-mode");
 				}
 
 				function map_mousedown_event(event) {
@@ -624,6 +902,7 @@
 							anchors[antenna_id].set_radius(updated_info.r);
 							anchors[antenna_id].is_active = true;
 							// anchors[antenna_id].update_element();
+							anchors[antenna_id].update_debug_elements(updated_info);
 							continue;
 						}
 
@@ -631,6 +910,8 @@
 						anchors[antenna_id].set_radius(updated_info.r);
 						anchors[antenna_id].insert_point(map);
 						adjust_frame_scale_with_points();
+						anchors[antenna_id].insert_debug(anchor_debug_element);
+						anchors[antenna_id].update_debug_elements(updated_info);
 					}
 
 					for (let point_id in points) {

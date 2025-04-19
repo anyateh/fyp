@@ -74,14 +74,14 @@ class AntennaNode:
 			'x': self.x,
 			'y': self.y,
 			'dbm': self.dbm,
-			'r': self.inverse_friis(),
-			'r_w_avg': self.inv_friis_avg.avg(),
-			'debug': {
-				'avg_fifo_buffer': self.inv_friis_avg.buffer,
-				'avg_fifo_n_items': len(self.inv_friis_avg.buffer),
-				'avg_fifo_capacity': self.inv_friis_avg.capacity,
-				'avg_fifo_ptr': self.inv_friis_avg.current_ptr,
-				'avg_fifo_sum': self.inv_friis_avg.readings_sum
+			'r': None if self.dbm == None else self.inverse_friis(),
+			'r_w_avg': None if self.dbm == None else self.inv_friis_avg.avg(),
+			'avg_fifo': {
+				'buffer': self.inv_friis_avg.buffer,
+				'n_items': len(self.inv_friis_avg.buffer),
+				'capacity': self.inv_friis_avg.capacity,
+				'ptr': self.inv_friis_avg.current_ptr,
+				'sum': self.inv_friis_avg.readings_sum
 			}
 		}
 
