@@ -697,8 +697,8 @@
 				}
 
 				function update_axes() {
-					axes.x.style.transform = "translateY(" + (-viewport_offset_y) + "px)";
-					axes.y.style.transform = "translateX(" + (viewport_offset_x) + "px)";
+					axes.x.style.transform = "translateY(" + -(viewport_offset_y - 2) + "px)";
+					axes.y.style.transform = "translateX(" + (viewport_offset_x - 2) + "px)";
 				}
 
 				// var update_tmr = setInterval(get_updates, 500);
