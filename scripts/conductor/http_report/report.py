@@ -106,7 +106,7 @@ def approve_websocket_req(client:socket, websocket_key:bytes) -> None:
 
 def websocket_handler(websocket:socket, headers:dict[str, str], is_server_alive_fx:Callable[[], bool]) -> None:
 	approve_websocket_req(websocket, headers["Sec-WebSocket-Key"].encode(encoding = 'utf-8'))
-	websocket.settimeout(0.02)
+	websocket.settimeout(0.1)
 	while is_server_alive_fx():
 		try:
 			received_bytes = websocket.recv(1024)
