@@ -392,17 +392,25 @@
 						return;
 					}
 
+					var plot_w = max_x - min_x;
+					var plot_h = max_y - min_y;
+
 					var x_scale = (max_x - min_x == 0) ? viewport_scale_x
 						: (map_box.width - viewport_padding_x - viewport_offset_x)
-						 / (max_x - min_x);
+						 / plot_w;
 					var y_scale = (max_y - min_y == 0) ? viewport_scale_y
 						: (map_box.height - viewport_padding_y - viewport_offset_y)
-						 / (max_y - min_y);
+						 / plot_h;
 
-					set_zoom_scale(x_scale, y_scale);
+					var scale_factor = Math.min(x_scale, y_scale);
 
-					viewport_offset_x = min_x + viewport_padding_x;
-					viewport_offset_y = min_y + viewport_padding_y;
+					var plot_scaled_w = plot_w * scale_factor;
+					var plot_scaled_h = plot_h * scale_factor;
+
+					set_zoom_scale(scale_factor, scale_factor);
+
+					viewport_offset_x = min_x + viewport_padding_x + (map_box.width - plot_scaled_w) / 2;
+					viewport_offset_y = min_y + viewport_padding_y + (map_box.height - plot_scaled_h) / 2;
 				}
 
 				function calc_millis_per_frame() {
