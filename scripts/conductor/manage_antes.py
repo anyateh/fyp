@@ -38,7 +38,7 @@ class AntennaNode:
 
 	dbm:Optional[float] = None
 
-	dbm_avg:AverageFIFO = AverageFIFO(4)
+	inv_friis_avg:AverageFIFO = AverageFIFO(4)
 
 	signal_fingerprint:Optional[list[float]] = None
 
@@ -51,20 +51,22 @@ class AntennaNode:
 
 		global ring_colours
 
+		self.inv_friis_avg = AverageFIFO(4)
+
 		r, g, b = ring_colours[self.id % len(ring_colours)]
 		self.ring = OutlineEllipse(int(x), int(y), 0, 0, r, g, b)
 
 	def inverse_friis(self) -> float:
 		if self.dbm == None:
 			return 0.0
-		return inv_friis(self.dbm_avg.avg(), self.gain)
+		return inv_friis(self.dbm, self.gain)
 
 	def update_reading_avg(self) -> None:
 		if self.dbm is None:
-			self.dbm_avg.clear()
+			self.inv_friis_avg.clear()
 			return
 
-		self.dbm_avg.add(self.dbm)
+		self.inv_friis_avg.add(self.inverse_friis())
 
 	def convert_to_json_obj(self) -> dict[str, Any]:
 		return {
@@ -86,7 +88,8 @@ class AntennaNode:
 __antennas_registered:dict[int, AntennaNode] = {}
 
 antenna_screen = AntennaScreen()
-show_screen    = True
+show_screen    = False
+use_avg        = False
 
 lowest_x_coord  = 0.0
 highest_x_coord = 0.0
@@ -211,7 +214,7 @@ def can_perform_localization() -> bool:
 
 def localize_transmitter_pos() -> tuple[Optional[float], Optional[float]]:
 	# Perform trilateration using data from registered clients
-	return estimate_location(__antennas_registered)
+	return estimate_location(__antennas_registered, use_avg)
 
 def gen_json_update() -> str:
 	d = {
@@ -250,7 +253,7 @@ def print_antennas() -> None:
 		buffered_output.write("\x1b[30;46m Antennas Begin \x1b[0m\n\n")
 
 		for i in __antennas_registered.values():
-			dbm_str = f'\x1b[1;32m{i.dbm_avg.avg()}\x1b[0m' if i.dbm != None else "\x1b[1;31mno value\x1b[0m"
+			dbm_str = f'\x1b[1;32m{i.dbm}\x1b[0m' if i.dbm != None else "\x1b[1;31mno value\x1b[0m"
 			buffered_output.write(f"Ante {i.id}: x = {i.x}, y = {i.y}, dbm = {dbm_str}.\n")
 
 		buffered_output.write("\n\x1b[30;46m Antennas End \x1b[0m\n")
