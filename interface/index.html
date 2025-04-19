@@ -12,13 +12,23 @@
 		<script type="text/javascript" src="js/queue.js"></script>
 
 		<style type="text/css">
-			html, body {
+			html {
 				/* background-color: #282828; */
-				background-color: #38353b;
-				margin: 0;
-				padding: 0;
+				/* background-color: #38353b; */
+				background-color: #342f46;  /* fallback for old browsers */
+				background-image: linear-gradient(to right, #342f46, #441969); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
+
 				color: #ddd;
 				font-family: 'Overpass', sans-serif;
+			}
+
+			html, body {
+				margin: 0;
+				padding: 0;
+			}
+
+			h1 {
+				font-size: 1.2em;
 			}
 		</style>
 	</head>
@@ -41,6 +51,8 @@
 				left: 0;
 				width: 100%;
 				height: 100%;
+				background-image: -webkit-linear-gradient(135deg, #1f163f, #2a1c37);  /* Chrome 10-25, Safari 5.1-6 */
+				background-image: linear-gradient(135deg, #1f163f, #2a1c37); /* W3C, IE 10+/ Edge, Firefox 16+, Chrome 26+, Opera 12+, Safari 7+ */
 			}
 
 			.map-whole .x-axis,
@@ -48,7 +60,7 @@
 				left: 0;
 				bottom: 0;
 				position: absolute;
-				border: 2px dashed #444;
+				border: 2px dashed #3b2660;
 				font-size: 0;
 				z-index: 0;
 			}
@@ -93,7 +105,7 @@
 				bottom: 0;
 				position: absolute;
 				border-radius: 100%;
-				border: 4px dotted #e5e5e5;
+				border: 4px dotted #6a6590;
 				transform-origin: center;
 				will-change: transform, opacity;
 			}
@@ -111,6 +123,11 @@
 				color: #ddd5ff;
 				text-align: center;
 				z-index: 4;
+			}
+
+			.map-viewport .anchor-centre-label {
+				background-color: #3d3e73;
+				color: #d5e0ff;
 			}
 
 			.map-viewport .anchor-centre-label .label-heading,
