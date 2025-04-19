@@ -8,6 +8,28 @@ __base_frontend_dir = "interface"
 __index_html_file = path.join(__base_frontend_dir, "index.html")
 __js_queue_js_file = path.join(__base_frontend_dir, "js", "queue.js")
 
+__fonts_overpass_css_file = path.join(__base_frontend_dir, "fonts", "overpass.css")
+__fonts_overpass_qFdB35WCmI96Ajtm81GgY93qxycJ_woff2_file = \
+		path.join(__base_frontend_dir, "fonts", "overpass", "qFdB35WCmI96Ajtm81GgY93qxycJ.woff2")
+__fonts_overpass_qFdB35WCmI96Ajtm81GgY9bqxycJ_woff2_file = \
+		path.join(__base_frontend_dir, "fonts", "overpass", "qFdB35WCmI96Ajtm81GgY9bqxycJ.woff2")
+__fonts_overpass_qFdB35WCmI96Ajtm81GgY9fqxycJ_woff2_file = \
+		path.join(__base_frontend_dir, "fonts", "overpass", "qFdB35WCmI96Ajtm81GgY9fqxycJ.woff2")
+__fonts_overpass_qFdB35WCmI96Ajtm81GgY9nqxw_woff2_file = \
+		path.join(__base_frontend_dir, "fonts", "overpass", "qFdB35WCmI96Ajtm81GgY9nqxw.woff2")
+__fonts_overpass_qFdB35WCmI96Ajtm81GgY9TqxycJ_woff2_file = \
+		path.join(__base_frontend_dir, "fonts", "overpass", "qFdB35WCmI96Ajtm81GgY9TqxycJ.woff2")
+__fonts_overpass_qFdH35WCmI96Ajtm81GhU9vyww_woff2_file = \
+		path.join(__base_frontend_dir, "fonts", "overpass", "qFdH35WCmI96Ajtm81GhU9vyww.woff2")
+__fonts_overpass_qFdH35WCmI96Ajtm81GlU9s_woff2_file = \
+		path.join(__base_frontend_dir, "fonts", "overpass", "qFdH35WCmI96Ajtm81GlU9s.woff2")
+__fonts_overpass_qFdH35WCmI96Ajtm81GoU9vyww_woff2_file = \
+		path.join(__base_frontend_dir, "fonts", "overpass", "qFdH35WCmI96Ajtm81GoU9vyww.woff2")
+__fonts_overpass_qFdH35WCmI96Ajtm81GqU9vyww_woff2_file = \
+		path.join(__base_frontend_dir, "fonts", "overpass", "qFdH35WCmI96Ajtm81GqU9vyww.woff2")
+__fonts_overpass_qFdH35WCmI96Ajtm81GrU9vyww_woff2_file = \
+		path.join(__base_frontend_dir, "fonts", "overpass", "qFdH35WCmI96Ajtm81GrU9vyww.woff2")
+
 class Supplier:
 	content_fx:Optional[Callable[[], bytes]]
 	datemodified_fx:Optional[Callable[[], int]]
@@ -91,3 +113,124 @@ def queue_js_supplier_time() -> int:
 	return int(path.getmtime(__js_queue_js_file))
 
 db_table['/js/queue.js'] = DB_Resource("/js/queue.js", "text/javascript", Supplier(queue_js_supplier, queue_js_supplier_time))
+
+def fonts_overpass_css_supplier() -> bytes:
+	with open(__fonts_overpass_css_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def fonts_overpass_css_supplier_time() -> int:
+	return int(path.getmtime(__fonts_overpass_css_file))
+
+db_table['/fonts/overpass.css'] = DB_Resource("/fonts/overpass.css", "text/css", Supplier(fonts_overpass_css_supplier, fonts_overpass_css_supplier_time))
+
+def fonts_overpass_qFdB35WCmI96Ajtm81GgY93qxycJ_woff2_supplier() -> bytes:
+	with open(__fonts_overpass_qFdB35WCmI96Ajtm81GgY93qxycJ_woff2_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def fonts_overpass_qFdB35WCmI96Ajtm81GgY93qxycJ_woff2_supplier_time() -> int:
+	return int(path.getmtime(__fonts_overpass_qFdB35WCmI96Ajtm81GgY93qxycJ_woff2_file))
+
+db_table['/fonts/overpass/qFdB35WCmI96Ajtm81GgY93qxycJ.woff2'] = DB_Resource("/fonts/overpass/qFdB35WCmI96Ajtm81GgY93qxycJ.woff2", "application/font-woff2", Supplier(fonts_overpass_qFdB35WCmI96Ajtm81GgY93qxycJ_woff2_supplier, fonts_overpass_qFdB35WCmI96Ajtm81GgY93qxycJ_woff2_supplier_time))
+
+def fonts_overpass_qFdB35WCmI96Ajtm81GgY9bqxycJ_woff2_supplier() -> bytes:
+	with open(__fonts_overpass_qFdB35WCmI96Ajtm81GgY9bqxycJ_woff2_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def fonts_overpass_qFdB35WCmI96Ajtm81GgY9bqxycJ_woff2_supplier_time() -> int:
+	return int(path.getmtime(__fonts_overpass_qFdB35WCmI96Ajtm81GgY9bqxycJ_woff2_file))
+
+db_table['/fonts/overpass/qFdB35WCmI96Ajtm81GgY9bqxycJ.woff2'] = DB_Resource("/fonts/overpass/qFdB35WCmI96Ajtm81GgY9bqxycJ.woff2", "application/font-woff2", Supplier(fonts_overpass_qFdB35WCmI96Ajtm81GgY9bqxycJ_woff2_supplier, fonts_overpass_qFdB35WCmI96Ajtm81GgY9bqxycJ_woff2_supplier_time))
+
+def fonts_overpass_qFdB35WCmI96Ajtm81GgY9fqxycJ_woff2_supplier() -> bytes:
+	with open(__fonts_overpass_qFdB35WCmI96Ajtm81GgY9fqxycJ_woff2_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def fonts_overpass_qFdB35WCmI96Ajtm81GgY9fqxycJ_woff2_supplier_time() -> int:
+	return int(path.getmtime(__fonts_overpass_qFdB35WCmI96Ajtm81GgY9fqxycJ_woff2_file))
+
+db_table['/fonts/overpass/qFdB35WCmI96Ajtm81GgY9fqxycJ.woff2'] = DB_Resource("/fonts/overpass/qFdB35WCmI96Ajtm81GgY9fqxycJ.woff2", "application/font-woff2", Supplier(fonts_overpass_qFdB35WCmI96Ajtm81GgY9fqxycJ_woff2_supplier, fonts_overpass_qFdB35WCmI96Ajtm81GgY9fqxycJ_woff2_supplier_time))
+
+def fonts_overpass_qFdB35WCmI96Ajtm81GgY9nqxw_woff2_supplier() -> bytes:
+	with open(__fonts_overpass_qFdB35WCmI96Ajtm81GgY9nqxw_woff2_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def fonts_overpass_qFdB35WCmI96Ajtm81GgY9nqxw_woff2_supplier_time() -> int:
+	return int(path.getmtime(__fonts_overpass_qFdB35WCmI96Ajtm81GgY9nqxw_woff2_file))
+
+db_table['/fonts/overpass/qFdB35WCmI96Ajtm81GgY9nqxw.woff2'] = DB_Resource("/fonts/overpass/qFdB35WCmI96Ajtm81GgY9nqxw.woff2", "application/font-woff2", Supplier(fonts_overpass_qFdB35WCmI96Ajtm81GgY9nqxw_woff2_supplier, fonts_overpass_qFdB35WCmI96Ajtm81GgY9nqxw_woff2_supplier_time))
+
+def fonts_overpass_qFdB35WCmI96Ajtm81GgY9TqxycJ_woff2_supplier() -> bytes:
+	with open(__fonts_overpass_qFdB35WCmI96Ajtm81GgY9TqxycJ_woff2_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def fonts_overpass_qFdB35WCmI96Ajtm81GgY9TqxycJ_woff2_supplier_time() -> int:
+	return int(path.getmtime(__fonts_overpass_qFdB35WCmI96Ajtm81GgY9TqxycJ_woff2_file))
+
+db_table['/fonts/overpass/qFdB35WCmI96Ajtm81GgY9TqxycJ.woff2'] = DB_Resource("/fonts/overpass/qFdB35WCmI96Ajtm81GgY9TqxycJ.woff2", "application/font-woff2", Supplier(fonts_overpass_qFdB35WCmI96Ajtm81GgY9TqxycJ_woff2_supplier, fonts_overpass_qFdB35WCmI96Ajtm81GgY9TqxycJ_woff2_supplier_time))
+
+def fonts_overpass_qFdH35WCmI96Ajtm81GhU9vyww_woff2_supplier() -> bytes:
+	with open(__fonts_overpass_qFdH35WCmI96Ajtm81GhU9vyww_woff2_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def fonts_overpass_qFdH35WCmI96Ajtm81GhU9vyww_woff2_supplier_time() -> int:
+	return int(path.getmtime(__fonts_overpass_qFdH35WCmI96Ajtm81GhU9vyww_woff2_file))
+
+db_table['/fonts/overpass/qFdH35WCmI96Ajtm81GhU9vyww.woff2'] = DB_Resource("/fonts/overpass/qFdH35WCmI96Ajtm81GhU9vyww.woff2", "application/font-woff2", Supplier(fonts_overpass_qFdH35WCmI96Ajtm81GhU9vyww_woff2_supplier, fonts_overpass_qFdH35WCmI96Ajtm81GhU9vyww_woff2_supplier_time))
+
+def fonts_overpass_qFdH35WCmI96Ajtm81GlU9s_woff2_supplier() -> bytes:
+	with open(__fonts_overpass_qFdH35WCmI96Ajtm81GlU9s_woff2_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def fonts_overpass_qFdH35WCmI96Ajtm81GlU9s_woff2_supplier_time() -> int:
+	return int(path.getmtime(__fonts_overpass_qFdH35WCmI96Ajtm81GlU9s_woff2_file))
+
+db_table['/fonts/overpass/qFdH35WCmI96Ajtm81GlU9s.woff2'] = DB_Resource("/fonts/overpass/qFdH35WCmI96Ajtm81GlU9s.woff2", "application/font-woff2", Supplier(fonts_overpass_qFdH35WCmI96Ajtm81GlU9s_woff2_supplier, fonts_overpass_qFdH35WCmI96Ajtm81GlU9s_woff2_supplier_time))
+
+def fonts_overpass_qFdH35WCmI96Ajtm81GoU9vyww_woff2_supplier() -> bytes:
+	with open(__fonts_overpass_qFdH35WCmI96Ajtm81GoU9vyww_woff2_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def fonts_overpass_qFdH35WCmI96Ajtm81GoU9vyww_woff2_supplier_time() -> int:
+	return int(path.getmtime(__fonts_overpass_qFdH35WCmI96Ajtm81GoU9vyww_woff2_file))
+
+db_table['/fonts/overpass/qFdH35WCmI96Ajtm81GoU9vyww.woff2'] = DB_Resource("/fonts/overpass/qFdH35WCmI96Ajtm81GoU9vyww.woff2", "application/font-woff2", Supplier(fonts_overpass_qFdH35WCmI96Ajtm81GoU9vyww_woff2_supplier, fonts_overpass_qFdH35WCmI96Ajtm81GoU9vyww_woff2_supplier_time))
+
+def fonts_overpass_qFdH35WCmI96Ajtm81GqU9vyww_woff2_supplier() -> bytes:
+	with open(__fonts_overpass_qFdH35WCmI96Ajtm81GqU9vyww_woff2_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def fonts_overpass_qFdH35WCmI96Ajtm81GqU9vyww_woff2_supplier_time() -> int:
+	return int(path.getmtime(__fonts_overpass_qFdH35WCmI96Ajtm81GqU9vyww_woff2_file))
+
+db_table['/fonts/overpass/qFdH35WCmI96Ajtm81GqU9vyww.woff2'] = DB_Resource("/fonts/overpass/qFdH35WCmI96Ajtm81GqU9vyww.woff2", "application/font-woff2", Supplier(fonts_overpass_qFdH35WCmI96Ajtm81GqU9vyww_woff2_supplier, fonts_overpass_qFdH35WCmI96Ajtm81GqU9vyww_woff2_supplier_time))
+
+def fonts_overpass_qFdH35WCmI96Ajtm81GrU9vyww_woff2_supplier() -> bytes:
+	with open(__fonts_overpass_qFdH35WCmI96Ajtm81GrU9vyww_woff2_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def fonts_overpass_qFdH35WCmI96Ajtm81GrU9vyww_woff2_supplier_time() -> int:
+	return int(path.getmtime(__fonts_overpass_qFdH35WCmI96Ajtm81GrU9vyww_woff2_file))
+
+db_table['/fonts/overpass/qFdH35WCmI96Ajtm81GrU9vyww.woff2'] = DB_Resource("/fonts/overpass/qFdH35WCmI96Ajtm81GrU9vyww.woff2", "application/font-woff2", Supplier(fonts_overpass_qFdH35WCmI96Ajtm81GrU9vyww_woff2_supplier, fonts_overpass_qFdH35WCmI96Ajtm81GrU9vyww_woff2_supplier_time))
