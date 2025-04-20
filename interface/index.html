@@ -32,6 +32,10 @@
 				font-size: 1.2em;
 			}
 
+			.bold {
+				font-weight: bold;
+			}
+
 			.code-block {
 				font-family: monospace;
 				overflow-x: auto;
@@ -259,7 +263,7 @@
 				margin-top: 0;
 			}
 
-			.menu-contents .anchor-debug-info {
+			.menu-contents .inner-tile {
 				margin: 1em 0;
 				padding: 1em;
 				border-radius: 1em;
@@ -267,12 +271,15 @@
 				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 			}
 
-			.menu-contents .anchor-debug-info .title {
+			.menu-contents .inner-tile .title {
 				margin: 0;
+			}
+
+			.menu-contents .anchor-debug-info .title {
 				cursor: pointer;
-				padding: 0.5em 1em;
 				border-radius: 0.5em;
 				transition: background 0.3s ease;
+				padding: 0.5em 1em;
 			}
 
 			@media screen and (hover: hover) {
@@ -326,6 +333,33 @@
 				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 			}
 
+			.menu-contents .inner-tile .option-button {
+				cursor: pointer;
+				border-radius: 0.5em;
+				transition: background 0.3s ease;
+				padding: 0.5em 1em;
+			}
+
+			@media screen and (hover: hover) {
+				.menu-contents .inner-tile .option-button:hover {
+					background-color: #7d78ac;
+				}
+			}
+
+			.menu-contents .inner-tile .option-button.active,
+			.menu-contents .inner-tile .option-button:active {
+				background-color: #7d78ac;
+			}
+
+			.menu-contents .inner-tile .left-right-sectioned {
+				display: flex;
+				flex-direction: row;
+			}
+
+			.menu-contents .inner-tile .left-right-sectioned .stretchable {
+				flex-grow: 1;
+			}
+
 			.floating-title {
 				position: fixed;
 				left: 5rem; /* With Hamburger Menu */
@@ -347,7 +381,7 @@
 		<main class="map-viewport">
 			<div id="Map" class="map-whole"></div>
 		</main>
-		<nav id="HamburgerMenu" class="hambuger-menu">
+		<nav id="HamburgerMenu" class="hambuger-menu" tabindex="0">
 			<div class="line-1"></div>
 			<div class="line-2"></div>
 			<div class="line-3"></div>
@@ -366,6 +400,15 @@
 					<input id="DummyNodeSubmit" type="submit" value="Apply">
 				</form>
 				<div id="DummyNodeSubmitResponse" class="code-block"></div>
+			</div>
+			<div class="tile">
+				<p class="title">Settings</p>
+				<div class="inner-tile">
+					<div id="UseAverageToggle" class="left-right-sectioned option-button" tabindex="0" role="button">
+						<div class="stretchable bold">Use Averaging</div>
+						<div>off</div>
+					</div>
+				</div>
 			</div>
 			<div id="AnchorDebugInfo" class="tile">
 				<span class="title">Debug</span>
@@ -417,6 +460,9 @@
 				var dragging_coast_velocity = {x: 0, y: 0}; // Pixels per frame
 				var dragging_prev_coords_queue = new Queue(3);
 				var dragging_timing_now = 0;
+
+				var use_averaging = false;
+				var toggleAvgStatus = document.getElementById("UseAverageToggle").lastElementChild.firstChild;
 
 				function Anchor(id, x, y) {
 					this.id = id;
@@ -475,7 +521,7 @@
 
 				Anchor.prototype.debug_setup = function() {
 					this.debug_element = document.createElement('details');
-					this.debug_element.classList.add("anchor-debug-info");
+					this.debug_element.classList.add("anchor-debug-info", "inner-tile");
 
 					var title = document.createElement('summary');
 					title.classList.add('title');
@@ -974,6 +1020,14 @@
 					// upd_obj = JSON.parse(json_update);
 					upd_obj = json_update;
 
+					if (upd_obj.use_avg) {
+						use_averaging = true;
+						toggleAvgStatus.textContent = "on";
+					} else {
+						use_averaging = false;
+						toggleAvgStatus.textContent = "off";
+					}
+
 					for (let antenna_id in anchors) {
 						anchors[antenna_id].is_active = false;
 					}
@@ -983,7 +1037,7 @@
 
 						if (anchors.hasOwnProperty(antenna_id)) {
 							anchors[antenna_id].set_coord(updated_info.x, updated_info.y);
-							anchors[antenna_id].set_radius(updated_info.r);
+							anchors[antenna_id].set_radius(use_averaging ? updated_info.r_w_avg : updated_info.r);
 							anchors[antenna_id].is_active = true;
 							// anchors[antenna_id].update_element();
 							anchors[antenna_id].update_debug_elements(updated_info);
@@ -991,7 +1045,7 @@
 						}
 
 						anchors[antenna_id] = new Anchor(antenna_id, updated_info.x, updated_info.y);
-						anchors[antenna_id].set_radius(updated_info.r);
+						anchors[antenna_id].set_radius(use_averaging ? updated_info.r_w_avg : updated_info.r);
 						anchors[antenna_id].insert_point(map);
 						adjust_frame_scale_with_points();
 						anchors[antenna_id].insert_debug(anchor_debug_element);
@@ -1091,6 +1145,26 @@
 
 				document.getElementById("DummyNodeSubmit").addEventListener("click", dummy_node_submit);
 				document.getElementById("DummyNodeSubmitResponse").style.display = 'none';
+
+				function toggle_use_avg(event) {
+					if (use_averaging) {
+						fetch("/set_use_averaging", {
+							method: "POST", 
+							body: "off"
+						})
+						use_averaging = false;
+						toggleAvgStatus.textContent = "off";
+					} else {
+						fetch("/set_use_averaging", {
+							method: "POST", 
+							body: "on"
+						})
+						use_averaging = true;
+						toggleAvgStatus.textContent = "on";
+					}
+				}
+
+				document.getElementById("UseAverageToggle").addEventListener("click", toggle_use_avg);
 
 				// var update_tmr = setInterval(get_updates, 500);
 				var update_tmr = setInterval(attempt_new_socket, 5000);

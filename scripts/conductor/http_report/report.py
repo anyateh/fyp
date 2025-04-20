@@ -10,7 +10,7 @@ from typing import Callable, Iterable, Optional
 
 from .database import get_data_entry
 from ..dummy.set_dummy_coord import set_dummy_coord
-from ..manage_antes import gen_json_update
+from ..manage_antes import gen_json_update, set_use_avg
 from .websocket_util import create_response_text_frame, extract_text_frame, get_optcode, is_valid_client_frame, TEXT as OPTTEXT
 
 response_header_template = \
@@ -248,10 +248,23 @@ def handle_set_dummy_coord_req(client:socket, post_content:bytes) -> None:
 		response = gen_basic_response(__status_text[200], ''.join(exc_tb.format()).encode(encoding = 'utf-8'), "text/plain")
 		client.sendall(response)
 
+def handle_set_use_avg_req(client:socket, post_content:bytes) -> None:
+	if post_content == b'on':
+		set_use_avg(True)
+	elif post_content == b'off':
+		set_use_avg(False)
+
+	response = gen_basic_response(__status_text[200], b"", "text/plain")
+	client.sendall(response)
+
 def handle_http_request(client:socket, req_type:str, path:str, headers:dict[str, str], request_content:bytes) -> None:
-	if req_type == 'POST' and path == '/set_dummy_coords':
-		handle_set_dummy_coord_req(client, request_content);
-		return
+	if req_type == 'POST':
+		if path == '/set_dummy_coords':
+			handle_set_dummy_coord_req(client, request_content);
+			return
+		if path == '/set_use_averaging':
+			handle_set_use_avg_req(client, request_content);
+			return
 
 	data_type, db_content = get_data_entry(path)
 

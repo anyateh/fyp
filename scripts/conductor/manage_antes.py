@@ -227,12 +227,17 @@ def localize_transmitter_pos() -> tuple[Optional[float], Optional[float]]:
 	# Perform trilateration using data from registered clients
 	return estimate_location(__antennas_registered, use_avg)
 
+def set_use_avg(set:bool) -> None:
+	global use_avg
+	use_avg = set
+
 def gen_json_update() -> str:
 	if json_buffer_cache:
 		return json_buffer_cache
 	d = {
 		"estimated_sources": {},
-		"antennas": {k:v.convert_to_json_obj() for k, v in __antennas_registered.items()}
+		"antennas": {k:v.convert_to_json_obj() for k, v in __antennas_registered.items()},
+		'use_avg': use_avg
 	}
 
 	if can_perform_localization():
