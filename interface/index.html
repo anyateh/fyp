@@ -31,6 +31,12 @@
 			h1 {
 				font-size: 1.2em;
 			}
+
+			.code-block {
+				font-family: monospace;
+				overflow-x: auto;
+				white-space: pre-wrap;
+			}
 		</style>
 	</head>
 	<body>
@@ -126,6 +132,10 @@
 				z-index: 4;
 			}
 
+			.map-viewport .point-label {
+				z-index: 5;
+			}
+
 			.map-viewport .anchor-centre-label {
 				background-color: #3d3e73;
 				color: #d5e0ff;
@@ -147,6 +157,17 @@
 				background-color: #493f73;
 				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 				z-index: 10;
+				transition: transform 0.3s ease;
+			}
+
+			@media screen and (hover: hover) {
+				.hambuger-menu:hover {
+					transform: scale(1.1);
+				}
+			}
+
+			.hambuger-menu:active {
+				transform: scale(0.9);
 			}
 
 			.hambuger-menu .line-1,
@@ -207,6 +228,7 @@
 				z-index: 9;
 				transition: transform 0.35s ease, opacity 0.35s ease;
 				direction: rtl;
+				/* scrollbar-width: thin; */
 			}
 
 			.menu-contents.hidden {
@@ -229,11 +251,12 @@
 				background-color: #493f73;
 				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 				direction: ltr;
+				margin: 1em 0;
 			}
 
 			.menu-contents .tile .title {
 				font-weight: bold;
-				cursor: pointer;
+				margin-top: 0;
 			}
 
 			.menu-contents .anchor-debug-info {
@@ -246,6 +269,20 @@
 
 			.menu-contents .anchor-debug-info .title {
 				margin: 0;
+				cursor: pointer;
+				padding: 0.5em 1em;
+				border-radius: 0.5em;
+				transition: background 0.3s ease;
+			}
+
+			@media screen and (hover: hover) {
+				.menu-contents .anchor-debug-info .title:hover {
+					background-color: #7d78ac;
+				}
+			}
+
+			.menu-contents .anchor-debug-info .title:active {
+				background-color: #7d78ac;
 			}
 
 			.menu-contents .anchor-debug-prop {
@@ -258,6 +295,35 @@
 
 			.menu-contents .anchor-debug-prop .prop-value {
 				text-align: right;
+			}
+
+			.menu-contents input {
+				font: inherit;
+				padding: 0.5em 1em;
+				background: none;
+				border: none;
+				color: inherit;
+			}
+
+			.menu-contents form {
+				margin: 1em 0;
+			}
+
+			.menu-contents form.one-liner {
+				display: flex;
+				flex-direction: row;
+			}
+
+			.menu-contents form.one-liner input[type = 'text'],
+			.menu-contents form.one-liner input[type = 'number'] {
+				width: 100%;
+			}
+
+			.menu-contents .code-block {
+				padding: 1em 1em;
+				border-radius: 1em;
+				background-color: #6a6590;
+				box-shadow: 2px 2px 5px rgba(0, 0, 0, 0.2);
 			}
 
 			.floating-title {
@@ -290,6 +356,17 @@
 			<h1>EE4002D Real-time Stage Tracking</h1>
 		</header>
 		<aside id="ToolsMenu" class="menu-contents hidden">
+			<div class="tile">
+				<p class="title">
+					Dummy Node
+				</p>
+				<form class="one-liner" action="/set_dummy_coords" method="post" target="_blank">
+					<input type="number" id="DummyNodeX" name="x" placeholder="X">
+					<input type="number" id="DummyNodeY" name="y" placeholder="Y">
+					<input id="DummyNodeSubmit" type="submit" value="Apply">
+				</form>
+				<div id="DummyNodeSubmitResponse" class="code-block"></div>
+			</div>
 			<div id="AnchorDebugInfo" class="tile">
 				<span class="title">Debug</span>
 			</div>
@@ -988,6 +1065,32 @@
 					axes.x.style.transform = "translateY(" + -(viewport_offset_y - 2) + "px)";
 					axes.y.style.transform = "translateX(" + (viewport_offset_x - 2) + "px)";
 				}
+
+				function dummy_node_submit(event) {
+					var x = document.getElementById("DummyNodeX").value;
+					var y = document.getElementById("DummyNodeY").value;
+
+					if (!x && !y) {
+						document.getElementById("DummyNodeSubmitResponse").style.display = 'none';
+						event.preventDefault();
+						return true;
+					}
+					var form_data = new URLSearchParams();
+					form_data.append("x", x);
+					form_data.append("y", y);
+					fetch("/set_dummy_coords", {
+						method: "POST",
+						body: form_data
+					}).then(x => x.text()).then(function(output_log) {
+						document.getElementById("DummyNodeSubmitResponse").style.display = '';
+						document.getElementById("DummyNodeSubmitResponse").innerText = output_log;
+					});
+
+					event.preventDefault();
+				}
+
+				document.getElementById("DummyNodeSubmit").addEventListener("click", dummy_node_submit);
+				document.getElementById("DummyNodeSubmitResponse").style.display = 'none';
 
 				// var update_tmr = setInterval(get_updates, 500);
 				var update_tmr = setInterval(attempt_new_socket, 5000);

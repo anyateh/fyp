@@ -1,11 +1,15 @@
 from base64 import b64encode
 from hashlib import sha1
+from math import isnan
+from os import path
 from socket import AF_INET, socket, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR, timeout
 from sys import stderr
+from traceback import format_exc, TracebackException
 from threading import Thread
 from typing import Callable, Iterable, Optional
 
 from .database import get_data_entry
+from ..dummy.set_dummy_coord import set_dummy_coord
 from ..manage_antes import gen_json_update
 from .websocket_util import create_response_text_frame, extract_text_frame, get_optcode, is_valid_client_frame, TEXT as OPTTEXT
 
@@ -216,7 +220,39 @@ def gen_basic_response(status:tuple[int, str], content:bytes, content_type:str) 
 
 	return header + content
 
-def handle_http_request(client:socket, req_type:str, path:str, headers:dict[str, str]) -> None:
+def handle_set_dummy_coord_req(client:socket, post_content:bytes) -> None:
+	decoded_content = post_content.decode(encoding = 'utf-8')
+
+	kv_pairs = decoded_content.split("&")
+
+	coords = {k: v for k, v in (i.split('=') for i in kv_pairs)}
+
+	try:
+		x = float(coords['x'])
+		y = float(coords['y'])
+
+		assert not isnan(x)
+		assert not isnan(y)
+
+		set_dummy_coord(x, y, True)
+
+		response = gen_basic_response(__status_text[200], b"Attempted to move dummy node.", "text/plain")
+		client.sendall(response)
+	except Exception as e:
+		exc_tb = TracebackException(type(e), e, e.__traceback__)
+		# https://stackoverflow.com/questions/69925180/python-tracebacks-how-to-hide-absolute-paths
+		for frame_sum in exc_tb.stack:
+			frame_sum.filename = path.relpath(frame_sum.filename)
+
+		# response = gen_basic_response(__status_text[200], format_exc().encode(encoding = 'utf-8'), "text/plain")
+		response = gen_basic_response(__status_text[200], ''.join(exc_tb.format()).encode(encoding = 'utf-8'), "text/plain")
+		client.sendall(response)
+
+def handle_http_request(client:socket, req_type:str, path:str, headers:dict[str, str], request_content:bytes) -> None:
+	if req_type == 'POST' and path == '/set_dummy_coords':
+		handle_set_dummy_coord_req(client, request_content);
+		return
+
 	data_type, db_content = get_data_entry(path)
 
 	response = main_page_response.encode(encoding = 'utf-8')
@@ -234,13 +270,14 @@ def client_handler(connection:socket, ip:str, port:int, is_server_alive_fx:Calla
 			if not http_req:
 				break
 
+			# TODO: Make below crash-proof
 			request_type, path, headers = extract_http_info(http_req)
 
 			if is_websocket_req(headers):
 				websocket_handler(connection, headers, is_server_alive_fx)
 				break
 
-			handle_http_request(connection, request_type, path, headers)
+			handle_http_request(connection, request_type, path, headers, http_req.split(b'\r\n\r\n', 1)[1])
 		except timeout:
 			pass
 
