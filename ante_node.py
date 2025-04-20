@@ -34,17 +34,28 @@ def main() -> None:
 		antenna_client.close()
 		exit(1)
 
-	while True:
+	keep_alive = True
+
+	def ctrl_c_handler(sig, frame) -> None:
+		nonlocal keep_alive
+		keep_alive = False
+
+	signal(SIGINT, ctrl_c_handler)
+
+	while keep_alive:
 		data_request_pkt = antenna_client.receive_packet_request()
 		if not data_request_pkt:
 			continue
 
 		if data_request_pkt.is_kick_request():
 			logger.debug("Received Kick request")
-			antenna_client.send_server_close_ack()
+			if data_request_pkt.is_server_closing_noti():
+				antenna_client.send_server_close_ack()
+			else:
+				antenna_client.send_kick_out_ack()
 			logger.debug("Acknowledgement sent")
 			antenna_client.close()
-			break
+			return
 
 		if not data_request_pkt.is_dbm_data_request():
 			continue
@@ -54,6 +65,13 @@ def main() -> None:
 		dbm_measurement = asyncio.run(measure_dbm(antenna_client))
 
 		antenna_client.send_requested_data(fid, dbm_measurement)
+
+	logout_ack_pkt = antenna_client.request_logout()
+
+	while not logout_ack_pkt:
+		logout_ack_pkt = antenna_client.request_logout()
+
+	antenna_client.close()
 
 if __name__ == '__main__':
 	main()

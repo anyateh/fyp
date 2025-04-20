@@ -147,6 +147,12 @@ def deregister_ante_node(a_id:int) -> None:
 def get_ante_node_coords(a_id:int) -> tuple[float, float]:
 	return __antennas_registered[a_id].x, __antennas_registered[a_id].y
 
+async def obtain_data_wrapper(id:int, packet:DBM_Packet, server:TrianServer) -> Optional[DBM_Packet]:
+	try:
+		return await server.send_packet_to_client(id, packet, True)
+	except ConnectionResetError:
+		return None
+
 async def update_ante_readings(frame_id:int, server:TrianServer) -> None:
 	global json_buffer_cache
 	obtain_data_tasks = []
@@ -155,7 +161,8 @@ async def update_ante_readings(frame_id:int, server:TrianServer) -> None:
 		# Send request data packets to all antes
 		request_pkt = DBM_Packet.create_reading_request(i.id, frame_id)
 
-		obtain_data_tasks.append(server.send_packet_to_client(i.id, request_pkt, True))
+		# obtain_data_tasks.append(server.send_packet_to_client(i.id, request_pkt, True))
+		obtain_data_tasks.append(obtain_data_wrapper(i.id, request_pkt, server))
 
 		i.dbm = None
 	
@@ -164,7 +171,7 @@ async def update_ante_readings(frame_id:int, server:TrianServer) -> None:
 	if __current_request_id == frame_id:
 		for i in results:
 			if i:
-				manage_data_packet(i, __current_request_id)
+				manage_data_packet(i, __current_request_id, server)
 
 	json_buffer_cache = None
 
@@ -194,8 +201,10 @@ async def stop_ante_updates() -> None:
 	global __keep_alive
 	__keep_alive = False
 
-def manage_data_packet(packet:DBM_Packet, frame_id:int) -> None:
+def manage_data_packet(packet:DBM_Packet, frame_id:int, server:TrianServer) -> None:
 	# dbm = struct.unpack("<d", packet.data)[0]
+	if packet.is_kick_request():
+		server.close_client(packet.identifier_8b, False, True)
 	dbm, received_frame_id = packet.get_dbm_data()
 
 	if received_frame_id == frame_id and packet.identifier_8b in __antennas_registered:

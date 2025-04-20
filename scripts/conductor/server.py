@@ -48,7 +48,7 @@ class TrianServer:
 		clients = list(self.clients)
 		client_close_awaitables = []
 		for client_id in clients:
-			client_close_awaitables.append(self.close_client(client_id))
+			client_close_awaitables.append(self.close_client(client_id, True, False))
 
 		await asyncio.gather(*client_close_awaitables)
 
@@ -122,7 +122,11 @@ class TrianServer:
 
 			header_packet, reported_data_size = DBM_Packet.from_bytes_with_size(header)
 
-			if header_packet.identifier_8b not in self.clients:
+			if header_packet.identifier_8b in self.clients:
+				if header_packet.is_login_request():
+					await self.close_client(header_packet.identifier_8b, False, False)
+					self.clients[header_packet.identifier_8b] = client
+			else:
 				self.clients[header_packet.identifier_8b] = client
 
 			if reported_data_size > 0:
@@ -138,19 +142,25 @@ class TrianServer:
 		except socket_timeout:
 			return None
 
-	async def close_client(self, client_id:int) -> None:
+	async def close_client(self, client_id:int, part_of_svr_exit:bool, as_ack:bool) -> None:
 		client = self.clients[client_id]
 
 		# x, y = get_ante_node_coords(client_id)
 		deregister_ante_node(client_id)
 
-		svr_close_pkt = DBM_Packet.create_server_exit_noti(client_id)
+		svr_close_pkt = DBM_Packet.create_server_exit_noti(client_id) \
+				if part_of_svr_exit else \
+				(DBM_Packet.create_remove_ante_ack(client_id) \
+	 				if as_ack else \
+					DBM_Packet.create_remove_ante_req(client_id))
+
 		logger.debug(f"Sending kick packet to antenna {client_id}")
-		ack_pkt = await self.send_packet_to_client(client_id, svr_close_pkt, True)
-		if ack_pkt and ack_pkt.is_server_closing_noti():
-			logger.debug(f"Received logoff acknowledgement from {client_id}")
-		else:
-			logger.debug(f"No acknowledgement from {client_id}")
+		ack_pkt = await self.send_packet_to_client(client_id, svr_close_pkt, as_ack)
+		if not as_ack:
+			if ack_pkt and ack_pkt.is_kick_request():
+				logger.debug(f"Received logoff acknowledgement from {client_id}")
+			else:
+				logger.debug(f"No acknowledgement from {client_id}")
 
 		del self.clients[client_id]
 		client.connection.close()

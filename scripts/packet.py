@@ -238,6 +238,14 @@ class DBM_Packet:
 		return DBM_Packet(identifier, DBM_Packet.FLAG_ACCEPT_REQ | DBM_Packet.FLAG_GET_ANT_SG, DBM_Packet._package_query_dbm_data_response(frame_id, dbm_reading))
 
 	@staticmethod
+	def create_remove_ante_req(identifier:int):
+		return DBM_Packet(identifier, DBM_Packet.FLAG_KICK_ANT, b'')
+
+	@staticmethod
+	def create_remove_ante_ack(identifier:int):
+		return DBM_Packet(identifier, DBM_Packet.FLAG_ACCEPT_REQ | DBM_Packet.FLAG_KICK_ANT, b'')
+
+	@staticmethod
 	def create_server_exit_noti(identifier:int):
 		return DBM_Packet(identifier, DBM_Packet.FLAG_SVR_EXIT | DBM_Packet.FLAG_KICK_ANT, b'')
 
