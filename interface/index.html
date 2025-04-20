@@ -3,7 +3,7 @@
 	<head>
 		<meta charset="UTF-8">
 		<meta name="viewport" content="width=device-width, initial-scale=1.0">
-		<title>Demo</title>
+		<title>EE4002D</title>
 
 		<link rel="icon" type="image/png" href="icons/icon_32.png" sizes="32x32">
 		<!-- <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -675,6 +675,24 @@
 					this.debug_avg_fifo_sum_tn.textContent = anchor_json.avg_fifo.sum;
 
 					this.debug_avg_fifo_buffer_update(anchor_json);
+				};
+
+				Anchor.prototype.gen_editable_debug_prop = function(prop_title_str, value_text_field) {
+					var prop = document.createElement('div');
+					prop.classList.add("anchor-debug-prop");
+					this.debug_element.appendChild(prop);
+
+					var prop_title = document.createElement("p");
+					prop_title.classList.add("prop-name");
+					prop_title.appendChild(document.createTextNode(prop_title_str));
+					prop.appendChild(prop_title);
+
+					var prop_val = document.createElement("p");
+					prop_val.classList.add("prop-value");
+					value_text_field.classList.add("prop-value");
+					prop.appendChild(value_text_field);
+
+					return prop;
 				};
 
 				Anchor.prototype.settings_setup = function() {
