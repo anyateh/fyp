@@ -6,6 +6,7 @@ from ..manage_antes import gen_json_update
 
 __base_frontend_dir = "interface"
 __index_html_file = path.join(__base_frontend_dir, "index.html")
+__favicon_ico_file = path.join(__base_frontend_dir, "favicon.ico")
 __js_queue_js_file = path.join(__base_frontend_dir, "js", "queue.js")
 __css_scrollbar_css_file = path.join(__base_frontend_dir, "css", "scrollbar.css")
 
@@ -30,6 +31,10 @@ __fonts_overpass_qFdH35WCmI96Ajtm81GqU9vyww_woff2_file = \
 		path.join(__base_frontend_dir, "fonts", "overpass", "qFdH35WCmI96Ajtm81GqU9vyww.woff2")
 __fonts_overpass_qFdH35WCmI96Ajtm81GrU9vyww_woff2_file = \
 		path.join(__base_frontend_dir, "fonts", "overpass", "qFdH35WCmI96Ajtm81GrU9vyww.woff2")
+
+__fonts_sharetechmono_css_file = path.join(__base_frontend_dir, "fonts", "sharetechmono.css")
+__fonts_sharetechmono_J7aHnp1uDWRBEqV98dVQztYldFcLowEF_woff2_file = \
+		path.join(__base_frontend_dir, "fonts", "sharetechmono", "J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2")
 
 class Supplier:
 	content_fx:Optional[Callable[[], bytes]]
@@ -246,3 +251,25 @@ def fonts_overpass_qFdH35WCmI96Ajtm81GrU9vyww_woff2_supplier_time() -> int:
 	return int(path.getmtime(__fonts_overpass_qFdH35WCmI96Ajtm81GrU9vyww_woff2_file))
 
 db_table['/fonts/overpass/qFdH35WCmI96Ajtm81GrU9vyww.woff2'] = DB_Resource("/fonts/overpass/qFdH35WCmI96Ajtm81GrU9vyww.woff2", "application/font-woff2", Supplier(fonts_overpass_qFdH35WCmI96Ajtm81GrU9vyww_woff2_supplier, fonts_overpass_qFdH35WCmI96Ajtm81GrU9vyww_woff2_supplier_time))
+
+def fonts_sharetechmono_css_supplier() -> bytes:
+	with open(__fonts_sharetechmono_css_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def fonts_sharetechmono_css_supplier_time() -> int:
+	return int(path.getmtime(__fonts_sharetechmono_css_file))
+
+db_table['/fonts/sharetechmono.css'] = DB_Resource("/fonts/sharetechmono.css", "text/css", Supplier(fonts_sharetechmono_css_supplier, fonts_sharetechmono_css_supplier_time))
+
+def fonts_sharetechmono_J7aHnp1uDWRBEqV98dVQztYldFcLowEF_woff2_supplier() -> bytes:
+	with open(__fonts_sharetechmono_J7aHnp1uDWRBEqV98dVQztYldFcLowEF_woff2_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def fonts_sharetechmono_J7aHnp1uDWRBEqV98dVQztYldFcLowEF_woff2_supplier_time() -> int:
+	return int(path.getmtime(__fonts_sharetechmono_J7aHnp1uDWRBEqV98dVQztYldFcLowEF_woff2_file))
+
+db_table['/fonts/sharetechmono/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2'] = DB_Resource("/fonts/sharetechmono/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2", "application/font-woff2", Supplier(fonts_sharetechmono_css_supplier, fonts_sharetechmono_css_supplier_time))
