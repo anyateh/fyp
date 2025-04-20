@@ -49,6 +49,9 @@ class AntennaNode:
 		self.x  = x
 		self.y  = y
 
+		self.xy_need_update   = False
+		self.gain_need_update = False
+
 		global ring_colours
 
 		self.inv_friis_avg = AverageFIFO(4)
@@ -153,6 +156,13 @@ async def obtain_data_wrapper(id:int, packet:DBM_Packet, server:TrianServer) -> 
 	except ConnectionResetError:
 		return None
 
+async def send_coords_update(id:int, x:float, y:float, server:TrianServer) -> Optional[DBM_Packet]:
+	try:
+		upd_pkt:DBM_Packet = DBM_Packet.create_coord_update(id, x, y)
+		return await server.send_packet_to_client(id, upd_pkt, False)
+	except ConnectionResetError:
+		return None
+
 async def update_ante_readings(frame_id:int, server:TrianServer) -> None:
 	global json_buffer_cache
 	obtain_data_tasks = []
@@ -163,6 +173,9 @@ async def update_ante_readings(frame_id:int, server:TrianServer) -> None:
 
 		# obtain_data_tasks.append(server.send_packet_to_client(i.id, request_pkt, True))
 		obtain_data_tasks.append(obtain_data_wrapper(i.id, request_pkt, server))
+
+		if i.xy_need_update:
+			obtain_data_tasks.append(send_coords_update(i.id, i.x, i.y, server))
 
 		i.dbm = None
 	
@@ -239,6 +252,15 @@ def localize_transmitter_pos() -> tuple[Optional[float], Optional[float]]:
 def set_use_avg(set:bool) -> None:
 	global use_avg
 	use_avg = set
+
+def update_ante_coords(ant_id:int, x:float, y:float) -> None:
+	__antennas_registered[ant_id].x = x
+	__antennas_registered[ant_id].y = y
+	__antennas_registered[ant_id].xy_need_update = True
+
+def update_ante_gain(ant_id:int, gain:float) -> None:
+	__antennas_registered[ant_id].gain = gain
+	__antennas_registered[ant_id].gain_need_update = True
 
 def gen_json_update() -> str:
 	if json_buffer_cache:

@@ -10,7 +10,7 @@ from typing import Callable, Iterable, Optional
 
 from .database import get_data_entry
 from ..dummy.set_dummy_coord import set_dummy_coord
-from ..manage_antes import gen_json_update, set_use_avg
+from ..manage_antes import gen_json_update, set_use_avg, update_ante_coords
 from .websocket_util import create_response_text_frame, extract_text_frame, get_optcode, is_valid_client_frame, TEXT as OPTTEXT
 
 response_header_template = \
@@ -50,6 +50,7 @@ not_found_tmp = \
 __status_text = {
 	101: (101, "Switching Protocols"),
 	200: (200, "OK"),
+	204: (204, "No Content"),
 	404: (404, "Not Found"),
 	501: (501, "Not Implemented")
 }
@@ -254,8 +255,38 @@ def handle_set_use_avg_req(client:socket, post_content:bytes) -> None:
 	elif post_content == b'off':
 		set_use_avg(False)
 
-	response = gen_basic_response(__status_text[200], b"", "text/plain")
+	response = gen_basic_response(__status_text[204], b"", "text/plain")
 	client.sendall(response)
+
+def handle_set_x_y_id_req(client:socket, post_content:bytes) -> None:
+	decoded_content = post_content.decode(encoding = 'utf-8')
+	kv_pairs = decoded_content.split("&")
+	info = {k: v for k, v in (i.split('=') for i in kv_pairs)}
+
+	try:
+		x = float(info['x'])
+		y = float(info['y'])
+		aid = int(info['id'])
+
+		assert not isnan(x)
+		assert not isnan(y)
+
+		update_ante_coords(aid, x, y)
+
+		response = gen_basic_response(
+			__status_text[200], b"Attempted to move Antenna #"
+			+ info['id'].encode(encoding = 'utf-8') + b".",
+			"text/plain"
+		)
+		client.sendall(response)
+	except Exception as e:
+		exc_tb = TracebackException(type(e), e, e.__traceback__)
+		# https://stackoverflow.com/questions/69925180/python-tracebacks-how-to-hide-absolute-paths
+		for frame_sum in exc_tb.stack:
+			frame_sum.filename = path.relpath(frame_sum.filename)
+
+		response = gen_basic_response(__status_text[200], ''.join(exc_tb.format()).encode(encoding = 'utf-8'), "text/plain")
+		client.sendall(response)
 
 def handle_http_request(client:socket, req_type:str, path:str, headers:dict[str, str], request_content:bytes) -> None:
 	if req_type == 'POST':
@@ -264,6 +295,9 @@ def handle_http_request(client:socket, req_type:str, path:str, headers:dict[str,
 			return
 		if path == '/set_use_averaging':
 			handle_set_use_avg_req(client, request_content);
+			return
+		if path == '/set_ante_coords':
+			handle_set_x_y_id_req(client, request_content);
 			return
 
 	data_type, db_content = get_data_entry(path)

@@ -474,6 +474,15 @@
 						<div>off</div>
 					</div>
 				</div>
+				<div class="inner-tile">
+					<details>
+						<summary class="title">Antenna Settings</summary>
+						<div id="AntennaSettings">
+							
+						</div>
+					</details>
+				</div>
+				<div id="AntennaSettingResponse" class="code-block"></div>
 			</div>
 			<div id="AnchorDebugInfo" class="tile">
 				<span class="title">Debug</span>
@@ -511,6 +520,8 @@
 				var hamburger_menu = document.getElementById("HamburgerMenu");
 				var menu_contents = document.getElementById("ToolsMenu");
 				var anchor_debug_element = document.getElementById("AnchorDebugInfo");
+				var anchor_settings_element = document.getElementById("AntennaSettings");
+				var anchor_settings_output = document.getElementById("AntennaSettingResponse");
 
 				var dragging_mode = false;
 				var start_dragging_offsets = {
@@ -560,6 +571,7 @@
 					this.is_active = true;
 
 					this.debug_setup();
+					this.settings_setup();
 
 					this.update_element(true);
 				}
@@ -661,6 +673,65 @@
 
 					this.debug_avg_fifo_buffer_update(anchor_json);
 				};
+
+				Anchor.prototype.settings_setup = function() {
+					this.settings_section = document.createElement("section");
+
+					var antenna_label = document.createElement("p");
+					antenna_label.classList.add("anchor-settings-label");
+					antenna_label.appendChild(document.createTextNode("Antenna #" + this.id));
+					this.settings_section.appendChild(antenna_label);
+
+					var one_liner_xy = document.createElement("form");
+					one_liner_xy.classList.add("one-liner");
+					one_liner_xy.method = "post";
+					this.settings_section.appendChild(one_liner_xy);
+
+					this.set_x_field = document.createElement("input");
+					this.set_x_field.type = "number";
+					this.set_x_field.name = "x";
+					this.set_x_field.placeholder = "X";
+					one_liner_xy.appendChild(this.set_x_field);
+
+					this.set_y_field = document.createElement("input");
+					this.set_y_field.type = "number";
+					this.set_y_field.name = "y";
+					this.set_y_field.placeholder = "Y";
+					one_liner_xy.appendChild(this.set_y_field);
+
+					this.apply_xy_field = document.createElement("input");
+					this.apply_xy_field.type = "submit";
+					this.apply_xy_field.value = "Apply";
+					one_liner_xy.appendChild(this.apply_xy_field);
+
+					var obj = this;
+					this.apply_xy_field.onclick = function (event) {
+						if (!obj.set_x_field.value && !obj.set_y_field.value) {
+							anchor_settings_output.style.display = "none";
+							event.preventDefault();
+							return true;
+						}
+
+						var info = new URLSearchParams();
+						info.append("id", obj.id);
+						info.append("x", obj.set_x_field.value);
+						info.append("y", obj.set_y_field.value);
+						fetch("/set_ante_coords", {
+							method: "POST",
+							body: info
+						}).then(x => x.text()).then(function(value) {
+							anchor_settings_output.style.display = "";
+							anchor_settings_output.innerText = value;
+						});
+						anchor_settings_output.style.display = "none";
+
+						event.preventDefault();
+					};
+				};
+
+				Anchor.prototype.insert_settings = function(insert_to) {
+					insert_to.appendChild(this.settings_section);
+				}
 
 				Anchor.prototype.update_element = function(update_radius) {
 					if (this.is_active || this.radius == null) {
@@ -1118,6 +1189,7 @@
 						anchors[antenna_id].insert_point(map);
 						adjust_frame_scale_with_points();
 						anchors[antenna_id].insert_debug(anchor_debug_element);
+						anchors[antenna_id].insert_settings(anchor_settings_element);
 						anchors[antenna_id].update_debug_elements(updated_info);
 					}
 
@@ -1214,6 +1286,8 @@
 
 				document.getElementById("DummyNodeSubmit").addEventListener("click", dummy_node_submit);
 				document.getElementById("DummyNodeSubmitResponse").style.display = 'none';
+
+				anchor_settings_output.style.display = "none";
 
 				function toggle_use_avg(event) {
 					if (use_averaging) {
