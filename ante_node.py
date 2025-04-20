@@ -57,6 +57,14 @@ def main() -> None:
 			antenna_client.close()
 			return
 
+		if data_request_pkt.is_coord_update_request():
+			x, y = data_request_pkt.unpack_coord_update()
+			if x:
+				antenna_client.x = x
+			if y:
+				antenna_client.y = y
+			continue
+
 		if not data_request_pkt.is_dbm_data_request():
 			continue
 
