@@ -97,6 +97,7 @@ lowest_y_coord  = 0.0
 highest_y_coord = 0.0
 
 buffered_output:Optional[TextIO] = None
+json_buffer_cache:str = None
 
 # Return reply_packet, expecting_response
 async def decode_packet(packet:DBM_Packet) -> tuple[Optional[DBM_Packet], bool]:
@@ -147,7 +148,9 @@ def get_ante_node_coords(a_id:int) -> tuple[float, float]:
 	return __antennas_registered[a_id].x, __antennas_registered[a_id].y
 
 async def update_ante_readings(frame_id:int, server:TrianServer) -> None:
+	global json_buffer_cache
 	obtain_data_tasks = []
+	json_buffer_cache = gen_json_update()
 	for i in __antennas_registered.values():
 		# Send request data packets to all antes
 		request_pkt = DBM_Packet.create_reading_request(i.id, frame_id)
@@ -162,6 +165,8 @@ async def update_ante_readings(frame_id:int, server:TrianServer) -> None:
 		for i in results:
 			if i:
 				manage_data_packet(i, __current_request_id)
+
+	json_buffer_cache = None
 
 	for i in __antennas_registered.values():
 		i.update_reading_avg()
@@ -223,6 +228,8 @@ def localize_transmitter_pos() -> tuple[Optional[float], Optional[float]]:
 	return estimate_location(__antennas_registered, use_avg)
 
 def gen_json_update() -> str:
+	if json_buffer_cache:
+		return json_buffer_cache
 	d = {
 		"estimated_sources": {},
 		"antennas": {k:v.convert_to_json_obj() for k, v in __antennas_registered.items()}
