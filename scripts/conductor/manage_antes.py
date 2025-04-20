@@ -180,7 +180,7 @@ async def loop_ante_updates(server:TrianServer) -> None:
 		__current_request_id = frame_id
 		await update_ante_readings(frame_id, server)
 		print_antennas()
-		await asyncio.sleep(0.5)
+		await asyncio.sleep(0.1)
 
 	buffered_output.close()
 	buffered_output = None
