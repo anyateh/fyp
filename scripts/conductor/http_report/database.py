@@ -10,6 +10,11 @@ __favicon_ico_file = path.join(__base_frontend_dir, "favicon.ico")
 __js_queue_js_file = path.join(__base_frontend_dir, "js", "queue.js")
 __css_scrollbar_css_file = path.join(__base_frontend_dir, "css", "scrollbar.css")
 
+__icons_icon_32_png_file = path.join(__base_frontend_dir, "icons", "icon_32.png")
+__icons_icon_64_png_file = path.join(__base_frontend_dir, "icons", "icon_64.png")
+__icons_icon_128_png_file = path.join(__base_frontend_dir, "icons", "icon_128.png")
+__icons_icon_256_png_file = path.join(__base_frontend_dir, "icons", "icon_256.png")
+
 __fonts_overpass_css_file = path.join(__base_frontend_dir, "fonts", "overpass.css")
 __fonts_overpass_qFdB35WCmI96Ajtm81GgY93qxycJ_woff2_file = \
 		path.join(__base_frontend_dir, "fonts", "overpass", "qFdB35WCmI96Ajtm81GgY93qxycJ.woff2")
@@ -103,6 +108,61 @@ def index_html_supplier_time() -> int:
 
 db_table['/']           = DB_Resource("/", "text/html", Supplier(index_html_supplier, index_html_supplier_time))
 db_table['/index.html'] = DB_Resource("/index.html", "text/html", Supplier(index_html_supplier, index_html_supplier_time))
+
+def favicon_ico_supplier() -> bytes:
+	with open(__favicon_ico_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def favicon_ico_supplier_time() -> int:
+	return int(path.getmtime(__favicon_ico_file))
+
+db_table['/favicon.ico'] = DB_Resource("/favicon.ico", "image/x-icon", Supplier(favicon_ico_supplier, favicon_ico_supplier_time))
+
+def icon_32_supplier() -> bytes:
+	with open(__icons_icon_32_png_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def icon_32_supplier_time() -> int:
+	return int(path.getmtime(__icons_icon_32_png_file))
+
+db_table['/icons/icon_32.png'] = DB_Resource("/icons/icon_32.png", "image/png", Supplier(icon_32_supplier, icon_32_supplier_time))
+
+def icon_64_supplier() -> bytes:
+	with open(__icons_icon_64_png_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def icon_64_supplier_time() -> int:
+	return int(path.getmtime(__icons_icon_64_png_file))
+
+db_table['/icons/icon_64.png'] = DB_Resource("/icons/icon_64.png", "image/png", Supplier(icon_64_supplier, icon_64_supplier_time))
+
+def icon_128_supplier() -> bytes:
+	with open(__icons_icon_128_png_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def icon_128_supplier_time() -> int:
+	return int(path.getmtime(__icons_icon_128_png_file))
+
+db_table['/icons/icon_128.png'] = DB_Resource("/icons/icon_128.png", "image/png", Supplier(icon_128_supplier, icon_128_supplier_time))
+
+def icon_256_supplier() -> bytes:
+	with open(__icons_icon_256_png_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def icon_256_supplier_time() -> int:
+	return int(path.getmtime(__icons_icon_256_png_file))
+
+db_table['/icons/icon_256.png'] = DB_Resource("/icons/icon_256.png", "image/png", Supplier(icon_256_supplier, icon_256_supplier_time))
 
 def upd_json_supplier() -> bytes:
 	return gen_json_update().encode(encoding = 'utf-8')

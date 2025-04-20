@@ -1,0 +1,112 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   width="512"
+   height="512"
+   viewBox="0 0 512 512"
+   version="1.1"
+   id="svg1"
+   inkscape:version="1.4.1 (93de688d07, 2025-03-30)"
+   sodipodi:docname="icon.svg"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:svg="http://www.w3.org/2000/svg">
+  <sodipodi:namedview
+     id="namedview1"
+     pagecolor="#ffffff"
+     bordercolor="#000000"
+     borderopacity="0.25"
+     inkscape:showpageshadow="2"
+     inkscape:pageopacity="0.0"
+     inkscape:pagecheckerboard="0"
+     inkscape:deskcolor="#d1d1d1"
+     inkscape:document-units="px"
+     inkscape:zoom="1.3968575"
+     inkscape:cx="240.53993"
+     inkscape:cy="235.52868"
+     inkscape:window-width="1894"
+     inkscape:window-height="984"
+     inkscape:window-x="1930"
+     inkscape:window-y="50"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="layer1" />
+  <defs
+     id="defs1">
+    <linearGradient
+       id="linearGradient4"
+       inkscape:collect="always">
+      <stop
+         style="stop-color:#bc4e9c;stop-opacity:1;"
+         offset="0"
+         id="stop4" />
+      <stop
+         style="stop-color:#f80759;stop-opacity:1;"
+         offset="1"
+         id="stop5" />
+    </linearGradient>
+    <linearGradient
+       inkscape:collect="always"
+       xlink:href="#linearGradient4"
+       id="linearGradient5"
+       x1="116"
+       y1="156"
+       x2="396"
+       y2="356"
+       gradientUnits="userSpaceOnUse" />
+    <filter
+       style="color-interpolation-filters:sRGB;"
+       inkscape:label="Drop Shadow"
+       id="filter24"
+       x="-0.031428571"
+       y="-0.044"
+       width="1.0485714"
+       height="1.068">
+      <feFlood
+         result="flood"
+         in="SourceGraphic"
+         flood-opacity="0.478431"
+         flood-color="rgb(0,0,0)"
+         id="feFlood23" />
+      <feGaussianBlur
+         result="blur"
+         in="SourceGraphic"
+         stdDeviation="2.000000"
+         id="feGaussianBlur23" />
+      <feOffset
+         result="offset"
+         in="blur"
+         dx="-4.000000"
+         dy="-4.000000"
+         id="feOffset23" />
+      <feComposite
+         result="comp1"
+         operator="out"
+         in="flood"
+         in2="offset"
+         id="feComposite23" />
+      <feComposite
+         result="comp2"
+         operator="atop"
+         in="comp1"
+         in2="SourceGraphic"
+         id="feComposite24" />
+    </filter>
+  </defs>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1">
+    <path
+       style="fill:#383838;fill-opacity:1;stroke:none;stroke-width:8;stroke-linecap:round;stroke-linejoin:round;stroke-opacity:1"
+       d="M 256.83622,511.63071 C 488.17386,516.42479 514.84323,476.84585 511.78346,256.68762 514.84323,36.529383 488.17386,-3.0495484 256.83622,1.7445296 25.49858,-3.0495484 -1.1707899,36.529383 1.8889801,256.68762 -1.1707899,476.84585 25.49858,516.42479 256.83622,511.63071 Z"
+       id="path3"
+       sodipodi:nodetypes="ccccc" />
+    <path
+       id="rect1"
+       style="fill:url(#linearGradient5);stroke-width:2;stroke-linecap:round;stroke-linejoin:round;stroke-dasharray:2, 4;filter:url(#filter24)"
+       d="M 216 156 C 204.92 156 196 164.92 196 176 L 196 336 C 196 347.08 204.92 356 216 356 C 227.08 356 236 347.08 236 336 L 236 176 C 236 164.92 227.08 156 216 156 z M 296 156 C 284.92 156 276 164.92 276 176 L 276 336 C 276 347.08 284.92 356 296 356 C 307.08 356 316 347.08 316 336 L 316 176 C 316 164.92 307.08 156 296 156 z M 136 206 C 124.92 206 116 214.92 116 226 L 116 286 C 116 297.08 124.92 306 136 306 C 147.08 306 156 297.08 156 286 L 156 226 C 156 214.92 147.08 206 136 206 z M 376 206 C 364.92 206 356 214.92 356 226 L 356 286 C 356 297.08 364.92 306 376 306 C 387.08 306 396 297.08 396 286 L 396 226 C 396 214.92 387.08 206 376 206 z " />
+  </g>
+</svg>
