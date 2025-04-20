@@ -470,7 +470,8 @@
 				var dragging_timing_now = 0;
 
 				var use_averaging = false;
-				var toggleAvgStatus = document.getElementById("UseAverageToggle").lastElementChild.firstChild;
+				var toggleAvg = document.getElementById("UseAverageToggle");
+				var toggleAvgStatus = toggleAvg.lastElementChild.firstChild;
 
 				function Anchor(id, x, y) {
 					this.id = id;
@@ -1032,9 +1033,11 @@
 					if (upd_obj.use_avg) {
 						use_averaging = true;
 						toggleAvgStatus.textContent = "on";
+						toggleAvg.classList.add("active");
 					} else {
 						use_averaging = false;
 						toggleAvgStatus.textContent = "off";
+						toggleAvg.classList.remove("active");
 					}
 
 					for (let antenna_id in anchors) {
@@ -1163,6 +1166,7 @@
 						})
 						use_averaging = false;
 						toggleAvgStatus.textContent = "off";
+						toggleAvg.classList.remove("active");
 					} else {
 						fetch("/set_use_averaging", {
 							method: "POST", 
@@ -1170,6 +1174,7 @@
 						})
 						use_averaging = true;
 						toggleAvgStatus.textContent = "on";
+						toggleAvg.classList.add("active");
 					}
 				}
 
