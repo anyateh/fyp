@@ -642,6 +642,7 @@
 							this.debug_avg_fifo_buffer_props[i].prop.parentNode.removeChild(this.debug_avg_fifo_buffer_props[i].prop);
 							this.debug_avg_fifo_buffer_props.pop();
 						}
+						this.debug_avg_fifo_buffer_props.length = n_buff;
 					}
 
 					for (let i = 0; i < this.debug_avg_fifo_buffer_props.length; i++) {

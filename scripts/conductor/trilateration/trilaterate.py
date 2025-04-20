@@ -21,12 +21,15 @@ def inv_friis(power_received_dbm:float, antenna_gain_dbm:float) -> float:
 
 # Currently assuming single device to track.
 def estimate_location(antennas:dict[int, AntennaNode], use_avg:bool = False) -> tuple[Optional[float], Optional[float]]:
+	antennas_clone = antennas.copy()
+
 	# Pick the first antenna in the dict.
 	try:
-		ref_ant_id, ref_ant = next(iter(antennas.items()))
+		ref_ant_id, ref_ant = next(iter(antennas_clone.items()))
 
-		remaining_antennas = {k:v for k, v in antennas.items() if v.dbm is not None}
-		del remaining_antennas[ref_ant_id]
+		remaining_antennas = {k:v for k, v in antennas_clone.items() if v.dbm is not None}
+		if ref_ant_id in remaining_antennas:
+			del remaining_antennas[ref_ant_id]
 
 		assert len(remaining_antennas) >= 1
 
