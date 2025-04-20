@@ -462,7 +462,7 @@
 				};
 				// var milliseconds_per_count = 100;
 				var milliseconds_per_frame = 16.7; // To be determined automatically
-				var dragging_deccel_factor = 0.1; // Hooke's constant
+				var dragging_deccel_factor = 0.03; // Hooke's constant
 				var dragging_prev_offset_coord = {x: 0, y: 0};
 				var dragging_upd_time = {prev: 0, now: 0};
 				var dragging_coast_velocity = {x: 0, y: 0}; // Pixels per frame
@@ -937,6 +937,7 @@
 					viewport_offset_y += dragging_coast_velocity.y;
 					dragging_coast_velocity.x = dec_stop_at_0(dragging_coast_velocity.x, get_coasting_deccel(dragging_coast_velocity.x));
 					dragging_coast_velocity.y = dec_stop_at_0(dragging_coast_velocity.y, get_coasting_deccel(dragging_coast_velocity.y));
+					paint_elements(false);
 					if (!dragging_mode && (dragging_coast_velocity.x != 0 || dragging_coast_velocity.y != 0))
 						requestAnimationFrame(gliding_update);
 				}
