@@ -274,4 +274,4 @@ class DBM_Packet:
 	@staticmethod
 	def create_coord_update(identifier:int, x:float, y:float):
 		coord_upd = DBM_Packet.pack_coord_update(x, y)
-		return DBM_Packet(identifier, DBM_Packet.FLAG_UPDATE_ANT, 0, coord_upd)
+		return DBM_Packet(identifier, DBM_Packet.FLAG_UPDATE_ANT, coord_upd)

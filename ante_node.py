@@ -6,6 +6,7 @@ from sys import argv, stderr
 
 from scripts.ante_terminal.client import AnteClient
 from scripts.ante_terminal.obtain_signal import measure_dbm
+from scripts.packet import DBM_Packet
 from scripts.logger import logger, set_colour_formatting
 
 def print_usage(arg0:str) -> None:
@@ -58,7 +59,7 @@ def main() -> None:
 			return
 
 		if data_request_pkt.is_coord_update_request():
-			x, y = data_request_pkt.unpack_coord_update()
+			x, y = DBM_Packet.unpack_coord_update(data_request_pkt.data)
 			if x:
 				antenna_client.x = x
 			if y:
