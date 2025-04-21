@@ -992,9 +992,28 @@
 
 				hamburger_menu.addEventListener("click", toggle_hamburger_menu);
 
-				function set_zoom_scale(zx, zy) {
+				function set_zoom_scale(zx, zy, clientx, clienty) {
+					let scale_scale_factor_x = zx / viewport_scale_x;
+					let scale_scale_factor_y = zy / viewport_scale_y;
+
 					viewport_scale_x = zx;
 					viewport_scale_y = zy;
+
+					let vh = map.clientHeight;
+					let cy = vh - clienty;
+
+					let zoom_point_correct_x = -clientx * scale_scale_factor_x + clientx;
+					let zoom_point_correct_y = -cy * scale_scale_factor_y + cy;
+					let zoom_point_graphic_correct_y = -clienty * scale_scale_factor_y + clienty;
+
+					viewport_offset_x = scale_scale_factor_x * viewport_offset_x + zoom_point_correct_x;
+					viewport_offset_y = scale_scale_factor_y * viewport_offset_y + zoom_point_correct_y;
+
+					start_dragging_offsets.x = scale_scale_factor_x * start_dragging_offsets.x + zoom_point_correct_x;
+					start_dragging_offsets.y = scale_scale_factor_y * start_dragging_offsets.y + zoom_point_correct_y;
+
+					start_dragging_offsets.mouse_x = scale_scale_factor_x * start_dragging_offsets.mouse_x + zoom_point_correct_x;
+					start_dragging_offsets.mouse_y = scale_scale_factor_y * start_dragging_offsets.mouse_y + zoom_point_graphic_correct_y;
 
 					paint_elements(true);
 				}
@@ -1014,21 +1033,24 @@
 
 					let zoom_factor = cur_fingers_length / pinch_ref_length;
 
-					set_zoom_scale(zoom_factor * zoom_x_before_pinch, zoom_factor * zoom_y_before_pinch);
+					let mid_x = (touch1X + touch2X) / 2;
+					let mid_y = (touch1Y + touch2Y) / 2;
+
+					set_zoom_scale(zoom_factor * zoom_x_before_pinch, zoom_factor * zoom_y_before_pinch, 0, 0);
 				}
 
 				function pinch_zoom_end() {
 					// Reserved for possible momentum zooming
 				}
 
-				function zoom_map(amt) {
+				function zoom_map(amt, clientX, clientY) {
 					var offset = -amt * 0.2 / 180;
 
-					set_zoom_scale(viewport_scale_x + offset, viewport_scale_y + offset);
+					set_zoom_scale(viewport_scale_x + offset, viewport_scale_y + offset, clientX, clientY);
 				}
 
 				function map_wheel_event(event) {
-					zoom_map(event.deltaY);
+					zoom_map(event.deltaY, event.clientX, event.clientY);
 				}
 
 				map.addEventListener("wheel", map_wheel_event);
@@ -1087,7 +1109,7 @@
 					var plot_scaled_w = plot_w * scale_factor;
 					var plot_scaled_h = plot_h * scale_factor;
 
-					set_zoom_scale(scale_factor, scale_factor);
+					set_zoom_scale(scale_factor, scale_factor, 0, 0);
 
 					viewport_offset_x = min_x + viewport_padding_x + (map_box.width - plot_scaled_w) / 2;
 					viewport_offset_y = min_y + viewport_padding_y + (map_box.height - plot_scaled_h) / 2;
@@ -1264,8 +1286,10 @@
 					}
 					if (touches.length >= 1) {
 						if (dragging_mode){
-							start_dragging_offsets.mouse_x += touches[0].clientX - current_dragging_touchpoint.x;
-							start_dragging_offsets.mouse_y += touches[0].clientY - current_dragging_touchpoint.y;
+							let teleport_x = touches[0].clientX - current_dragging_touchpoint.x;
+							let teleport_y = touches[0].clientY - current_dragging_touchpoint.y;
+							start_dragging_offsets.mouse_x += teleport_x;
+							start_dragging_offsets.mouse_y += teleport_y;
 						} else {
 							activate_dragging_mode(touches[0].clientX, touches[0].clientY);
 							current_dragging_touchpoint.x = touches[0].clientX;
