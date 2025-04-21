@@ -1422,7 +1422,7 @@
 
 				function attempt_new_socket() {
 					if (!socket_active) {
-						wsocket = new WebSocket("upd.json");
+						wsocket = new WebSocket("ws://" + location.host + "/upd.json");
 						wsocket.onopen = sock_start;
 						wsocket.onclose = sock_stopped;
 						wsocket.onerror = sock_stopped;
