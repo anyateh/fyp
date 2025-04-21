@@ -15,6 +15,13 @@ __icons_icon_64_png_file = path.join(__base_frontend_dir, "icons", "icon_64.png"
 __icons_icon_128_png_file = path.join(__base_frontend_dir, "icons", "icon_128.png")
 __icons_icon_256_png_file = path.join(__base_frontend_dir, "icons", "icon_256.png")
 
+__icons_ios_launchpage_png_file = path.join(__base_frontend_dir, "icons", "ios", "launchpage.png")
+
+__icons_icon_app_64_png_file = path.join(__base_frontend_dir, "icons", "ios", "icon_64.png")
+__icons_icon_app_128_png_file = path.join(__base_frontend_dir, "icons", "ios", "icon_128.png")
+__icons_icon_app_180_png_file = path.join(__base_frontend_dir, "icons", "ios", "icon_180.png")
+__icons_icon_app_256_png_file = path.join(__base_frontend_dir, "icons", "ios", "icon_256.png")
+
 __fonts_overpass_css_file = path.join(__base_frontend_dir, "fonts", "overpass.css")
 __fonts_overpass_qFdB35WCmI96Ajtm81GgY93qxycJ_woff2_file = \
 		path.join(__base_frontend_dir, "fonts", "overpass", "qFdB35WCmI96Ajtm81GgY93qxycJ.woff2")
@@ -163,6 +170,61 @@ def icon_256_supplier_time() -> int:
 	return int(path.getmtime(__icons_icon_256_png_file))
 
 db_table['/icons/icon_256.png'] = DB_Resource("/icons/icon_256.png", "image/png", Supplier(icon_256_supplier, icon_256_supplier_time))
+
+def icon_ios_launchpage_supplier() -> bytes:
+	with open(__icons_ios_launchpage_png_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def icon_ios_launchpage_supplier_time() -> int:
+	return int(path.getmtime(__icons_ios_launchpage_png_file))
+
+db_table['/icons/ios/launchpage.png'] = DB_Resource("/icons/ios/launchpage.png", "image/png", Supplier(icon_ios_launchpage_supplier, icon_ios_launchpage_supplier_time))
+
+def icon_app_64_supplier() -> bytes:
+	with open(__icons_icon_app_64_png_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def icon_app_64_supplier_time() -> int:
+	return int(path.getmtime(__icons_icon_app_64_png_file))
+
+db_table['/icons/ios/icon_64.png'] = DB_Resource("/icons/ios/icon_64.png", "image/png", Supplier(icon_app_64_supplier, icon_app_64_supplier_time))
+
+def icon_app_128_supplier() -> bytes:
+	with open(__icons_icon_app_128_png_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def icon_app_128_supplier_time() -> int:
+	return int(path.getmtime(__icons_icon_app_128_png_file))
+
+db_table['/icons/ios/icon_128.png'] = DB_Resource("/icons/ios/icon_128.png", "image/png", Supplier(icon_app_128_supplier, icon_app_128_supplier_time))
+
+def icon_app_180_supplier() -> bytes:
+	with open(__icons_icon_app_180_png_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def icon_app_180_supplier_time() -> int:
+	return int(path.getmtime(__icons_icon_app_180_png_file))
+
+db_table['/icons/ios/icon_180.png'] = DB_Resource("/icons/ios/icon_180.png", "image/png", Supplier(icon_app_180_supplier, icon_app_180_supplier_time))
+
+def icon_app_256_supplier() -> bytes:
+	with open(__icons_icon_app_256_png_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def icon_app_256_supplier_time() -> int:
+	return int(path.getmtime(__icons_icon_app_256_png_file))
+
+db_table['/icons/ios/icon_256.png'] = DB_Resource("/icons/ios/icon_256.png", "image/png", Supplier(icon_app_256_supplier, icon_app_256_supplier_time))
 
 def upd_json_supplier() -> bytes:
 	return gen_json_update().encode(encoding = 'utf-8')
