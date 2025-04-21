@@ -530,6 +530,9 @@
 					x: 0, y: 0,
 					mouse_x: 0, mouse_y: 0
 				};
+				var current_dragging_touchpoint = {
+					x: 0, y: 0
+				}; // For touchend as it doesn't keep record of leaving touches.
 				// var milliseconds_per_count = 100;
 				var milliseconds_per_frame = 16.7; // To be determined automatically
 				var dragging_deccel_factor = 0.03; // Hooke's constant
@@ -1203,6 +1206,33 @@
 					if (touches.length >= 1) {
 						if (!dragging_mode) {
 							activate_dragging_mode(touches[0].clientX, touches[0].clientY);
+							current_dragging_touchpoint.x = touches[0].clientX;
+							current_dragging_touchpoint.y = touches[0].clientY;
+						}
+					} else {
+						if (dragging_mode) {
+							deactivate_dragging_mode();
+						}
+					}
+					event.preventDefault();
+				}
+
+				function map_touchend_event(event) {
+					var touches = event.touches;
+					var changed_touches = event.changedTouches;
+					if (touches.length >= 2) {
+						pinch_zoom_start(touches[0].clientX, touches[0].clientY, touches[1].clientX, touches[1].clientY);
+					} else {
+						pinch_zoom_end();
+					}
+					if (touches.length >= 1) {
+						if (dragging_mode){
+							start_dragging_offsets.mouse_x += touches[0].clientX - current_dragging_touchpoint.x;
+							start_dragging_offsets.mouse_y += touches[0].clientY - current_dragging_touchpoint.y;
+						} else {
+							activate_dragging_mode(touches[0].clientX, touches[0].clientY);
+							current_dragging_touchpoint.x = touches[0].clientX;
+							current_dragging_touchpoint.y = touches[0].clientY;
 						}
 					} else {
 						if (dragging_mode) {
@@ -1226,6 +1256,8 @@
 						pinch_zoom_move(touches[0].clientX, touches[0].clientY, touches[1].clientX, touches[1].clientY);
 					}
 					if (touches.length >= 1) {
+						current_dragging_touchpoint.x = touches[0].clientX;
+						current_dragging_touchpoint.y = touches[0].clientY;
 						dragging_update(touches[0].clientX - start_dragging_offsets.mouse_x, start_dragging_offsets.mouse_y - touches[0].clientY);
 					}
 					event.preventDefault();
@@ -1237,7 +1269,7 @@
 
 				map.addEventListener("touchstart", map_touchstart_event);
 				// TODO: Fix sudden jumping when removing finger
-				map.addEventListener("touchend", map_touchstart_event);
+				map.addEventListener("touchend", map_touchend_event);
 				map.addEventListener("touchmove", map_touchmove_event);
 				map.addEventListener("touchcancel", map_touchinterrupt_event);
 
