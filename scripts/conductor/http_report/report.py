@@ -1,6 +1,6 @@
 from base64 import b64encode
 from hashlib import sha1
-from math import isnan
+from math import isinf, isnan
 from os import path
 from socket import AF_INET, socket, SOCK_STREAM, SOL_SOCKET, SO_REUSEADDR, timeout
 from sys import stderr
@@ -234,6 +234,8 @@ def handle_set_dummy_coord_req(client:socket, post_content:bytes) -> None:
 
 		assert not isnan(x)
 		assert not isnan(y)
+		assert not isinf(x)
+		assert not isinf(y)
 
 		set_dummy_coord(x, y, True)
 
@@ -270,6 +272,8 @@ def handle_set_x_y_id_req(client:socket, post_content:bytes) -> None:
 
 		assert not isnan(x)
 		assert not isnan(y)
+		assert not isinf(x)
+		assert not isinf(y)
 
 		update_ante_coords(aid, x, y)
 
