@@ -919,6 +919,9 @@
 				};
 
 				Point.prototype.set_coord = function(x, y) {
+					if (x == null || y == null) {
+						return;
+					}
 					this.x = x;
 					this.y = y;
 				};
@@ -1285,6 +1288,10 @@
 				map.addEventListener("touchmove", map_touchmove_event);
 				map.addEventListener("touchcancel", map_touchinterrupt_event);
 
+				function is_finite_real_number(n) {
+					return n != null && isFinite(n) && !isNaN(n);
+				}
+
 				function parse_updates(json_update) {
 					// upd_obj = JSON.parse(json_update);
 					upd_obj = json_update;
@@ -1332,8 +1339,10 @@
 						let updated_info = upd_obj.estimated_sources[point_id];
 
 						if (points.hasOwnProperty(point_id)) {
-							points[point_id].set_coord(updated_info.x, updated_info.y);
-							points[point_id].is_active = true;
+							if (is_finite_real_number(updated_info.x) && is_finite_real_number(updated_info.y)) {
+								points[point_id].set_coord(updated_info.x, updated_info.y);
+								points[point_id].is_active = true;
+							}
 							// points[point_id].update_element();
 							continue;
 						}

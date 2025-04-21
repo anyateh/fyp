@@ -6,6 +6,7 @@ else:
 
 import numpy as np
 
+from math   import isnan, isinf
 from typing import Optional
 
 FREQUENCY  = 500e6
@@ -15,6 +16,9 @@ WAVELENGTH = SOL / FREQUENCY
 # Tentative constants
 TRANSMITTER_POWER_DBM = 1.0
 TRANSMITTER_GAIN_DBM  = 1.0 # No transmitter dish focusing the signal
+
+def is_dbm_valid_for_trilat(dbm:float) -> bool:
+	return dbm is not None and not isnan(dbm) and not isinf(dbm)
 
 def inv_friis(power_received_dbm:float, antenna_gain_dbm:float) -> float:
 	return WAVELENGTH / (4 * np.pi * 10**((power_received_dbm - TRANSMITTER_POWER_DBM - TRANSMITTER_GAIN_DBM - antenna_gain_dbm) / 20))
@@ -27,7 +31,7 @@ def estimate_location(antennas:dict[int, AntennaNode], use_avg:bool = False) -> 
 	try:
 		ref_ant_id, ref_ant = next(iter(antennas_clone.items()))
 
-		remaining_antennas = {k:v for k, v in antennas_clone.items() if v.dbm is not None}
+		remaining_antennas = {k:v for k, v in antennas_clone.items() if is_dbm_valid_for_trilat(v.dbm)}
 		if ref_ant_id in remaining_antennas:
 			del remaining_antennas[ref_ant_id]
 
@@ -77,5 +81,7 @@ def estimate_location(antennas:dict[int, AntennaNode], use_avg:bool = False) -> 
 		return tuple(np.linalg.lstsq(left_side_matrix_rows, right_side_matrix_rows, rcond = None)[0])
 
 	except StopIteration:
+		return None, None
+	except ZeroDivisionError:
 		return None, None
 

@@ -12,7 +12,7 @@ if TYPE_CHECKING:
 	from .server              import TrianServer
 else:
 	TrianServer   = 'TrianServer'
-from .trilateration.trilaterate import estimate_location, inv_friis
+from .trilateration.trilaterate import estimate_location, inv_friis, is_dbm_valid_for_trilat
 from ..tui.ellipse        import OutlineEllipse
 from ..tui.antenna_screen import AntennaScreen
 
@@ -233,7 +233,7 @@ def can_perform_localization() -> bool:
 	count = 0
 	first_ante = None
 	for ante in __antennas_registered.values():
-		if ante.dbm is not None:
+		if is_dbm_valid_for_trilat(ante.dbm):
 			if not first_ante:
 				first_ante = ante
 			count += 1
