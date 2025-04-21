@@ -523,6 +523,9 @@
 						<div class="stretchable bold">Use Averaging</div>
 						<div>off</div>
 					</div>
+					<div id="ReloadWebApp" class="option-button" tabindex="0" role="button">
+						<div class="stretchable bold">Reload Page</div>
+					</div>
 				</div>
 				<div class="inner-tile">
 					<details>
@@ -1496,6 +1499,12 @@
 				}
 
 				document.getElementById("UseAverageToggle").addEventListener("click", toggle_use_avg);
+
+				function reload_web_app(event) {
+					location.reload();
+				}
+
+				document.getElementById("ReloadWebApp").addEventListener("click", reload_web_app);
 
 				// var update_tmr = setInterval(get_updates, 500);
 				var update_tmr = setInterval(attempt_new_socket, 5000);
