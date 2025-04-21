@@ -1221,11 +1221,12 @@
 				}
 
 				function map_touchmove_event(event) {
-					if (event.touches.length >= 2) {
+					let touches = event.touches;
+					if (touches.length >= 2) {
 						pinch_zoom_move(touches[0].clientX, touches[0].clientY, touches[1].clientX, touches[1].clientY);
 					}
-					if (event.touches.length >= 1) {
-						dragging_update(event.touches[0].clientX - start_dragging_offsets.mouse_x, start_dragging_offsets.mouse_y - event.touches[0].clientY);
+					if (touches.length >= 1) {
+						dragging_update(touches[0].clientX - start_dragging_offsets.mouse_x, start_dragging_offsets.mouse_y - touches[0].clientY);
 					}
 					event.preventDefault();
 				}
