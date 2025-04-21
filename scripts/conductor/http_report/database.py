@@ -7,6 +7,7 @@ from ..manage_antes import gen_json_update
 __base_frontend_dir      = "interface"
 __index_html_file        = path.join(__base_frontend_dir, "index.html")
 __favicon_ico_file       = path.join(__base_frontend_dir, "favicon.ico")
+__manifest_json_file     = path.join(__base_frontend_dir, "manifest.json")
 __js_queue_js_file       = path.join(__base_frontend_dir, "js", "queue.js")
 __css_scrollbar_css_file = path.join(__base_frontend_dir, "css", "scrollbar.css")
 
@@ -162,6 +163,17 @@ def favicon_ico_supplier_time() -> int:
 	return int(path.getmtime(__favicon_ico_file))
 
 db_table['/favicon.ico'] = DB_Resource("/favicon.ico", "image/x-icon", Supplier(favicon_ico_supplier, favicon_ico_supplier_time))
+
+def manifest_json_supplier() -> bytes:
+	with open(__manifest_json_file, 'rb') as f:
+		d = f.read()
+
+	return d
+
+def manifest_json_supplier_time() -> int:
+	return int(path.getmtime(__manifest_json_file))
+
+db_table['/manifest.json'] = DB_Resource("/manifest.json", "application/json", Supplier(manifest_json_supplier, manifest_json_supplier_time))
 
 def favicon_32_png_supplier() -> bytes:
 	with open(__icons_favicon_32_png_file, 'rb') as f:
