@@ -75,9 +75,14 @@ def main() -> None:
 
 		antenna_client.send_requested_data(fid, dbm_measurement)
 
+	resend_limit = 6
+
 	logout_ack_pkt = antenna_client.request_logout()
 
-	while not logout_ack_pkt:
+	for _ in range(resend_limit):
+		if logout_ack_pkt:
+			break
+
 		logout_ack_pkt = antenna_client.request_logout()
 
 	antenna_client.close()
