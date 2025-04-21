@@ -77,8 +77,8 @@ class AntennaNode:
 			'x': self.x,
 			'y': self.y,
 			'dbm': self.dbm,
-			'r': None if self.dbm == None else self.inverse_friis(),
-			'r_w_avg': None if self.dbm == None else self.inv_friis_avg.avg(),
+			'r': self.inverse_friis() if is_dbm_valid_for_trilat(self.dbm) else None,
+			'r_w_avg': self.inv_friis_avg.avg() if is_dbm_valid_for_trilat(self.dbm) and self.inv_friis_avg.buffer else None,
 			'avg_fifo': {
 				'buffer': self.inv_friis_avg.buffer,
 				'n_items': len(self.inv_friis_avg.buffer),
