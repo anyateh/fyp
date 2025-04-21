@@ -111,7 +111,11 @@ def approve_websocket_req(client:socket, websocket_key:bytes) -> None:
 
 def websocket_handler(websocket:socket, headers:dict[str, str], is_server_alive_fx:Callable[[], bool]) -> None:
 	approve_websocket_req(websocket, headers["Sec-WebSocket-Key"].encode(encoding = 'utf-8'))
-	websocket.settimeout(0.1)
+
+	poll_timeout = 0.1
+
+	websocket.settimeout(poll_timeout)
+
 	while is_server_alive_fx():
 		try:
 			received_bytes = websocket.recv(1024)
@@ -125,10 +129,14 @@ def websocket_handler(websocket:socket, headers:dict[str, str], is_server_alive_
 			if get_optcode(received_bytes) != OPTTEXT:
 				continue
 
-			t = extract_text_frame(received_bytes)
+			new_timeout_text = extract_text_frame(received_bytes)
 
-			response = create_response_text_frame(f"Received: {t}")
-			websocket.sendall(response)
+			try:
+				poll_timeout = float(new_timeout_text)
+				if not isinf(poll_timeout) and not isnan(poll_timeout):
+					websocket.settimeout(poll_timeout)
+			except ValueError:
+				continue
 		except timeout:
 			response = create_response_text_frame(gen_json_update())
 			websocket.sendall(response)
