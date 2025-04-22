@@ -573,10 +573,18 @@
 				</div>
 				<div class="inner-tile">
 					<details>
+						<summary class="title">Poll Rate Settings</summary>
+						<p class="bold">Poll Rate Delay (ms)</p>
+						<form class="one-liner">
+							<input id="PollRateSetField" type="number" name="pollrate" placeholder="Pollrate Delay (ms)">
+							<input id="PollRateSetButton" type="submit" value="Set">
+						</form>
+					</details>
+				</div>
+				<div class="inner-tile">
+					<details>
 						<summary class="title">Antenna Settings</summary>
-						<div id="AntennaSettings">
-							
-						</div>
+						<div id="AntennaSettings"></div>
 					</details>
 				</div>
 				<div id="AntennaSettingResponse" class="code-block"></div>
@@ -1590,12 +1598,77 @@
 
 				var wsocket = null;
 				var socket_active = false;
+				var socket_poll_delay = 100;
+				var stashed_poll_delay = 100;
+				var prev_recv_time = 0;
+				var use_aimd_flow_control = true;
+				var aimd_hold_count = 10;
+				var poll_rate_text_field = document.getElementById("PollRateSetField");
+
+				function send_poll_rate_to_backend() {
+					if (wsocket) {
+						wsocket.send("" + (socket_poll_delay / 1000));
+						poll_rate_text_field.value = socket_poll_delay;
+					}
+				}
+
+				function wind_down_poll_rate() {
+					if (!wsocket) {
+						return;
+					}
+					stashed_poll_delay = socket_poll_delay;
+					socket_poll_delay = 10000;
+					send_poll_rate_to_backend();
+					use_aimd_flow_control = false;
+				}
+
+				function wind_up_poll_rate() {
+					if (!wsocket) {
+						return;
+					}
+					socket_poll_delay = stashed_poll_delay;
+					send_poll_rate_to_backend();
+					use_aimd_flow_control = true;
+					prev_recv_time = performance.now();
+					aimd_hold_count = 10;
+				}
+
+				window.addEventListener("blur", wind_down_poll_rate);
+				window.addEventListener("focus", wind_up_poll_rate);
+
+				function aimd_flow_ctrl(t1) {
+					let delay = Math.floor(t1 - prev_recv_time);
+
+					if (delay > 100) {
+						if (delay <= Math.floor(socket_poll_delay * 1.1)) {
+							socket_poll_delay--;
+						} else {
+							socket_poll_delay *= 2;
+						}
+
+						send_poll_rate_to_backend();
+					}
+				}
 
 				function sock_start(event) {
+					socket_poll_delay = 100;
+					poll_rate_text_field.value = socket_poll_delay;
+					prev_recv_time = performance.now();
+					aimd_hold_count = 10;
 					socket_active = true;
 				}
 
 				function sock_receive_updates(event) {
+					let t1 = performance.now();
+					if (use_aimd_flow_control) {
+						if (aimd_hold_count > 0) {
+							aimd_hold_count--;
+						} else {
+							aimd_hold_count = 10;
+							aimd_flow_ctrl(t1);
+						}
+					}
+					prev_recv_time = t1;
 					parse_updates(JSON.parse(event.data));
 				}
 
@@ -1612,6 +1685,31 @@
 						wsocket.onmessage = sock_receive_updates;
 					}
 				}
+
+				function set_poll_rate(event) {
+					if (!wsocket) {
+						event.preventDefault();
+						return;
+					}
+
+					let pr_ms = parseInt(document.getElementById("PollRateSetField").value);
+
+					if (isNaN(pr_ms)) {
+						event.preventDefault();
+						return;
+					}
+
+					socket_poll_delay = pr_ms;
+					if (wsocket) {
+						wsocket.send("" + (socket_poll_delay / 1000));
+					}
+					if (!use_aimd_flow_control) {
+						wind_up_poll_rate();
+					}
+					event.preventDefault();
+				}
+
+				document.getElementById("PollRateSetButton").addEventListener("click", set_poll_rate);
 
 				function setup_axes() {
 					var x_axis = document.createElement('div');
