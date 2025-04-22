@@ -1676,12 +1676,12 @@
 				function sock_receive_updates(event) {
 					let t1 = performance.now();
 					if (use_aimd_flow_control) {
-						if (aimd_hold_count > 0) {
-							aimd_hold_count--;
-						} else {
-							aimd_hold_count = 10;
+						// if (aimd_hold_count > 0) {
+						// 	aimd_hold_count--;
+						// } else {
+						// 	aimd_hold_count = 10;
 							aimd_flow_ctrl(t1);
-						}
+						// }
 					}
 					prev_recv_time = t1;
 					parse_updates(JSON.parse(event.data));
