@@ -2,7 +2,7 @@
 <html lang="en">
 	<head>
 		<meta charset="UTF-8">
-		<meta name="viewport" content="width=device-width, initial-scale=1.0">
+		<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
 		<title>EE4002D</title>
 
 		<link rel="icon" type="image/png" href="icons/favicon_32.png" sizes="32x32">
@@ -535,6 +535,17 @@
 			.floating-title h1 {
 				margin: 0;
 				font-size: 1em;
+			}
+
+			.ip-x-bottom-exclude-zone {
+				position: fixed;
+				left: 0;
+				right: 0;
+				bottom: 0;
+				height: 0;
+				z-index: 11;
+				height: env(safe-area-inset-bottom);
+				background-color: transparent;
 			}
 		</style>
 		<main class="map-viewport">
@@ -1784,6 +1795,12 @@
 
 				document.getElementById("ReloadWebApp").addEventListener("click", reload_web_app);
 
+				function ipx_exclude_zone_setup() {
+					var exclude_zone = document.createElement("div");
+					exclude_zone.classList.add("ip-x-bottom-exclude-zone");
+					document.body.appendChild(exclude_zone);
+				}
+
 				// var update_tmr = setInterval(get_updates, 500);
 				var update_tmr = setInterval(attempt_new_socket, 5000);
 				attempt_new_socket();
@@ -1796,6 +1813,7 @@
 				points[0].is_active = false;
 				points[0].insert_point(document.getElementById("Map"));
 				adjust_frame_scale_with_points();
+				ipx_exclude_zone_setup();
 			// })();
 		</script>
 	</body>
