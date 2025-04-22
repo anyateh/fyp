@@ -1650,15 +1650,19 @@
 				function aimd_flow_ctrl(t1) {
 					let delay = Math.floor(t1 - prev_recv_time);
 
-					if (delay > 100) {
-						if (delay <= Math.floor(socket_poll_delay * 1.1)) {
-							socket_poll_delay--;
-						} else {
-							socket_poll_delay *= 2;
+					if (delay <= Math.floor(socket_poll_delay * 1.1)) {
+						socket_poll_delay--;
+						if (socket_poll_delay < 100) {
+							socket_poll_delay = 100;
 						}
-
-						send_poll_rate_to_backend();
+					} else {
+						socket_poll_delay *= 2;
+						if (socket_poll_delay > 500) {
+							socket_poll_delay = 500;
+						}
 					}
+
+					send_poll_rate_to_backend();
 				}
 
 				function sock_start(event) {
