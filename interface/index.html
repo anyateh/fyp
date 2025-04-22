@@ -1613,8 +1613,8 @@
 				var stashed_poll_delay = 100;
 				var prev_recv_time = 0;
 				var use_aimd_flow_control = true;
-				var aimd_hold_count = 10;
 				var poll_rate_text_field = document.getElementById("PollRateSetField");
+				var processing_time = 0;
 
 				function send_poll_rate_to_backend() {
 					if (wsocket) {
@@ -1641,7 +1641,6 @@
 					send_poll_rate_to_backend();
 					use_aimd_flow_control = true;
 					prev_recv_time = performance.now();
-					aimd_hold_count = 10;
 				}
 
 				window.addEventListener("blur", wind_down_poll_rate);
@@ -1669,22 +1668,29 @@
 					socket_poll_delay = 100;
 					poll_rate_text_field.value = socket_poll_delay;
 					prev_recv_time = performance.now();
-					aimd_hold_count = 10;
 					socket_active = true;
 				}
 
 				function sock_receive_updates(event) {
-					let t1 = performance.now();
-					if (use_aimd_flow_control) {
-						// if (aimd_hold_count > 0) {
-						// 	aimd_hold_count--;
-						// } else {
-						// 	aimd_hold_count = 10;
-							aimd_flow_ctrl(t1);
-						// }
-					}
-					prev_recv_time = t1;
+					// let t1 = performance.now();
+					// if (use_aimd_flow_control) {
+					// 	aimd_flow_ctrl(t1);
+					// }
+					// prev_recv_time = t1;
+
+					let t0 = performance.now();
 					parse_updates(JSON.parse(event.data));
+					let t1 = performance.now();
+
+					processing_time = Math.round(t1 - t0);
+
+					if (processing_time > socket_poll_delay) {
+						let prev_delay = socket_poll_delay;
+						socket_poll_delay = /* Math.min( */Math.max(Math.round(processing_time) * 2, 100)/* , 500) */;
+						if (socket_poll_delay == prev_delay) {
+							send_poll_rate_to_backend();
+						}
+					}
 				}
 
 				function sock_stopped(event) {
