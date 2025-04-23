@@ -87,7 +87,7 @@
 				font-family: "Share Tech Mono", monospace;
 				overflow-x: auto;
 				white-space: pre-wrap;
-				font-size: 0.8em;
+				font-size: 0.9em;
 			}
 		</style>
 	</head>
@@ -383,6 +383,9 @@
 				border-radius: 0.5em;
 				transition: background 0.3s ease, transform 0.3s ease;
 				padding: 0.5em 1em;
+				margin: 0.5em 0;
+				-webkit-user-select: none;
+				user-select: none;
 			}
 
 			@media screen and (hover: hover) {
@@ -582,14 +585,6 @@
 			<div class="tile">
 				<p class="title">Settings</p>
 				<div class="inner-tile">
-					<div id="UseAverageToggle" class="left-right-sectioned option-button" tabindex="0" role="button">
-						<div class="stretchable bold">Use Averaging (radius)</div>
-						<div>off</div>
-					</div>
-					<div id="UseAverageToggleDBM" class="left-right-sectioned option-button" tabindex="0" role="button">
-						<div class="stretchable bold">Use Averaging (dBm)</div>
-						<div>off</div>
-					</div>
 					<div id="ReloadWebApp" class="option-button" tabindex="0" role="button">
 						<div class="stretchable bold">Reload Page</div>
 					</div>
@@ -597,6 +592,14 @@
 				<div class="inner-tile">
 					<details>
 						<summary class="title">Smoothing Settings</summary>
+						<div id="UseAverageToggle" class="left-right-sectioned option-button" tabindex="0" role="button">
+							<div class="stretchable bold">Use smoothing for radii</div>
+							<div>off</div>
+						</div>
+						<div id="UseAverageToggleDBM" class="left-right-sectioned option-button" tabindex="0" role="button">
+							<div class="stretchable bold">Use smoothing for dBm readings</div>
+							<div>off</div>
+						</div>
 						<p><label for="DBMAvgSizeField" class="bold">Average last n dBms</label></p>
 						<form class="one-liner" action="/set_dbm_avg_size" method="post" target="_blank">
 							<input id="DBMAvgSizeField" type="number" name="size" placeholder="Last n dBms">
