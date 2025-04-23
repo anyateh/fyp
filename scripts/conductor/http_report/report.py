@@ -178,7 +178,12 @@ def extract_http_first_line(byte_seq:bytes) -> str:
 def extract_http_info(http_packet:bytes) -> tuple[str, str, dict[str, str]]:
 	first_l = extract_http_first_line(http_packet)
 
-	first_l, headers = http_packet.split(b'\r\n\r\n', 1)[0].split(b'\r\n', 1)
+	__html_header_content_split = http_packet.split(b'\r\n\r\n', 1)[0].split(b'\r\n', 1)
+
+	if len(__html_header_content_split) != 2:
+		return
+
+	first_l, headers = __html_header_content_split
 
 	first_l = first_l.decode(encoding = 'utf-8')
 
@@ -238,11 +243,11 @@ def send_censored_traceback(e:Exception, client:socket) -> None:
 def handle_set_dummy_coord_req(client:socket, post_content:bytes) -> None:
 	decoded_content = post_content.decode(encoding = 'utf-8')
 
-	kv_pairs = decoded_content.split("&")
-
-	coords = {k: v for k, v in (i.split('=') for i in kv_pairs)}
-
 	try:
+		kv_pairs = decoded_content.split("&")
+
+		coords = {k: v for k, v in (i.split('=') for i in kv_pairs)}
+
 		x = float(coords['x'])
 		y = float(coords['y'])
 
@@ -305,10 +310,10 @@ def calibrate_trilateration_float(
 	) -> None:
 	decoded_content = post_content.decode(encoding = 'utf-8')
 	
-	kv_pairs = decoded_content.split("&")
-	info = {k: v for k, v in (i.split('=') for i in kv_pairs)}
-
 	try:
+		kv_pairs = decoded_content.split("&")
+		info = {k: v for k, v in (i.split('=') for i in kv_pairs)}
+
 		float_val = float(info[key_name])
 
 		if isnan(float_val):
