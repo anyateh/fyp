@@ -587,10 +587,35 @@
 				<div class="inner-tile">
 					<details>
 						<summary class="title">Poll Rate Settings</summary>
-						<p class="bold">Poll Rate Delay (ms)</p>
+						<p><label for="PollRateSetField" class="bold">Poll Rate Delay (ms)</label></p>
 						<form class="one-liner">
 							<input id="PollRateSetField" type="number" name="pollrate" placeholder="Pollrate Delay (ms)">
 							<input id="PollRateSetButton" type="submit" value="Set">
+						</form>
+					</details>
+				</div>
+				<div class="inner-tile">
+					<details>
+						<summary class="title">Calibration Settings</summary>
+						<p><label for="ReferencePowerField" class="bold">Reference Power (dBm)</label></p>
+						<form class="one-liner" action="/calibrate_transmitter_power" method="post" target="_blank">
+							<input id="ReferencePowerField" type="number" name="dbm" placeholder="Power (dBm)">
+							<input id="ReferencePowerButton" type="submit" value="Calibrate">
+						</form>
+						<p><label for="ReferenceDistanceField" class="bold">Reference Distance (m)</label></p>
+						<form class="one-liner" action="/calibrate_reference_distance" method="post" target="_blank">
+							<input id="ReferenceDistanceField" type="number" name="d0" placeholder="Distance (m)">
+							<input id="ReferenceDistanceButton" type="submit" value="Calibrate">
+						</form>
+						<p><label for="PathLossField" class="bold">Path Loss (free space is 2)</label></p>
+						<form class="one-liner" action="/calibrate_path_loss" method="post" target="_blank">
+							<input id="PathLossField" type="number" name="loss" placeholder="Loss">
+							<input id="PathLossButton" type="submit" value="Calibrate">
+						</form>
+						<p><label for="FrequencyField" class="bold">Signal Frequency (Hz)</label></p>
+						<form class="one-liner" action="/calibrate_signal_frequency" method="post" target="_blank">
+							<input id="FrequencyField" type="number" name="frequency" placeholder="Frequency (Hz)">
+							<input id="FrequencyButton" type="submit" value="Calibrate">
 						</form>
 					</details>
 				</div>
@@ -1601,6 +1626,8 @@
 						points[point_id].insert_point(map);
 					}
 
+					update_calibration_fields(upd_obj.calibration);
+
 					paint_elements(true);
 				}
 				// window.parse_updates = parse_updates;
@@ -1811,6 +1838,102 @@
 					var exclude_zone = document.createElement("div");
 					exclude_zone.classList.add("ip-x-bottom-exclude-zone");
 					document.body.appendChild(exclude_zone);
+				}
+
+				var refPwrField = document.getElementById("ReferencePowerField");
+				var refPwrButton = document.getElementById("ReferencePowerButton");
+				var refDisField = document.getElementById("ReferenceDistanceField");
+				var refDisButton = document.getElementById("ReferenceDistanceButton");
+				var pathLossField = document.getElementById("PathLossField");
+				var pathLossButton = document.getElementById("PathLossButton");
+				var freqField = document.getElementById("FrequencyField");
+				var freqButton = document.getElementById("FrequencyButton");
+				var calibrate_setting_changing = {
+					p0: false,
+					d0: false,
+					loss: false,
+					freq: false
+				}
+
+				function calibrate_request(event, text_field, action_url, form_name) {
+					var x = text_field.value;
+
+					if (!x) {
+						anchor_settings_output.style.display = 'none';
+						event.preventDefault();
+						return true;
+					}
+
+					var form_data = new URLSearchParams();
+					form_data.append(form_name, x);
+
+					fetch(action_url, {
+						method: "POST",
+						body: form_data
+					}).then(x => x.text()).then(function(output_log) {
+						anchor_settings_output.style.display = '';
+						anchor_settings_output.innerText = output_log;
+					});
+
+					event.preventDefault();
+				}
+
+				function calibrate_transmitter_power(event) {
+					calibrate_request(event, refPwrField, "/calibrate_transmitter_power", "dbm");
+					calibrate_setting_changing.p0 = false;
+				}
+
+				function calibrate_reference_distance(event) {
+					calibrate_request(event, refDisField, "/calibrate_reference_distance", "d0");
+					calibrate_setting_changing.d0 = false;
+				}
+
+				function calibrate_signal_frequency(event) {
+					calibrate_request(event, freqField, "/calibrate_signal_frequency", "frequency");
+					calibrate_setting_changing.freq = false;
+				}
+
+				function calibrate_path_loss(event) {
+					calibrate_request(event, pathLossField, "/calibrate_path_loss", "loss");
+					calibrate_setting_changing.loss = false;
+				}
+
+				refPwrButton.addEventListener("click", calibrate_transmitter_power);
+				refDisButton.addEventListener("click", calibrate_reference_distance);
+				pathLossButton.addEventListener("click", calibrate_path_loss);
+				freqButton.addEventListener("click", calibrate_signal_frequency);
+
+				function calibrate_transmitter_power_input_upd(event) {
+					calibrate_setting_changing.p0 = true;
+				}
+				function calibrate_reference_distance_input_upd(event) {
+					calibrate_setting_changing.d0 = true;
+				}
+				function calibrate_path_loss_input_upd(event) {
+					calibrate_setting_changing.loss = true;
+				}
+				function calibrate_signal_frequency_input_upd(event) {
+					calibrate_setting_changing.freq = true;
+				}
+
+				refPwrField.addEventListener("input", calibrate_transmitter_power_input_upd);
+				refDisField.addEventListener("input", calibrate_reference_distance_input_upd);
+				pathLossField.addEventListener("input", calibrate_path_loss_input_upd);
+				freqField.addEventListener("input", calibrate_signal_frequency_input_upd);
+
+				function update_calibration_fields(info) {
+					if (!calibrate_setting_changing.p0) {
+						refPwrField.value = info.p0dbm;
+					}
+					if (!calibrate_setting_changing.d0) {
+						refDisField.value = info.d0;
+					}
+					if (!calibrate_setting_changing.loss) {
+						pathLossField.value = info.path_loss;
+					}
+					if (!calibrate_setting_changing.freq) {
+						freqField.value = info.signal_frequency;
+					}
 				}
 
 				// var update_tmr = setInterval(get_updates, 500);
