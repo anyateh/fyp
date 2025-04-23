@@ -10,7 +10,7 @@ from typing import Callable, Iterable, Optional
 
 from .database import get_data_entry
 from ..dummy.set_dummy_coord import set_dummy_coord
-from ..manage_antes import gen_json_update, set_use_avg_dbm, set_use_avg_rad, update_ante_coords
+from ..manage_antes import gen_json_update, set_dbm_averaging_size, set_radii_averaging_size, set_use_avg_dbm, set_use_avg_rad, update_ante_coords
 from ..trilateration.trilaterate import calibrate_space_path_loss, calibrate_reference_distance, calibrate_transmitter_frequency, calibrate_transmitter_power
 from .websocket_util import create_response_text_frame, extract_text_frame, get_optcode, is_valid_client_frame, TEXT as OPTTEXT
 
@@ -330,6 +330,50 @@ def calibrate_trilateration_float(
 	except Exception as e:
 		send_censored_traceback(e, client)
 
+def adjust_dbm_avg_size(
+		client:socket, post_content:bytes
+	) -> None:
+	decoded_content = post_content.decode(encoding = 'utf-8')
+	
+	try:
+		kv_pairs = decoded_content.split("&")
+		info = {k: v for k, v in (i.split('=') for i in kv_pairs if '=' in i)}
+		size = int(info["size"])
+
+		if size <= 0:
+			raise ValueError("Cannot set to Negative Values.")
+
+		set_dbm_averaging_size(size)
+
+		send_plain_text_message_response(
+			__status_text[200], client,
+			f"Set dBm averaging to last {size} items."
+		)
+	except Exception as e:
+		send_censored_traceback(e, client)
+
+def adjust_radius_avg_size(
+		client:socket, post_content:bytes
+	) -> None:
+	decoded_content = post_content.decode(encoding = 'utf-8')
+	
+	try:
+		kv_pairs = decoded_content.split("&")
+		info = {k: v for k, v in (i.split('=') for i in kv_pairs if '=' in i)}
+		size = int(info["size"])
+
+		if size <= 0:
+			raise ValueError("Cannot set to Negative Values.")
+
+		set_radii_averaging_size(size)
+
+		send_plain_text_message_response(
+			__status_text[200], client,
+			f"Set radii averaging to last {size} items."
+		)
+	except Exception as e:
+		send_censored_traceback(e, client)
+
 def handle_http_request(client:socket, req_type:str, path:str, headers:dict[str, str], request_content:bytes) -> None:
 	if req_type == 'POST':
 		if path == '/set_dummy_coords':
@@ -379,6 +423,12 @@ def handle_http_request(client:socket, req_type:str, path:str, headers:dict[str,
 				"Path loss value",
 				"Path loss is calibrated to %f."
 			);
+			return
+		if path == '/set_dbm_avg_size':
+			adjust_dbm_avg_size(client, request_content);
+			return
+		if path == '/set_radii_avg_size':
+			adjust_radius_avg_size(client, request_content);
 			return
 
 	data_type, db_content = get_data_entry(path)

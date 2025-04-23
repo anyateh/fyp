@@ -98,6 +98,12 @@ class AntennaNode:
 	def inverse_friis(self) -> Optional[float]:
 		return self.radius()
 
+	def set_radius_smoothing_size(self, n:int) -> None:
+		self.inv_friis_avg = self.inv_friis_avg.clone_to_size(n)
+
+	def set_dbm_smoothing_size(self, n:int) -> None:
+		self.dbm_avg = self.dbm_avg.clone_to_size(n)
+
 	# def update_reading_avg(self) -> None:
 	# 	if self.dbm is None:
 	# 		self.inv_friis_avg.clear()
@@ -319,6 +325,14 @@ def update_ante_coords(ant_id:int, x:float, y:float) -> None:
 def update_ante_gain(ant_id:int, gain:float) -> None:
 	__antennas_registered[ant_id].gain = gain
 	__antennas_registered[ant_id].gain_need_update = True
+
+def set_dbm_averaging_size(size:int) -> None:
+	for i in __antennas_registered.values():
+		i.set_dbm_smoothing_size(size)
+
+def set_radii_averaging_size(size:int) -> None:
+	for i in __antennas_registered.values():
+		i.set_radius_smoothing_size(size)
 
 def gen_json_update() -> str:
 	if json_buffer_cache:

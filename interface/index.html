@@ -596,15 +596,18 @@
 				</div>
 				<div class="inner-tile">
 					<details>
-						<summary class="title">Poll Rate Settings</summary>
-						<p><label for="PollRateSetField" class="bold">Poll Rate Delay (ms)</label></p>
-						<form class="one-liner">
-							<input id="PollRateSetField" type="number" name="pollrate" placeholder="Pollrate Delay (ms)">
-							<input id="PollRateSetButton" type="submit" value="Set">
+						<summary class="title">Smoothing Settings</summary>
+						<p><label for="DBMAvgSizeField" class="bold">Average last n dBms</label></p>
+						<form class="one-liner" action="/set_dbm_avg_size" method="post" target="_blank">
+							<input id="DBMAvgSizeField" type="number" name="size" placeholder="Last n dBms">
+							<input id="DBMAvgSizeButton" type="submit" value="Apply">
+						</form>
+						<p><label for="RadAvgSizeField" class="bold">Average last n radii</label></p>
+						<form class="one-liner" action="/set_radii_avg_size" method="post" target="_blank">
+							<input id="RadAvgSizeField" type="number" name="size" placeholder="Last n radii">
+							<input id="RadAvgSizeButton" type="submit" value="Apply">
 						</form>
 					</details>
-				</div>
-				<div class="inner-tile">
 					<details>
 						<summary class="title">Calibration Settings</summary>
 						<p><label for="ReferencePowerField" class="bold">Reference Power (dBm)</label></p>
@@ -626,6 +629,14 @@
 						<form class="one-liner" action="/calibrate_signal_frequency" method="post" target="_blank">
 							<input id="FrequencyField" type="number" name="frequency" placeholder="Frequency (Hz)">
 							<input id="FrequencyButton" type="submit" value="Calibrate">
+						</form>
+					</details>
+					<details>
+						<summary class="title">Poll Rate Settings</summary>
+						<p><label for="PollRateSetField" class="bold">Poll Rate Delay (ms)</label></p>
+						<form class="one-liner">
+							<input id="PollRateSetField" type="number" name="pollrate" placeholder="Pollrate Delay (ms)">
+							<input id="PollRateSetButton" type="submit" value="Set">
 						</form>
 					</details>
 				</div>
@@ -2027,6 +2038,22 @@
 						freqField.value = info.signal_frequency;
 					}
 				}
+
+				var dbm_avg_size_tf     = document.getElementById("DBMAvgSizeField");
+				var dbm_avg_size_button = document.getElementById("DBMAvgSizeButton");
+				var rad_avg_size_tf     = document.getElementById("RadAvgSizeField");
+				var rad_avg_size_button = document.getElementById("RadAvgSizeButton");
+
+				function set_radii_avg_size(event) {
+					calibrate_request(event, rad_avg_size_tf, "/set_radii_avg_size", "size");
+				}
+
+				function set_dbm_avg_size(event) {
+					calibrate_request(event, dbm_avg_size_tf, "/set_dbm_avg_size", "size");
+				}
+
+				dbm_avg_size_button.addEventListener("click", set_dbm_avg_size);
+				rad_avg_size_button.addEventListener("click", set_radii_avg_size);
 
 				// var update_tmr = setInterval(get_updates, 500);
 				var update_tmr = setInterval(attempt_new_socket, 5000);
