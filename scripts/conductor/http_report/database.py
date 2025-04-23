@@ -838,4 +838,4 @@ def fonts_sharetechmono_J7aHnp1uDWRBEqV98dVQztYldFcLowEF_woff2_supplier() -> byt
 def fonts_sharetechmono_J7aHnp1uDWRBEqV98dVQztYldFcLowEF_woff2_supplier_time() -> int:
 	return int(path.getmtime(__fonts_sharetechmono_J7aHnp1uDWRBEqV98dVQztYldFcLowEF_woff2_file))
 
-db_table['/fonts/sharetechmono/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2'] = DB_Resource("/fonts/sharetechmono/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2", "application/font-woff2", Supplier(fonts_sharetechmono_css_supplier, fonts_sharetechmono_css_supplier_time))
+db_table['/fonts/sharetechmono/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2'] = DB_Resource("/fonts/sharetechmono/J7aHnp1uDWRBEqV98dVQztYldFcLowEF.woff2", "application/font-woff2", Supplier(fonts_sharetechmono_J7aHnp1uDWRBEqV98dVQztYldFcLowEF_woff2_supplier, fonts_sharetechmono_J7aHnp1uDWRBEqV98dVQztYldFcLowEF_woff2_supplier_time))
