@@ -1,3 +1,4 @@
+from typing import Union
 
 class AverageFIFO:
 	buffer = []
@@ -41,3 +42,12 @@ class AverageFIFO:
 
 	def __len__(self) -> int:
 		return len(self.buffer)
+
+	def seralize_to_dict(self) -> dict[str, Union[list, int, float]]:
+		return {
+			'buffer': self.buffer,
+			'n_items': len(self.buffer),
+			'capacity': self.capacity,
+			'ptr': self.current_ptr,
+			'sum': self.readings_sum
+		} 

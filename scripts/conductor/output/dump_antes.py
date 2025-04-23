@@ -16,7 +16,7 @@ def __json_encode_antenna_node(ante:AntennaNode) -> dict:
 		'x'   : ante.x,
 		'y'   : ante.y,
 		'gain': ante.gain,
-		'dbm' : ante.dbm
+		'dbm' : ante.dbm()
 	}
 
 def dump_antes(antennas:dict[int, AntennaNode], filedes:TextIO) -> None:

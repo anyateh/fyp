@@ -10,7 +10,8 @@ from typing import Callable, Iterable, Optional
 
 from .database import get_data_entry
 from ..dummy.set_dummy_coord import set_dummy_coord
-from ..manage_antes import gen_json_update, set_use_avg, update_ante_coords
+from ..manage_antes import gen_json_update, set_use_avg_dbm, set_use_avg_rad, update_ante_coords
+from ..trilateration.trilaterate import calibrate_space_path_loss, calibrate_reference_distance, calibrate_transmitter_frequency, calibrate_transmitter_power
 from .websocket_util import create_response_text_frame, extract_text_frame, get_optcode, is_valid_client_frame, TEXT as OPTTEXT
 
 response_header_template = \
@@ -170,15 +171,6 @@ def receive_http_content(connection:socket) -> bytes:
 
 	return b''.join(http_fragments)
 
-# def find_first_crlf(byte_seq:bytes) -> int:
-# 	prev_b = None
-# 	for i, byte in enumerate(byte_seq):
-# 		if prev_b and prev_b == ord('\r') and byte == ord('\n'):
-# 			return i - 1
-# 		prev_b = byte
-
-# 	return len(byte_seq)
-
 def extract_http_first_line(byte_seq:bytes) -> str:
 	return byte_seq.split(b'\r\n', 1)[0].decode(encoding = "utf-8")
 
@@ -229,6 +221,20 @@ def gen_basic_response(status:tuple[int, str], content:bytes, content_type:str) 
 
 	return header + content
 
+def send_plain_text_message_response(status:tuple[int, str], client:socket, text:str) -> None:
+	response = gen_basic_response(status, text.encode(encoding = 'utf-8'), "text/plain")
+	client.sendall(response)
+
+def send_censored_traceback(e:Exception, client:socket) -> None:
+	exc_tb = TracebackException(type(e), e, e.__traceback__)
+	# https://stackoverflow.com/questions/69925180/python-tracebacks-how-to-hide-absolute-paths
+	for frame_sum in exc_tb.stack:
+		frame_sum.filename = path.relpath(frame_sum.filename)
+
+	# response = gen_basic_response(__status_text[200], format_exc().encode(encoding = 'utf-8'), "text/plain")
+	response = gen_basic_response(__status_text[200], ''.join(exc_tb.format()).encode(encoding = 'utf-8'), "text/plain")
+	client.sendall(response)
+
 def handle_set_dummy_coord_req(client:socket, post_content:bytes) -> None:
 	decoded_content = post_content.decode(encoding = 'utf-8')
 
@@ -247,26 +253,20 @@ def handle_set_dummy_coord_req(client:socket, post_content:bytes) -> None:
 
 		set_dummy_coord(x, y, True)
 
-		response = gen_basic_response(__status_text[200], b"Attempted to move dummy node.", "text/plain")
-		client.sendall(response)
+		send_plain_text_message_response(__status_text[200], client, "Attempted to move dummy node.")
 	except Exception as e:
-		exc_tb = TracebackException(type(e), e, e.__traceback__)
-		# https://stackoverflow.com/questions/69925180/python-tracebacks-how-to-hide-absolute-paths
-		for frame_sum in exc_tb.stack:
-			frame_sum.filename = path.relpath(frame_sum.filename)
+		send_censored_traceback(e, client)
 
-		# response = gen_basic_response(__status_text[200], format_exc().encode(encoding = 'utf-8'), "text/plain")
-		response = gen_basic_response(__status_text[200], ''.join(exc_tb.format()).encode(encoding = 'utf-8'), "text/plain")
-		client.sendall(response)
+def handle_set_use_avg_req(client:socket, post_content:bytes, avg_dbm:bool = False) -> None:
+	set_use_avg:Callable[[bool], None] = \
+		lambda x: set_use_avg_dbm(x) if avg_dbm else set_use_avg_rad(x)
 
-def handle_set_use_avg_req(client:socket, post_content:bytes) -> None:
 	if post_content == b'on':
 		set_use_avg(True)
 	elif post_content == b'off':
 		set_use_avg(False)
 
-	response = gen_basic_response(__status_text[204], b"", "text/plain")
-	client.sendall(response)
+	send_plain_text_message_response(__status_text[204], client, "")
 
 def handle_set_x_y_id_req(client:socket, post_content:bytes) -> None:
 	decoded_content = post_content.decode(encoding = 'utf-8')
@@ -285,31 +285,95 @@ def handle_set_x_y_id_req(client:socket, post_content:bytes) -> None:
 
 		update_ante_coords(aid, x, y)
 
-		response = gen_basic_response(
-			__status_text[200], b"Attempted to move Antenna #"
-			+ info['id'].encode(encoding = 'utf-8') + b".",
-			"text/plain"
+		# response = gen_basic_response(
+		# 	__status_text[200], b"Attempted to move Antenna #"
+		# 	+ info['id'].encode(encoding = 'utf-8') + b".",
+		# 	"text/plain"
+		# )
+		# client.sendall(response)
+		send_plain_text_message_response(__status_text[200], client,
+			"Attempted to move Antenna #{} to ({}, {})." \
+				.format(info['id'], info['x'], info['y'])
 		)
-		client.sendall(response)
 	except Exception as e:
-		exc_tb = TracebackException(type(e), e, e.__traceback__)
-		# https://stackoverflow.com/questions/69925180/python-tracebacks-how-to-hide-absolute-paths
-		for frame_sum in exc_tb.stack:
-			frame_sum.filename = path.relpath(frame_sum.filename)
+		send_censored_traceback(e, client)
 
-		response = gen_basic_response(__status_text[200], ''.join(exc_tb.format()).encode(encoding = 'utf-8'), "text/plain")
-		client.sendall(response)
+def calibrate_trilateration_float(
+		client:socket, post_content:bytes,
+		calibrate_fx:Callable[[float], None], 
+		key_name:str, val_desc:str, success_msg_fmt:str
+	) -> None:
+	decoded_content = post_content.decode(encoding = 'utf-8')
+	
+	kv_pairs = decoded_content.split("&")
+	info = {k: v for k, v in (i.split('=') for i in kv_pairs)}
+
+	try:
+		float_val = float(info[key_name])
+
+		if isnan(float_val):
+			raise ValueError(f"{val_desc} given is NaN.")
+
+		if isinf(float_val):
+			raise ValueError(f"{val_desc} given is a form of infinity.")
+
+		calibrate_fx(float_val)
+
+		send_plain_text_message_response(
+			__status_text[200], client, success_msg_fmt % (float_val,)
+		)
+	except Exception as e:
+		send_censored_traceback(e, client)
 
 def handle_http_request(client:socket, req_type:str, path:str, headers:dict[str, str], request_content:bytes) -> None:
 	if req_type == 'POST':
 		if path == '/set_dummy_coords':
 			handle_set_dummy_coord_req(client, request_content);
 			return
-		if path == '/set_use_averaging':
-			handle_set_use_avg_req(client, request_content);
+		if path == '/set_use_averaging' or path == '/set_use_averaging_rad':
+			handle_set_use_avg_req(client, request_content, False);
+			return
+		if path == '/set_use_averaging_dbm':
+			handle_set_use_avg_req(client, request_content, True);
 			return
 		if path == '/set_ante_coords':
 			handle_set_x_y_id_req(client, request_content);
+			return
+		if path == '/calibrate_transmitter_power':
+			calibrate_trilateration_float(
+				client, request_content,
+				calibrate_transmitter_power,
+				"dbm",
+				"Transmitter power dBm value",
+				"Transmitter power (value of P0) is calibrated to %f."
+			);
+			return
+		if path == '/calibrate_reference_distance':
+			calibrate_trilateration_float(
+				client, request_content,
+				calibrate_reference_distance,
+				"d0",
+				"Reference distance value",
+				"Reference distance (value of d0) is calibrated to %f."
+			);
+			return
+		if path == '/calibrate_signal_frequency':
+			calibrate_trilateration_float(
+				client, request_content,
+				calibrate_transmitter_frequency,
+				"frequency",
+				"Signal frequency value",
+				"Signal frequency is calibrated to %f."
+			);
+			return
+		if path == '/calibrate_path_loss':
+			calibrate_trilateration_float(
+				client, request_content,
+				calibrate_space_path_loss,
+				"loss",
+				"Path loss value",
+				"Path loss is calibrated to %f."
+			);
 			return
 
 	data_type, db_content = get_data_entry(path)
