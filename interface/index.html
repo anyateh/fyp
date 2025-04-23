@@ -577,7 +577,11 @@
 				<p class="title">Settings</p>
 				<div class="inner-tile">
 					<div id="UseAverageToggle" class="left-right-sectioned option-button" tabindex="0" role="button">
-						<div class="stretchable bold">Use Averaging</div>
+						<div class="stretchable bold">Use Averaging (radius)</div>
+						<div>off</div>
+					</div>
+					<div id="UseAverageToggleDBM" class="left-right-sectioned option-button" tabindex="0" role="button">
+						<div class="stretchable bold">Use Averaging (dBm)</div>
 						<div>off</div>
 					</div>
 					<div id="ReloadWebApp" class="option-button" tabindex="0" role="button">
@@ -677,9 +681,12 @@
 				var dragging_prev_coords_queue = new Queue(3);
 				var dragging_timing_now = 0;
 
-				var use_averaging = false;
+				var use_averaging_rad = false;
+				var use_averaging_dbm = false;
 				var toggleAvg = document.getElementById("UseAverageToggle");
 				var toggleAvgStatus = toggleAvg.lastElementChild.firstChild;
+				var toggleAvgDBM = document.getElementById("UseAverageToggleDBM");
+				var toggleAvgDBMStatus = toggleAvgDBM.lastElementChild.firstChild;
 
 				function Anchor(id, x, y) {
 					this.id = id;
@@ -1566,14 +1573,23 @@
 					// upd_obj = JSON.parse(json_update);
 					upd_obj = json_update;
 
-					if (upd_obj.use_avg) {
-						use_averaging = true;
+					if (upd_obj.use_avg_rad) {
+						use_averaging_rad = true;
 						toggleAvgStatus.textContent = "on";
 						toggleAvg.classList.add("active");
 					} else {
-						use_averaging = false;
+						use_averaging_rad = false;
 						toggleAvgStatus.textContent = "off";
 						toggleAvg.classList.remove("active");
+					}
+					if (upd_obj.use_avg_dbm) {
+						use_averaging_dbm = true;
+						toggleAvgDBMStatus.textContent = "on";
+						toggleAvgDBM.classList.add("active");
+					} else {
+						use_averaging_dbm = false;
+						toggleAvgDBMStatus.textContent = "off";
+						toggleAvgDBM.classList.remove("active");
 					}
 
 					for (let antenna_id in anchors) {
@@ -1585,7 +1601,7 @@
 
 						if (anchors.hasOwnProperty(antenna_id)) {
 							anchors[antenna_id].set_coord(updated_info.x, updated_info.y);
-							anchors[antenna_id].set_radius(use_averaging ? updated_info.r_w_avg : updated_info.r);
+							anchors[antenna_id].set_radius(use_averaging_rad ? updated_info.r_w_avg : updated_info.r);
 							anchors[antenna_id].is_active = true;
 							// anchors[antenna_id].update_element();
 							anchors[antenna_id].update_debug_elements(updated_info);
@@ -1598,7 +1614,7 @@
 						  colorAssignmentIndex++;
 						}
 						anchors[antenna_id].set_color(antennaColorMap[antenna_id]);
-						anchors[antenna_id].set_radius(use_averaging ? updated_info.r_w_avg : updated_info.r);
+						anchors[antenna_id].set_radius(use_averaging_rad ? updated_info.r_w_avg : updated_info.r);
 						anchors[antenna_id].insert_point(map);
 						adjust_frame_scale_with_points();
 						anchors[antenna_id].insert_debug(anchor_debug_element);
@@ -1807,26 +1823,47 @@
 				anchor_settings_output.style.display = "none";
 
 				function toggle_use_avg(event) {
-					if (use_averaging) {
-						fetch("/set_use_averaging", {
+					if (use_averaging_rad) {
+						fetch("/set_use_averaging_rad", {
 							method: "POST", 
 							body: "off"
 						})
-						use_averaging = false;
+						use_averaging_rad = false;
 						toggleAvgStatus.textContent = "off";
 						toggleAvg.classList.remove("active");
 					} else {
-						fetch("/set_use_averaging", {
+						fetch("/set_use_averaging_rad", {
 							method: "POST", 
 							body: "on"
 						})
-						use_averaging = true;
+						use_averaging_rad = true;
 						toggleAvgStatus.textContent = "on";
 						toggleAvg.classList.add("active");
 					}
 				}
 
-				document.getElementById("UseAverageToggle").addEventListener("click", toggle_use_avg);
+				function toggle_use_avg_dbm(event) {
+					if (use_averaging_dbm) {
+						fetch("/set_use_averaging_dbm", {
+							method: "POST", 
+							body: "off"
+						})
+						use_averaging_dbm = false;
+						toggleAvgDBMStatus.textContent = "off";
+						toggleAvgDBM.classList.remove("active");
+					} else {
+						fetch("/set_use_averaging_dbm", {
+							method: "POST", 
+							body: "on"
+						})
+						use_averaging_dbm = true;
+						toggleAvgDBMStatus.textContent = "on";
+						toggleAvgDBM.classList.add("active");
+					}
+				}
+
+				toggleAvg.addEventListener("click", toggle_use_avg);
+				toggleAvgDBM.addEventListener("click", toggle_use_avg_dbm);
 
 				function reload_web_app(event) {
 					location.reload();
