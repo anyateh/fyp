@@ -1,10 +1,9 @@
 from math import isinf, isnan
 from typing import Optional
 
-from .maybe import MaybeNumber
+from .maybe import Maybe
 
-class MaybeUsableReading(MaybeNumber):
-
+class MaybeUsableReading(Maybe):
     def __init__(self, value:Optional[float]) -> None:
         if value is None:
             super().__init__(None)

@@ -2,7 +2,10 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable, Generic, TypeVar
 
 Monad = TypeVar('Monad')
-T     = TypeVar('T', Any)
+T     = TypeVar('T', bound = Any)
+
+class Monad(Generic[T]):
+	pass
 
 class Monad(ABC, Generic[T]):
 	@classmethod
