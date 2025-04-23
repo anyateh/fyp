@@ -411,6 +411,12 @@
 				text-align: right;
 			}
 
+			.menu-contents .anchor-debug-prop .code-block {
+				max-height: 10em;
+				text-align: left;
+				overflow: auto;
+			}
+
 			.menu-contents input {
 				font: inherit;
 				padding: 0.5em 1em;
@@ -757,6 +763,7 @@
 					this.debug_x_tn = document.createTextNode(this.x + "m");
 					this.debug_y_tn = document.createTextNode(this.y + "m");
 					this.debug_dbm_tn = document.createTextNode(this.dbm + "dBm");
+					this.debug_dbm_smooth_tn = document.createTextNode(this.dbm + "dBm");
 					this.debug_r_tn = document.createTextNode(this.radius + "m");
 					this.debug_r_w_avg_tn = document.createTextNode(this.radius_w_avg + "m");
 
@@ -765,62 +772,107 @@
 					this.debug_avg_fifo_ptr_tn = document.createTextNode("N/A");
 					this.debug_avg_fifo_sum_tn = document.createTextNode("N/A");
 
+					this.debug_dbm_avg_fifo_capacity_tn = document.createTextNode("N/A");
+					this.debug_dbm_avg_fifo_ptr_tn = document.createTextNode("N/A");
+					this.debug_dbm_avg_fifo_sum_tn = document.createTextNode("N/A");
+					this.debug_dbm_avg_fifo_nitems_tn = document.createTextNode("N/A");
+
+					this.debug_rad_avg_fifo_capacity_tn = document.createTextNode("N/A");
+					this.debug_rad_avg_fifo_ptr_tn = document.createTextNode("N/A");
+					this.debug_rad_avg_fifo_sum_tn = document.createTextNode("N/A");
+					this.debug_rad_avg_fifo_nitems_tn = document.createTextNode("N/A");
+
 					this.debug_element.appendChild(this.gen_debug_prop("X Coordinate", this.debug_x_tn));
 					this.debug_element.appendChild(this.gen_debug_prop("Y Coordinate", this.debug_y_tn));
-					this.debug_element.appendChild(this.gen_debug_prop("dBm", this.debug_dbm_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("dBm (Raw)", this.debug_dbm_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("dBm (Smoothed)", this.debug_dbm_smooth_tn));
 					this.debug_element.appendChild(this.gen_debug_prop("Radius", this.debug_r_tn));
-					this.debug_element.appendChild(this.gen_debug_prop("Radius (After AverageFIFO)", this.debug_r_w_avg_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("Radius (After Averaging)", this.debug_r_w_avg_tn));
 
 					this.avg_fifo_debug_buffer_ele = document.createElement("div");
-					this.debug_element.appendChild(this.avg_fifo_debug_buffer_ele);
-					this.debug_element.appendChild(this.gen_debug_prop("AverageFIFO Capacity", this.debug_avg_fifo_capacity_tn));
-					this.debug_element.appendChild(this.gen_debug_prop("AverageFIFO Dequeue Pointer", this.debug_avg_fifo_ptr_tn));
-					this.debug_element.appendChild(this.gen_debug_prop("AverageFIFO Sum", this.debug_avg_fifo_sum_tn));
+
+					this.debug_dbm_average_queue_tf = document.createElement("div");
+					this.debug_dbm_average_queue_tf.classList.add("code-block");
+					this.debug_element.appendChild(this.gen_debug_prop("dBm average queue buffer", this.debug_dbm_average_queue_tf));
+					this.debug_element.appendChild(this.gen_debug_prop("Capacity", this.debug_dbm_avg_fifo_capacity_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("Dequeue Pointer", this.debug_dbm_avg_fifo_ptr_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("Sum", this.debug_dbm_avg_fifo_sum_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("Items Count", this.debug_dbm_avg_fifo_nitems_tn));
+
+					this.debug_radius_average_queue_tf = document.createElement("div");
+					this.debug_radius_average_queue_tf.classList.add("code-block");
+					this.debug_element.appendChild(this.gen_debug_prop("Radius average queue buffer", this.debug_radius_average_queue_tf));
+					this.debug_element.appendChild(this.gen_debug_prop("Capacity", this.debug_rad_avg_fifo_capacity_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("Dequeue Pointer", this.debug_rad_avg_fifo_ptr_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("Sum", this.debug_rad_avg_fifo_sum_tn));
+					this.debug_element.appendChild(this.gen_debug_prop("Items Count", this.debug_rad_avg_fifo_nitems_tn));
+
+					// this.debug_element.appendChild(this.avg_fifo_debug_buffer_ele);
+					// this.debug_element.appendChild(this.gen_debug_prop("AverageFIFO Capacity", this.debug_avg_fifo_capacity_tn));
+					// this.debug_element.appendChild(this.gen_debug_prop("AverageFIFO Dequeue Pointer", this.debug_avg_fifo_ptr_tn));
+					// this.debug_element.appendChild(this.gen_debug_prop("AverageFIFO Sum", this.debug_avg_fifo_sum_tn));
 				};
 
 				Anchor.prototype.insert_debug = function(insert_to) {
 					insert_to.appendChild(this.debug_element);
 				}
 
-				Anchor.prototype.debug_avg_fifo_buffer_update = function(anchor_json) {
-					var n_buff = anchor_json.avg_fifo.buffer.length;
-					if (n_buff < this.debug_avg_fifo_buffer_props.length) {
-						for (let i = n_buff; i < this.debug_avg_fifo_buffer_props.length; i++) {
-							this.debug_avg_fifo_buffer_props[i].prop.parentNode.removeChild(this.debug_avg_fifo_buffer_props[i].prop);
-							this.debug_avg_fifo_buffer_props.pop();
-						}
-						this.debug_avg_fifo_buffer_props.length = n_buff;
-					}
+				// Anchor.prototype.debug_avg_fifo_buffer_update = function(anchor_json) {
+				// 	var n_buff = anchor_json.avg_fifo.buffer.length;
+				// 	if (n_buff < this.debug_avg_fifo_buffer_props.length) {
+				// 		for (let i = n_buff; i < this.debug_avg_fifo_buffer_props.length; i++) {
+				// 			this.debug_avg_fifo_buffer_props[i].prop.parentNode.removeChild(this.debug_avg_fifo_buffer_props[i].prop);
+				// 			this.debug_avg_fifo_buffer_props.pop();
+				// 		}
+				// 		this.debug_avg_fifo_buffer_props.length = n_buff;
+				// 	}
 
-					for (let i = 0; i < this.debug_avg_fifo_buffer_props.length; i++) {
-						this.debug_avg_fifo_buffer_props[i].tn.textContent = anchor_json.avg_fifo.buffer[i];
-					}
+				// 	for (let i = 0; i < this.debug_avg_fifo_buffer_props.length; i++) {
+				// 		this.debug_avg_fifo_buffer_props[i].tn.textContent = anchor_json.avg_fifo.buffer[i];
+				// 	}
 
-					var n_existing = this.debug_avg_fifo_buffer_props.length;
+				// 	var n_existing = this.debug_avg_fifo_buffer_props.length;
 
-					for (let i = n_existing; i < n_buff; i++) {
-						var tn = document.createTextNode(anchor_json.avg_fifo.buffer[i]);
-						var prop = this.gen_debug_prop("Buffer #" + i, tn);
-						this.avg_fifo_debug_buffer_ele.appendChild(prop);
-						this.debug_avg_fifo_buffer_props.push({
-							prop: prop,
-							tn: tn
-						});
-					}
+				// 	for (let i = n_existing; i < n_buff; i++) {
+				// 		var tn = document.createTextNode(anchor_json.avg_fifo.buffer[i]);
+				// 		var prop = this.gen_debug_prop("Buffer #" + i, tn);
+				// 		this.avg_fifo_debug_buffer_ele.appendChild(prop);
+				// 		this.debug_avg_fifo_buffer_props.push({
+				// 			prop: prop,
+				// 			tn: tn
+				// 		});
+				// 	}
+				// };
+
+				Anchor.prototype.__queue_buffer_list = function(buffer) {
+					return buffer.map((v, i) => `Buffer #${i}: ${v}`).join('\n');
 				};
 
 				Anchor.prototype.update_debug_elements = function(anchor_json) {
-					this.debug_x_tn.textContent = anchor_json.x + "m";
-					this.debug_y_tn.textContent = anchor_json.y + "m";
-					this.debug_dbm_tn.textContent = anchor_json.dbm + "dBm";
-					this.debug_r_tn.textContent = anchor_json.r + "m";
-					this.debug_r_w_avg_tn.textContent = anchor_json.r_w_avg + "m";
+					this.debug_x_tn.textContent   = report_optional_value(anchor_json.x, "m");
+					this.debug_y_tn.textContent   = report_optional_value(anchor_json.y, "m");
+					this.debug_dbm_tn.textContent = report_optional_value(anchor_json.dbm_raw, "dBm");
+					this.debug_dbm_smooth_tn.textContent = report_optional_value(anchor_json.dbm_smoothed, "dBm");
+					this.debug_r_tn.textContent       = report_optional_value(anchor_json.r_raw, "m");
+					this.debug_r_w_avg_tn.textContent = report_optional_value(anchor_json.r_smoothed, "m");
 
-					this.debug_avg_fifo_capacity_tn.textContent = anchor_json.avg_fifo.capacity;
-					this.debug_avg_fifo_ptr_tn.textContent = anchor_json.avg_fifo.ptr;
-					this.debug_avg_fifo_sum_tn.textContent = anchor_json.avg_fifo.sum;
+					this.debug_dbm_average_queue_tf.innerText       = this.__queue_buffer_list(anchor_json.avg_dbm.buffer, "");
+					this.debug_dbm_avg_fifo_capacity_tn.textContent = report_optional_value(anchor_json.avg_dbm.capacity, "");
+					this.debug_dbm_avg_fifo_ptr_tn.textContent      = report_optional_value(anchor_json.avg_dbm.ptr, "");
+					this.debug_dbm_avg_fifo_sum_tn.textContent      = report_optional_value(anchor_json.avg_dbm.sum, "");
+					this.debug_dbm_avg_fifo_nitems_tn.textContent   = report_optional_value(anchor_json.avg_dbm.n_items, "");
 
-					this.debug_avg_fifo_buffer_update(anchor_json);
+					this.debug_radius_average_queue_tf.innerText    = this.__queue_buffer_list(anchor_json.r_avg.buffer, "");
+					this.debug_rad_avg_fifo_capacity_tn.textContent = report_optional_value(anchor_json.r_avg.capacity, "");
+					this.debug_rad_avg_fifo_ptr_tn.textContent      = report_optional_value(anchor_json.r_avg.ptr, "");
+					this.debug_rad_avg_fifo_sum_tn.textContent      = report_optional_value(anchor_json.r_avg.sum, "");
+					this.debug_rad_avg_fifo_nitems_tn.textContent   = report_optional_value(anchor_json.r_avg.n_items, "");
+
+					// this.debug_avg_fifo_capacity_tn.textContent = anchor_json.avg_fifo.capacity;
+					// this.debug_avg_fifo_ptr_tn.textContent = anchor_json.avg_fifo.ptr;
+					// this.debug_avg_fifo_sum_tn.textContent = anchor_json.avg_fifo.sum;
+
+					// this.debug_avg_fifo_buffer_update(anchor_json);
 				};
 
 				Anchor.prototype.gen_editable_debug_prop = function(prop_title_str, value_text_field) {
@@ -1567,6 +1619,10 @@
 
 				function is_finite_real_number(n) {
 					return n != null && isFinite(n) && !isNaN(n);
+				}
+
+				function report_optional_value(n, units) {
+					return (n == null || n == undefined) ? "N/A" : (n) + units;
 				}
 
 				function parse_updates(json_update) {
