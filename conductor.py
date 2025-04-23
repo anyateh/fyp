@@ -56,7 +56,8 @@ async def main_loop() -> None:
 		keep_server_alive = False
 
 		await antes.stop_ante_updates()
-		print("\x1b[?1049l", end = '', file = stderr)
+		if antes.display_on_console:
+			print("\x1b[?1049l", end = '', file = stderr)
 		await server.close()
 
 		http_thread.join()
@@ -78,7 +79,8 @@ async def main_loop() -> None:
 
 	while keep_server_alive:
 		if not loop_update_task:
-			print("\x1b[?1049h", end = '', file = stderr)
+			if antes.display_on_console:
+				print("\x1b[?1049h", end = '', file = stderr)
 			loop_update_task = asyncio.create_task(antes.loop_ante_updates(server))
 			loop_update_task.add_done_callback(probe_exception)
 

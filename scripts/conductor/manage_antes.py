@@ -136,11 +136,11 @@ class AntennaNode:
 
 __antennas_registered:dict[int, AntennaNode] = {}
 
-antenna_screen  = AntennaScreen()
-show_screen     = False
-use_avg_dbm     = False
-use_avg_rad     = False
-live_on_console = True
+antenna_screen     = AntennaScreen()
+show_screen        = False
+use_avg_dbm        = False
+use_avg_rad        = False
+display_on_console = True
 
 lowest_x_coord  = 0.0
 highest_x_coord = 0.0
@@ -259,7 +259,8 @@ async def loop_ante_updates(server:TrianServer) -> None:
 		frame_id = randint(1, 255)
 		__current_request_id = frame_id
 		await update_ante_readings(frame_id, server)
-		print_antennas()
+		if display_on_console:
+			print_antennas()
 		await asyncio.sleep(0.1)
 
 	buffered_output.close()
